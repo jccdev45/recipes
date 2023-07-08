@@ -6,6 +6,14 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type Tag = { id: string; tag: string };
+export type Step = { id: string; step: string };
+export type Ingredient = {
+  id: string;
+  ingredient: string;
+  amount: number;
+  unitMeasurement: string;
+};
 export interface Database {
   public: {
     Tables: {
@@ -45,122 +53,41 @@ export interface Database {
         };
         Relationships: [];
       };
-      ingredients: {
-        Row: {
-          amount: number | null;
-          id: string;
-          ingredient: string | null;
-          recipe_id: string | null;
-          unitMeasurement: string | null;
-        };
-        Insert: {
-          amount?: number | null;
-          id: string;
-          ingredient?: string | null;
-          recipe_id?: string | null;
-          unitMeasurement?: string | null;
-        };
-        Update: {
-          amount?: number | null;
-          id?: string;
-          ingredient?: string | null;
-          recipe_id?: string | null;
-          unitMeasurement?: string | null;
-        };
-        Relationships: [];
-      };
-      recipe_ingredients: {
-        Row: {
-          id: number;
-          ingredient_id: string | null;
-          recipe_id: string | null;
-        };
-        Insert: {
-          id?: never;
-          ingredient_id?: string | null;
-          recipe_id?: string | null;
-        };
-        Update: {
-          id?: never;
-          ingredient_id?: string | null;
-          recipe_id?: string | null;
-        };
-        Relationships: [];
-      };
       recipes: {
         Row: {
-          author: string | null;
-          firestore_id: string | null;
-          id: string;
-          img: string | null;
-          quote: string | null;
-          recipeName: string | null;
-          slug: string | null;
-          steps: Json | null;
-          tags: Json | null;
-          userId: string | null;
-        };
-        Insert: {
-          author?: string | null;
-          firestore_id?: string | null;
-          id: string;
-          img?: string | null;
-          quote?: string | null;
-          recipeName?: string | null;
-          slug?: string | null;
-          steps?: Json | null;
-          tags?: Json | null;
-          userId?: string | null;
-        };
-        Update: {
-          author?: string | null;
-          firestore_id?: string | null;
-          id?: string;
-          img?: string | null;
-          quote?: string | null;
-          recipeName?: string | null;
-          slug?: string | null;
-          steps?: Json | null;
-          tags?: Json | null;
-          userId?: string | null;
-        };
-        Relationships: [];
-      };
-      recipess: {
-        Row: {
-          author: string | null;
+          author: string;
           id: number;
           img: string | null;
-          ingredients: Json[] | null;
+          ingredients: Ingredient[];
           quote: string | null;
-          recipeName: string | null;
-          slug: string | null;
-          steps: Json[] | null;
-          tags: Json[] | null;
+          recipeName: string;
+          slug: string;
+          steps: Step[];
+          tags: Tag[];
           user_id: string | null;
         };
         Insert: {
-          author?: string | null;
+          author: string;
           id?: never;
           img?: string | null;
-          ingredients?: Json[] | null;
+          ingredients: Ingredient[];
           quote?: string | null;
-          recipeName?: string | null;
-          slug?: string | null;
-          steps?: Json[] | null;
-          tags?: Json[] | null;
+          recipeName: string;
+          slug: string;
+          steps: Step[];
+          tags: Tag[];
           user_id?: string | null;
         };
         Update: {
-          author?: string | null;
+          author?: string;
           id?: never;
           img?: string | null;
-          ingredients?: Json[] | null;
+          ingredients?: Ingredient[];
           quote?: string | null;
-          recipeName?: string | null;
-          slug?: string | null;
-          steps?: Json[] | null;
-          tags?: Json[] | null;
+          recipeName?: string;
+          slug?: string;
+          steps?: Step[];
+          tags?: Tag[];
           user_id?: string | null;
         };
         Relationships: [];
@@ -194,23 +121,7 @@ export interface Database {
       };
     };
     Views: {
-      with_ingredients: {
-        Row: {
-          amount: number | null;
-          author: string | null;
-          img: string | null;
-          ingredient: string | null;
-          quote: string | null;
-          recipeId: string | null;
-          recipeName: string | null;
-          slug: string | null;
-          steps: Json | null;
-          tags: Json | null;
-          unitMeasurement: string | null;
-          userId: string | null;
-        };
-        Relationships: [];
-      };
+      [_ in never]: never;
     };
     Functions: {
       [_ in never]: never;
@@ -224,12 +135,15 @@ export interface Database {
   };
 }
 
-export type Recipe = Database["public"]["Tables"]["recipess"]["Row"];
+export type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
 
-export type Ingredient = Pick<Recipe, "ingredients">;
-export type Step = Pick<Recipe, "steps">;
-export type Tag = Pick<Recipe, "tags">;
+export type InsertRecipess = Database["public"]["Tables"]["recipes"]["Insert"];
+export type UpdateRecipess = Database["public"]["Tables"]["recipes"]["Update"];
 
 export type Comment = Database["public"]["Tables"]["comments"]["Row"];
+export type InsertComment = Database["public"]["Tables"]["comments"]["Insert"];
+export type UpdateComment = Database["public"]["Tables"]["comments"]["Update"];
 
 export type User = Database["public"]["Tables"]["users"]["Row"];
+export type InsertUser = Database["public"]["Tables"]["users"]["Insert"];
+export type UpdateUser = Database["public"]["Tables"]["users"]["Update"];

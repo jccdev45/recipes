@@ -1,25 +1,62 @@
-// TODO: Duplicate or move this file outside the `_examples` folder to make it a route
+"use client";
 
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { RecipeCard } from "@/components/RecipeCard";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { Database, Recipe } from "@/types/supabase";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 
-export default async function ServerComponent() {
-  // Create a Supabase client configured to use cookies
-  const supabase = createServerComponentClient({ cookies });
+export default function RecipesPage() {
+  const supabase = createClientComponentClient<Database>();
+  const [search, setSearch] = useState("");
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
 
-  // This assumes you have a `todos` table in Supabase. Check out
-  // the `Create Table and seed with data` section of the README 👇
-  // https://github.com/vercel/next.js/blob/canary/examples/with-supabase/README.md
-  const { data: recipes } = await supabase.from("recipess").select();
+  useEffect(() => {
+    const getAllRecipes = async () => {
+      const { data } = await supabase.from("recipes").select();
 
-  // return <pre>{JSON.stringify(recipes, null, 2)}</pre>;
+      if (data) {
+        setRecipes(data);
+      }
+    };
+    const searchRecipes = async () => {
+      const { data } = await supabase
+        .from("recipes")
+        .select()
+        .textSearch("recipeName", `'${search}'`);
+
+      if (data) {
+        setRecipes(data);
+      }
+    };
+
+    !search.trim() ? getAllRecipes() : searchRecipes();
+  }, [search]);
+
+  // useEffect(() => {
+  //   const filteredRecipes = recipes?.filter((recipe) => {
+  //     return recipe.recipeName.toLowerCase().includes(search.toLowerCase());
+  //   });
+
+  //   setRecipes(filteredRecipes);
+  // }, [search]);
+
+  // TODO: ADD LOADING STATE, SKELETONS / SUSPENSE
 
   return (
-    <div>
-      {recipes?.map((recipe) => (
-        <RecipeCard recipe={recipe} />
-      ))}
-    </div>
+    <section className="flex flex-col">
+      <Input
+        value={search}
+        className="border"
+        placeholder="Search..."
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+        {recipes?.map((recipe) => (
+          <RecipeCard key={recipe.id} recipe={recipe} className="col-span-1" />
+        ))}
+      </div>
+    </section>
   );
 }
