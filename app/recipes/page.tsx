@@ -1,5 +1,6 @@
 // TODO: Duplicate or move this file outside the `_examples` folder to make it a route
 
+import { RecipeCard } from "@/components/RecipeCard";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
@@ -12,5 +13,13 @@ export default async function ServerComponent() {
   // https://github.com/vercel/next.js/blob/canary/examples/with-supabase/README.md
   const { data: recipes } = await supabase.from("recipess").select();
 
-  return <pre>{JSON.stringify(recipes, null, 2)}</pre>;
+  // return <pre>{JSON.stringify(recipes, null, 2)}</pre>;
+
+  return (
+    <div>
+      {recipes?.map((recipe) => (
+        <RecipeCard recipe={recipe} />
+      ))}
+    </div>
+  );
 }
