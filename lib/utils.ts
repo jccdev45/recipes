@@ -23,3 +23,10 @@ export const toBase64 = (str: string) =>
   typeof window === "undefined"
     ? Buffer.from(str).toString("base64")
     : window.btoa(str);
+
+let count = 0
+    
+export function genId() {
+  count = (count + 1) % Number.MAX_VALUE
+  return count.toString()
+}

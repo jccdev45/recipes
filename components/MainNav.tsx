@@ -16,7 +16,7 @@ import Link from "next/link";
 
 export function MainNav() {
   return (
-    <NavigationMenu className="">
+    <NavigationMenu className="h-12 p-6">
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
