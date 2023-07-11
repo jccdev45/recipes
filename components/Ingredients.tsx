@@ -10,7 +10,6 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   return (
     <div className={cn(``, className)}>
       <h3 className="prose">Ingredients</h3>
-      {/* TODO:  EXTRACT TO 'INGREDIENTS' COMPONENT FOR SCALING AMOUNTS? */}
       <ul className="">
         {ingredients.map(({ id, ingredient, amount, unitMeasurement }) => (
           <li key={id} className="flex items-center gap-x-1">

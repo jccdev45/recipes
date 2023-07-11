@@ -15,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex flex-col items-center bg-background">
+      <body className="min-h-screen bg-background">
         <MainNav />
-        <main className="w-full h-screen">{children}</main>
+        <main className="w-full">{children}</main>
         <Footer />
       </body>
     </html>

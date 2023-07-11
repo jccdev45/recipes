@@ -30,7 +30,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             alt={recipeName}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover w-auto h-auto"
+            className="object-cover w-auto h-auto rounded-lg"
             placeholder="blur"
             blurDataURL={`data:image/svg+xml;base64,${toBase64(
               shimmer(304, 203)

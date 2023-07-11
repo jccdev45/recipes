@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { maxAmount, minAmount } from "../constants";
 
 export const ingredientSchema = z.array(
   z.object({
@@ -9,8 +10,8 @@ export const ingredientSchema = z.array(
       .max(50, { message: "Ingredient must be less than 500 characters" }),
     amount: z
       .number()
-      .min(0.1, { message: "Amount must be greater than 0.1" })
-      .max(1000, { message: "Amount must be less than 1000" }),
+      .min(minAmount, { message: "Amount must be greater than 0.1" })
+      .max(maxAmount, { message: "Amount must be less than 1000" }),
     unitMeasurement: z.string(),
     // .min(3, { message: "Unit must be at least 3 characters" })
     // .max(50),
@@ -27,15 +28,17 @@ export const stepSchema = z.array(
   })
 );
 
-export const tagSchema = z.array(
-  z.object({
-    id: z.string(),
-    tag: z
-      .string()
-      .min(3, { message: "Tag must be at least 3 characters" })
-      .max(15, { message: "Tag must be less than 15 characters" }),
-  })
-);
+export const tagSchema = z
+  .array(
+    z.object({
+      id: z.string(),
+      tag: z
+        .string()
+        .min(3, { message: "Tag must be at least 3 characters" })
+        .max(15, { message: "Tag must be less than 15 characters" }),
+    })
+  )
+  .max(5, { message: "No more than 5 tags" });
 
 export const recipeFormSchema = z.object({
   id: z.string(),
@@ -87,7 +90,8 @@ export const commentSchema = z.object({
 // export type Step = AddRecipeFormValues["steps"][number];
 // export type Tag = AddRecipeFormValues["tags"][number];
 
-export type AddRecipeFormValues = z.infer<typeof recipeFormSchema>;
+const AddRecipeFormValues = recipeFormSchema.omit({ id: true });
+export type AddRecipeFormValues = z.infer<typeof AddRecipeFormValues>;
 export type CommentFormValues = z.infer<typeof commentSchema>;
 export type LoginFormValues = z.infer<typeof loginFormSchema>;
 export type RegisterFormValues = z.infer<typeof registerFormSchema>;

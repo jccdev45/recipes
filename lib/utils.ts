@@ -28,5 +28,57 @@ let count = 0
     
 export function genId() {
   count = (count + 1) % Number.MAX_VALUE
+
   return count.toString()
+}
+
+export function toFraction(decimal: number) {
+  // Check if the decimal is a whole number
+  if (Number.isInteger(decimal)) {
+    return decimal.toString(); // Return the decimal as it is
+  }
+
+  // Convert decimal to string
+  const decimalStr = decimal.toString();
+
+  // Check if the decimal has a fractional part
+  if (!decimalStr.includes('.')) {
+    return decimalStr; // No fractional part, return the decimal as it is
+  }
+
+  // Get the number of decimal places
+  const decimalPlaces = decimalStr.length - decimalStr.indexOf('.') - 1;
+
+  // Calculate the denominator (10^decimalPlaces)
+  const denominator = Math.pow(10, decimalPlaces);
+
+  // Calculate the numerator (decimal * denominator)
+  const numerator = decimal * denominator;
+
+  // Find the greatest common divisor (gcd) between the numerator and denominator
+  const gcd = findGCD(numerator, denominator);
+
+  // Simplify the fraction by dividing both numerator and denominator by the gcd
+  const simplifiedNumerator = numerator / gcd;
+  const simplifiedDenominator = denominator / gcd;
+
+  // Return the fraction as a string
+  return `${simplifiedNumerator}/${simplifiedDenominator}`;
+}
+
+// Helper function to find the greatest common divisor (gcd) using Euclid's algorithm
+function findGCD(a: number, b: number) {
+  if (b === 0) {
+    return a;
+  }
+
+  return findGCD(b, a % b);
+}
+
+export function toSlug(input: string): string {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with dashes
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+    .trim(); // Remove extra whitespace
 }

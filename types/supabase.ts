@@ -6,14 +6,22 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Tag = { id: string; tag: string };
-export type Step = { id: string; step: string };
+export type Tag = {
+  id: string;
+  tag: string;
+};
+export type Step = {
+  id: string;
+  step: string;
+};
 export type Ingredient = {
   id: string;
   ingredient: string;
   amount: number;
   unitMeasurement: string;
 };
+export type UnitMeasurement = Ingredient["unitMeasurement"];
+
 export interface Database {
   public: {
     Tables: {
@@ -67,7 +75,7 @@ export interface Database {
           user_id: string | null;
         };
         Insert: {
-          author: string;
+          author?: string;
           id?: never;
           img?: string | null;
           ingredients: Ingredient[];
@@ -136,9 +144,8 @@ export interface Database {
 }
 
 export type Recipe = Database["public"]["Tables"]["recipes"]["Row"];
-
-export type InsertRecipess = Database["public"]["Tables"]["recipes"]["Insert"];
-export type UpdateRecipess = Database["public"]["Tables"]["recipes"]["Update"];
+export type InsertRecipes = Database["public"]["Tables"]["recipes"]["Insert"];
+export type UpdateRecipes = Database["public"]["Tables"]["recipes"]["Update"];
 
 export type Comment = Database["public"]["Tables"]["comments"]["Row"];
 export type InsertComment = Database["public"]["Tables"]["comments"]["Insert"];

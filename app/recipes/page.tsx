@@ -52,6 +52,8 @@ export default function RecipesPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
+      {recipes.length === 0 && <div>No results found</div>}
+
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
         {recipes?.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} className="col-span-1" />

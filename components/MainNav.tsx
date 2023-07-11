@@ -11,12 +11,18 @@ import {
   NavigationMenuViewport,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Home, LogIn, PlusCircle, UtensilsCrossed } from "lucide-react";
+import {
+  ChefHat,
+  Home,
+  LogIn,
+  PlusCircle,
+  UtensilsCrossed,
+} from "lucide-react";
 import Link from "next/link";
 
 export function MainNav() {
   return (
-    <NavigationMenu className="h-12 p-6">
+    <NavigationMenu className="p-6 mx-auto">
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link href="/" legacyBehavior passHref>
@@ -29,7 +35,7 @@ export function MainNav() {
 
         <NavigationMenuItem>
           <NavigationMenuTrigger>
-            <UtensilsCrossed />
+            <ChefHat />
             Recipes
           </NavigationMenuTrigger>
           <NavigationMenuContent>
@@ -76,14 +82,14 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem> */}
 
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <Link href="/login" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               <LogIn />
               Login
             </NavigationMenuLink>
           </Link>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
       </NavigationMenuList>
     </NavigationMenu>
   );
