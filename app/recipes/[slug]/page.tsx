@@ -22,6 +22,11 @@ export default async function RecipePage({
     .select("*")
     .match({ slug })
     .single();
+  if (!recipe) {
+    return (
+      <div className="w-16 h-16 border-4 border-blue-400 border-solid rounded-full border-t-transparent animate-spin"></div>
+    );
+  }
   const {
     author,
     id,
@@ -42,7 +47,7 @@ export default async function RecipePage({
         <div className="w-3/4 h-full mx-auto rounded-lg lg:w-1/3">
           <AspectRatio ratio={5 / 4}>
             <Image
-              src={img || `https://placehold.it/350`}
+              src={img || "http://unsplash.it/g/300/300?gravity=center"}
               alt={recipeName}
               // width={250}
               // height={250}

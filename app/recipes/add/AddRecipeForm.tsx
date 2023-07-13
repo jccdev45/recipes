@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Controller,
@@ -46,8 +45,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { redirect } from "next/navigation";
 import { FileInput } from "./ImageUpload";
+import { useRouter } from "next/navigation";
 
 function useZodForm<TSchema extends z.ZodType>(
   props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
@@ -71,11 +70,13 @@ type AddRecipeFormProps = {
 
 export function AddRecipeForm({ user }: AddRecipeFormProps) {
   const supabase = createClientComponentClient<Database>();
-
+  const router = useRouter();
   const [uniqueTags, setUniqueTags] = useState<Tag[]>([]);
   const [units, setUnits] = useState<UnitMeasurement[]>([]);
-
   const [imgURL, setImgURL] = useState("");
+  const [recipeError, setRecipeError] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const getTags = async () => {
@@ -173,29 +174,32 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
     name: "tags",
     control,
   });
-  // const { update } = tagFieldArray;
+
   const update = (index: number, obj: { id: string; tag: string }) => {
     tagFieldArray.update(index, obj);
   };
 
   const handleImageUpload = async (file: File | null) => {
+    const fileExt = file?.name.split(".").pop();
+    const filePath = `${user?.email}/${Math.random()}.${fileExt}`;
+
     if (file) {
-      // TODO
-      // check if file exists
       const { data, error } = await supabase.storage
         .from("photos")
-        .upload(file.name, file, {
+        .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
         });
 
       if (error) {
-        console.log(error);
+        setUploadError(error.message);
       } else {
         setImgURL(data.path);
+        setIsUploading(false);
+        setUploadError("");
       }
     } else {
-      console.log("idk");
+      setUploadError("No file selected");
     }
   };
 
@@ -212,7 +216,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
       author: user?.email?.toString(),
       user_id: user?.id,
       slug: toSlug(values.recipeName),
-      img: imgURL,
+      img: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
     };
 
     const { data, error } = await supabase
@@ -222,8 +226,9 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
 
     if (!error) {
       reset();
+      router.push(`/recipes/${data?.[0].slug}`);
+      router.refresh();
     }
-    redirect(`/recipes/${data?.[0].slug}`);
   };
 
   return (
@@ -405,7 +410,6 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
           {/* NOTE: STEPS FIELD ARRAY */}
           <div className="">
             {stepFieldArray.fields.map((feeld, index) => {
-              const errorForField = errors?.steps?.[index]?.step;
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
                   <div className="grid items-end w-full grid-cols-1 lg:grid-cols-8 lg:gap-x-2">
@@ -527,7 +531,6 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
         <Button type="submit" disabled={!isSubmittable}>
           Submit
         </Button>
-        {/* <Button type="submit">Submit</Button> */}
       </form>
     </Form>
   );

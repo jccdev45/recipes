@@ -1,11 +1,9 @@
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { AddRecipeForm } from "./AddRecipeForm";
 import { redirect } from "next/navigation";
 
-export default async function AddRecipePage() {
+export default async function EditProfilePage() {
   const supabase = createServerComponentClient({ cookies });
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -14,5 +12,10 @@ export default async function AddRecipePage() {
     redirect("/login");
   }
 
-  return <AddRecipeForm user={user} />;
+  return (
+    <section>
+      <h1>Profile</h1>
+      <p>{user?.email}</p>
+    </section>
+  );
 }

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { UserCircle2 } from "lucide-react";
 import { ChangeEvent, useRef, useState } from "react";
 
 interface FileInputProps {
@@ -14,6 +15,7 @@ export function FileInput({ className, onFileChange }: FileInputProps) {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
+
     if (file) {
       setFileName(file.name);
       onFileChange(file);
@@ -36,16 +38,13 @@ export function FileInput({ className, onFileChange }: FileInputProps) {
         ref={fileInputRef}
         className="hidden"
         onChange={handleFileChange}
-        aria-label="Upload file"
+        aria-label="Upload image"
       />
-      <Button
-        type="button"
-        className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-        onClick={handleChooseFile}
-      >
-        Choose File
+      <Button type="button" className="text-sm" onClick={handleChooseFile}>
+        <UserCircle2 />
+        Select Image
       </Button>
-      <span className="ml-2">{fileName}</span>
+      <span className="w-full ml-2 truncate">{fileName}</span>
     </div>
   );
 }

@@ -100,29 +100,29 @@ export interface Database {
         };
         Relationships: [];
       };
-      users: {
+      profiles: {
         Row: {
-          displayName: string | null;
+          first_name: string | null;
+          last_name: string | null;
           email: string | null;
-          firestore_id: string | null;
           id: string;
-          photoURL: string | null;
+          avatar_url: string | null;
           userId: string | null;
         };
         Insert: {
-          displayName?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
           email?: string | null;
-          firestore_id?: string | null;
           id: string;
-          photoURL?: string | null;
+          avatar_url?: string | null;
           userId?: string | null;
         };
         Update: {
-          displayName?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
           email?: string | null;
-          firestore_id?: string | null;
           id?: string;
-          photoURL?: string | null;
+          avatar_url?: string | null;
           userId?: string | null;
         };
         Relationships: [];
@@ -151,6 +151,6 @@ export type Comment = Database["public"]["Tables"]["comments"]["Row"];
 export type InsertComment = Database["public"]["Tables"]["comments"]["Insert"];
 export type UpdateComment = Database["public"]["Tables"]["comments"]["Update"];
 
-export type User = Database["public"]["Tables"]["users"]["Row"];
-export type InsertUser = Database["public"]["Tables"]["users"]["Insert"];
-export type UpdateUser = Database["public"]["Tables"]["users"]["Update"];
+export type User = Database["public"]["Tables"]["profiles"]["Row"];
+export type InsertUser = Database["public"]["Tables"]["profiles"]["Insert"];
+export type UpdateUser = Database["public"]["Tables"]["profiles"]["Update"];

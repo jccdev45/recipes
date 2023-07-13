@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Comment as CommentType, Database } from "@/types/supabase";

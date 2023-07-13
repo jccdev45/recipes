@@ -4,7 +4,11 @@ const nextConfig = {
     serverActions: true,
   },
   images: {
-    domains: ["eebioglnufbnareanhqf.supabase.co", "placehold.it"],
+    domains: [
+      "eebioglnufbnareanhqf.supabase.co",
+      "placehold.it",
+      "unsplash.it",
+    ],
   },
 };
 
