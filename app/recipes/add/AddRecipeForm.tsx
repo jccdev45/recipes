@@ -1,29 +1,53 @@
 "use client";
 
-import { Plus, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, SubmitHandler, useFieldArray, useForm, UseFormProps } from 'react-hook-form';
-import * as z from 'zod';
-
-import { TagCombobox } from '@/components/TagCombobox';
-import { Button } from '@/components/ui/button';
+import { Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { maxAmount, minAmount } from '@/lib/constants';
-import { cn, genId, toSlug } from '@/lib/utils';
-import { AddRecipeFormValues, RecipeFormSchema } from '@/lib/zod/schema';
-import { Database, Ingredient, Step, Tag, UnitMeasurement } from '@/types/supabase';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+  UseFormProps,
+} from "react-hook-form";
+import * as z from "zod";
 
-import { FileInput } from './ImageUpload';
+import { TagCombobox } from "@/app/recipes/add/TagCombobox";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { maxAmount, minAmount } from "@/lib/constants";
+import { cn, genId, toSlug } from "@/lib/utils";
+import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema";
+import {
+  Database,
+  Ingredient,
+  Step,
+  Tag,
+  UnitMeasurement,
+} from "@/types/supabase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createClientComponentClient,
+  User,
+} from "@supabase/auth-helpers-nextjs";
+
+import { FileInput } from "./ImageUpload";
 
 function useZodForm<TSchema extends z.ZodType>(
   props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {

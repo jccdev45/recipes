@@ -1,15 +1,16 @@
-import { cookies } from 'next/headers';
-import Image from 'next/image';
-import Link from 'next/link';
+import { cookies } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
 
-import { CommentsSection } from '@/components/Comments';
-import { Ingredients } from '@/components/Ingredients';
-import { Steps } from '@/components/Steps';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { CommentsSection } from "@/components/Comments";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+
+import { Ingredients } from "./Ingredients";
+import { Steps } from "./Steps";
 
 import type { Database, Recipe } from "@/types/supabase";
 export default async function RecipePage({
