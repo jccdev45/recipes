@@ -1,8 +1,9 @@
 // TODO: Duplicate or move this file outside the `_examples` folder to make it a route
 
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 export async function GET() {
   // Create a Supabase client configured to use cookies

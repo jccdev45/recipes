@@ -1,25 +1,20 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { AuthError, User } from "@supabase/supabase-js";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+import { useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { FileInput } from '@/app/recipes/add/ImageUpload';
+import { Button } from '@/components/ui/button';
+import { ButtonLoading } from '@/components/ui/button-loading';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema";
-import { FileInput } from "@/app/recipes/add/ImageUpload";
-import { Button } from "@/components/ui/button";
-import { ButtonLoading } from "@/components/ui/button-loading";
+    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RegisterFormValues, RegisterSchema } from '@/lib/zod/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { AuthError, User } from '@supabase/supabase-js';
 
 type RegisterFormProps = {
   setView: Dispatch<SetStateAction<string>>;

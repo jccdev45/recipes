@@ -1,21 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { LoginFormValues, LoginSchema } from "@/lib/zod/schema";
-import { Button } from "@/components/ui/button";
+    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { LoginFormValues, LoginSchema } from '@/lib/zod/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export function LoginForm() {
   const supabase = createClientComponentClient();

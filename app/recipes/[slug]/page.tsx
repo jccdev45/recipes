@@ -1,21 +1,27 @@
-import { cookies } from "next/headers";
-import Image from "next/image";
-import Link from "next/link";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import type { Database, Recipe } from "@/types/supabase";
-import { Ingredients } from "@/components/Ingredients";
-import { Steps } from "@/components/Steps";
-import { Badge } from "@/components/ui/badge";
-import { CommentsSection } from "@/components/Comments";
+import { cookies } from 'next/headers';
+import Image from 'next/image';
+import Link from 'next/link';
 
+import { CommentsSection } from '@/components/Comments';
+import { Ingredients } from '@/components/Ingredients';
+import { Steps } from '@/components/Steps';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+
+import type { Database, Recipe } from "@/types/supabase";
 export default async function RecipePage({
   params: { slug },
 }: {
   params: { slug: string };
 }) {
   const supabase = createServerComponentClient<Database>({ cookies });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: recipe, error } = await supabase
     .from("recipes")
@@ -100,7 +106,13 @@ export default async function RecipePage({
         />
       </div>
 
-      <CommentsSection id={id} />
+      <Separator className="h-1 my-2 rounded-lg bg-slate-400" />
+
+      <CommentsSection
+        currentUser={user}
+        recipe_id={id}
+        className="flex flex-col w-full"
+      />
     </section>
   );
 }

@@ -1,18 +1,6 @@
 "use client";
 
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { User } from "@supabase/supabase-js";
-import {
   ChefHat,
   Edit,
   Home,
@@ -22,9 +10,23 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
+
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+  NavigationMenuViewport,
+} from "@/components/ui/navigation-menu";
+import { User } from "@supabase/supabase-js";
+
+import LogoutButton from "./LogoutButton";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import LogoutButton from "./LogoutButton";
 
 type MainNavProps = { className: string; user: User | null };
 
@@ -114,7 +116,9 @@ export function MainNav({ user, className }: MainNavProps) {
               <NavigationMenuTrigger>
                 <Avatar>
                   <AvatarImage src={user?.user_metadata.avatar_url} />
-                  <AvatarFallback>OK</AvatarFallback>
+                  <AvatarFallback>
+                    <UserCircle2 />
+                  </AvatarFallback>
                 </Avatar>
                 <span>{user?.user_metadata.first_name}</span>
               </NavigationMenuTrigger>

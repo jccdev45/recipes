@@ -1,22 +1,16 @@
-import { useState } from "react";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckIcon, ChevronsUpDown } from 'lucide-react';
+import { useState } from 'react';
+import { UseFieldArrayUpdate } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Tag } from "@/types/supabase";
-import { cn, genId } from "@/lib/utils";
-import { FormControl } from "./ui/form";
-import { UseFieldArrayUpdate } from "react-hook-form";
+    Command, CommandEmpty, CommandGroup, CommandInput, CommandItem
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn, genId } from '@/lib/utils';
+import { Tag } from '@/types/supabase';
+
+import { FormControl } from './ui/form';
 
 type TagProps = {
   className: string;

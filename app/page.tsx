@@ -1,11 +1,12 @@
-import { cookies } from "next/headers";
-import Image from "next/image";
-import Link from "next/link";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { RecipeCard } from "@/components/RecipeCard";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import CookingSvg from "/public/images/CookingSvg.svg";
+import CookingSvg from '/public/images/CookingSvg.svg';
+import { cookies } from 'next/headers';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { RecipeCard } from '@/components/RecipeCard';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function Index() {
   const supabase = createServerComponentClient({ cookies });

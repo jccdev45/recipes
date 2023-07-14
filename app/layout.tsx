@@ -1,8 +1,10 @@
-import { cookies } from "next/headers";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { MainNav } from "@/components/MainNav";
-import { Footer } from "@/components/Footer";
-import "./globals.css";
+import './globals.css';
+
+import { cookies } from 'next/headers';
+
+import { Footer } from '@/components/Footer';
+import { MainNav } from '@/components/MainNav';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export const metadata = {
   title: "Medina Recipes",
@@ -23,8 +25,8 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen bg-background">
-        <MainNav user={user} className="p-6 mx-auto" />
+      <body className="flex flex-col min-h-screen bg-background accent-blue-600">
+        <MainNav user={user} className="p-6 mx-auto max-h-20 shrink" />
         <main className="w-full grow">{children}</main>
         <Footer />
       </body>

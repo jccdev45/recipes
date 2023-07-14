@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Recipe } from "@/types/supabase";
+import { useEffect, useState } from 'react';
+
+import { Recipe } from '@/types/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function ClientComponent() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);

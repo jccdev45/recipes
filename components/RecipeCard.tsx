@@ -1,17 +1,14 @@
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
+
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Recipe } from "@/types/supabase";
-import { AspectRatio } from "./ui/aspect-ratio";
-import { Badge } from "./ui/badge";
-import { cn, shimmer, toBase64 } from "@/lib/utils";
+    Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import { cn, shimmer, toBase64 } from '@/lib/utils';
+import { Recipe } from '@/types/supabase';
+
+import { AspectRatio } from './ui/aspect-ratio';
+import { Badge } from './ui/badge';
 
 type RecipeCardProps = {
   recipe: Recipe;

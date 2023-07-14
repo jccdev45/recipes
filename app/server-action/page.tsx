@@ -1,8 +1,9 @@
 // TODO: Duplicate or move this file outside the `_examples` folder to make it a route
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
-import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+
+import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function ServerAction() {
   const addRecipe = async (formData: FormData) => {

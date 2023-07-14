@@ -1,7 +1,8 @@
-import { Step } from "@/types/supabase";
-import { Checkbox } from "./ui/checkbox";
-import { Label } from "./ui/label";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
+import { Step } from '@/types/supabase';
+
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 
 type StepsProps = {
   className: string;

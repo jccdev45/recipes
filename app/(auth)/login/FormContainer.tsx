@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { LoginForm } from "./LoginForm";
-import { Button } from "@/components/ui/button";
-import { RegisterForm } from "./RegisterForm";
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+
+import { LoginForm } from './LoginForm';
+import { RegisterForm } from './RegisterForm';
 
 export default function FormContainer() {
   const [view, setView] = useState("sign-in");

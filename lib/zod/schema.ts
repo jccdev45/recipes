@@ -1,7 +1,8 @@
-import * as z from "zod";
-import { maxAmount, minAmount } from "../constants";
+import * as z from 'zod';
 
-export const ingredientSchema = z.array(
+import { maxAmount, minAmount } from '../constants';
+
+export const IngredientSchema = z.array(
   z.object({
     id: z.string(),
     ingredient: z
@@ -18,7 +19,7 @@ export const ingredientSchema = z.array(
   })
 );
 
-export const stepSchema = z.array(
+export const StepSchema = z.array(
   z.object({
     id: z.string(),
     step: z
@@ -28,7 +29,7 @@ export const stepSchema = z.array(
   })
 );
 
-export const tagSchema = z
+export const TagSchema = z
   .array(
     z.object({
       id: z.string(),
@@ -40,7 +41,7 @@ export const tagSchema = z
   )
   .max(5, { message: "No more than 5 tags" });
 
-export const recipeFormSchema = z.object({
+export const RecipeFormSchema = z.object({
   recipeName: z
     .string()
     .min(3, { message: "Name must be at least 3 characters" })
@@ -49,9 +50,9 @@ export const recipeFormSchema = z.object({
     .string()
     .min(3, { message: "Quote must be at least 3 characters" })
     .max(50, { message: "Quote must be less than 50 characters" }),
-  ingredients: ingredientSchema,
-  steps: stepSchema,
-  tags: tagSchema,
+  ingredients: IngredientSchema,
+  steps: StepSchema,
+  tags: TagSchema,
 });
 
 const sharedFields = {
@@ -92,14 +93,14 @@ export const RegisterSchema = z
     path: ["confirm_password"],
   });
 
-export const commentSchema = z.object({
+export const CommentSchema = z.object({
   message: z
     .string()
     .min(1, { message: "Must be at least 1 character " })
     .max(500, { message: "Max 500 characters" }),
 });
 
-export type AddRecipeFormValues = z.infer<typeof recipeFormSchema>;
-export type CommentFormValues = z.infer<typeof commentSchema>;
+export type AddRecipeFormValues = z.infer<typeof RecipeFormSchema>;
+export type CommentFormValues = z.infer<typeof CommentSchema>;
 export type LoginFormValues = z.infer<typeof LoginSchema>;
 export type RegisterFormValues = z.infer<typeof RegisterSchema>;

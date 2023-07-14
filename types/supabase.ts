@@ -7,15 +7,15 @@ export type Json =
   | Json[];
 
 export type Tag = {
-  id: string;
+  id?: string;
   tag: string;
 };
 export type Step = {
-  id: string;
+  id?: string;
   step: string;
 };
 export type Ingredient = {
-  id: string;
+  id?: string;
   ingredient: string;
   amount: number;
   unitMeasurement: string;
@@ -27,37 +27,37 @@ export interface Database {
     Tables: {
       comments: {
         Row: {
-          author: string | null;
-          createdAt: Json | null;
-          firestore_id: string | null;
-          id: string;
-          likedBy: Json | null;
-          likes: number | null;
-          message: string | null;
-          recipeId: string | null;
-          userId: string | null;
+          author: string;
+          avatar_url: string | null;
+          created_at: string;
+          id?: string;
+          liked_by: Json[];
+          likes: number;
+          message: string;
+          recipe_id: number;
+          user_id: string;
         };
         Insert: {
-          author?: string | null;
-          createdAt?: Json | null;
-          firestore_id?: string | null;
-          id: string;
-          likedBy?: Json | null;
-          likes?: number | null;
-          message?: string | null;
-          recipeId?: string | null;
-          userId?: string | null;
+          author?: string;
+          avatar_url?: string | null;
+          created_at?: string;
+          id?: string;
+          liked_by?: Json[];
+          likes?: number;
+          message?: string;
+          recipe_id?: number;
+          user_id?: string;
         };
         Update: {
-          author?: string | null;
-          createdAt?: Json | null;
-          firestore_id?: string | null;
+          author?: string;
+          avatar_url?: string | null;
+          created_at?: string;
           id?: string;
-          likedBy?: Json | null;
-          likes?: number | null;
-          message?: string | null;
-          recipeId?: string | null;
-          userId?: string | null;
+          liked_by?: Json[];
+          likes?: number;
+          message?: string;
+          recipe_id?: number;
+          user_id?: string;
         };
         Relationships: [];
       };

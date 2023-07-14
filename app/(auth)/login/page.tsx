@@ -1,4 +1,4 @@
-import FormContainer from "./FormContainer";
+import FormContainer from './FormContainer';
 
 export default async function LoginPage() {
   return (

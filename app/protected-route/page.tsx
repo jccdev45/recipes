@@ -1,12 +1,12 @@
 // TODO: Duplicate or move this file outside the `_examples` folder to make it a route
 
+import { cookies } from 'next/headers';
+import Image from 'next/image';
+import { redirect } from 'next/navigation';
+
 import {
-  createServerActionClient,
-  createServerComponentClient,
-} from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import Image from 'next/image'
-import { redirect } from 'next/navigation'
+    createServerActionClient, createServerComponentClient
+} from '@supabase/auth-helpers-nextjs';
 
 export default async function ProtectedRoute() {
   const supabase = createServerComponentClient({ cookies })

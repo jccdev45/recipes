@@ -1,6 +1,7 @@
-import { cookies } from "next/headers";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { redirect } from "next/navigation";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function EditRecipePage() {
   const supabase = createServerComponentClient({ cookies });

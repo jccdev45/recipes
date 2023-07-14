@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { UserCircle2 } from "lucide-react";
-import { ChangeEvent, useRef, useState } from "react";
+import { UserCircle2 } from 'lucide-react';
+import { ChangeEvent, useRef, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface FileInputProps {
   className: string;

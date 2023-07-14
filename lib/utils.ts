@@ -1,6 +1,8 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
- 
+import { ClassValue, clsx, type } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+import { Ingredient } from '@/types/supabase';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -81,4 +83,23 @@ export function toSlug(input: string): string {
     .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with dashes
     .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
     .trim(); // Remove extra whitespace
+}
+
+// Borrowed from @hero-page/hero-recipe-utils that doesn't have @types
+// fuck making a .d.ts file, all my homies hate making .d.ts files
+export function scaleIngredients(ingredients: Ingredient[], servings: number): Ingredient[] {
+  if (servings <= 0) {
+    throw new Error('Invalid number of servings');
+  }
+
+  return ingredients.map((ingredient) => {
+    if (!ingredient.hasOwnProperty('amount') || ingredient.amount < 0) {
+      throw new Error(`Invalid quantity for ingredient: ${ingredient.ingredient}`);
+    }
+
+    return {
+      ...ingredient,
+      amount: ingredient.amount * servings,
+    };
+  });
 }

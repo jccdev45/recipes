@@ -1,10 +1,12 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { RecipeCard } from "@/components/RecipeCard";
-import { Database, Recipe } from "@/types/supabase";
-import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from 'react';
+
+import { RecipeCard } from '@/components/RecipeCard';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Database, Recipe } from '@/types/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function RecipesPage() {
   const supabase = createClientComponentClient<Database>();
@@ -12,36 +14,24 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   useEffect(() => {
-    const getAllRecipes = async () => {
-      const { data } = await supabase.from("recipes").select();
+    const fetchData = async () => {
+      let query = supabase.from("recipes").select();
+
+      if (search.trim()) {
+        query = query.textSearch("recipeName", `'%${search}%'`, {
+          type: "websearch",
+        });
+      }
+
+      const { data } = await query;
 
       if (data) {
         setRecipes(data);
       }
     };
-    const searchRecipes = async () => {
-      const { data } = await supabase
-        .from("recipes")
-        .select()
-        .textSearch("recipeName", `'${search}'`);
 
-      if (data) {
-        setRecipes(data);
-      }
-    };
-
-    !search.trim() ? getAllRecipes() : searchRecipes();
+    fetchData();
   }, [search]);
-
-  // useEffect(() => {
-  //   const filteredRecipes = recipes?.filter((recipe) => {
-  //     return recipe.recipeName.toLowerCase().includes(search.toLowerCase());
-  //   });
-
-  //   setRecipes(filteredRecipes);
-  // }, [search]);
-
-  // TODO: ADD LOADING STATE, SKELETONS / SUSPENSE
 
   return (
     <section className="flex flex-col">
@@ -52,10 +42,17 @@ export default function RecipesPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {recipes.length === 0 && <div>No results found</div>}
-
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-        {recipes?.map((recipe) => (
+        {recipes.length === 0 && (
+          <div className="col-span-1">
+            <Skeleton className="w-[325px] h-[215px] lg:w-[400px] lg:h-[266px]" />
+            <Skeleton className="w-12 h-5"></Skeleton>
+            <Skeleton className="h-5 w-[182px]"></Skeleton>
+            <Skeleton className="w-24 h-5"></Skeleton>
+          </div>
+        )}
+
+        {recipes.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} className="col-span-1" />
         ))}
       </div>
