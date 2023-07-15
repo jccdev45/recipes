@@ -1,10 +1,15 @@
 "use client";
 
-import { ListRestart } from "lucide-react";
+import { ArrowDown, ArrowUp, ListRestart } from "lucide-react";
+import { number2fraction } from "number2fraction";
 import { Fragment, useEffect, useState } from "react";
 
 import { maxAmount, minAmount } from "@/lib/constants";
-import { cn, scaleIngredients } from "@/lib/utils";
+import {
+  cn,
+  improperFractionToMixedFraction,
+  scaleIngredients,
+} from "@/lib/utils";
 import { Ingredient } from "@/types/supabase";
 
 import { Button } from "../../../components/ui/button";
@@ -30,38 +35,50 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   return (
     <div className={cn(`prose`, className)}>
       <h3 className="">Ingredients</h3>
+      <h6>Enter a whole number then fine tune with the arrow buttons.</h6>
       <span className="flex items-center justify-center w-2/3 mx-auto gap-x-4">
         <span className="flex items-center justify-center">
           <Input
-            type="number"
+            pattern="[0-9]+"
             name="servings"
             value={serving}
-            onChange={(e) => setServing(Number(e.target.value))}
-            step={0.5}
-            min={0.5}
-            max={50}
+            onChange={(e) => {
+              if (isNaN(Number(e.target.value))) {
+                return;
+              }
+              setServing(Number(e.target.value));
+            }}
             className="w-16 text-lg"
           />
+          <span>
+            <Button variant="outline" size="icon">
+              <ArrowUp onClick={() => setServing(serving + 0.5)} />
+            </Button>
+            <Button variant="outline" size="icon" disabled={serving === 0}>
+              <ArrowDown onClick={() => setServing(serving - 0.5)} />
+            </Button>
+          </span>
           <Label htmlFor="servings">Servings</Label>
         </span>
-        <Button
-          variant="outline"
-          onClick={() => setAdjusted(ingredients)}
-          className="w-1/3 mx-auto"
-        >
-          <ListRestart />
-          Reset Amounts
-        </Button>
       </span>
 
       <ul className="">
         {adjusted.map(({ id, ingredient, amount, unitMeasurement }, index) => (
           <Fragment key={id}>
             <li className="flex items-center justify-start gap-x-1">
-              {unitMeasurement === "unit" ? (
-                <div className="m-0 w-[12%] text-sm">-</div>
+              {unitMeasurement === "unit" || serving === 0 ? (
+                <div className="w-[12%] m-0">-</div>
               ) : (
-                <div className="m-0 w-[12%]">{amount}</div>
+                <div className="m-0 w-[12%]">
+                  {amount === Math.floor(amount)
+                    ? amount
+                    : // improperFractionToMixedFraction(
+                      //   math.format(math.fraction(amount), {
+                      //     fraction: "ratio",
+                      //   })
+                      // )
+                      number2fraction(amount, true)}
+                </div>
               )}
               <Label className="w-5/6 my-auto space-x-2" htmlFor={ingredient}>
                 <span>

@@ -22,7 +22,11 @@ export function StepBoxImStuck({ className, id, step }: StepPropsImStuck) {
       onClick={() => setIsChecked((isChecked) => !isChecked)}
     >
       <Checkbox id={id} checked={isChecked} className="m-0" />
-      <Label htmlFor={id} className="m-0">
+      <Label
+        htmlFor={id}
+        className="m-0 cursor-pointer"
+        onClick={() => setIsChecked((isChecked) => !isChecked)}
+      >
         {step}
       </Label>
     </li>

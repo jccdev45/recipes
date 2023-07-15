@@ -182,7 +182,9 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
 
   const handleImageUpload = async (file: File | null) => {
     const fileExt = file?.name.split(".").pop();
-    const filePath = `${user?.email}/${Math.random()}.${fileExt}`;
+    const filePath = `recipes/${form.getValues(
+      "recipeName"
+    )}/${Math.random()}.${fileExt}`;
 
     if (file) {
       const { data, error } = await supabase.storage
@@ -231,6 +233,9 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
       router.refresh();
     }
   };
+
+  const nameForImage =
+    !errors.recipeName && form.getValues("recipeName").length > 0;
 
   return (
     <Form {...form}>
@@ -526,7 +531,9 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          <FileInput onFileChange={handleImageUpload} className="" />
+          {nameForImage && (
+            <FileInput onFileChange={handleImageUpload} className="" />
+          )}
         </div>
 
         <Button type="submit" disabled={!isSubmittable}>

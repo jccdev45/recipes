@@ -24,7 +24,12 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
   const { author, id, img, quote, recipeName, slug, tags, user_id } = recipe;
 
   return (
-    <Card className={cn(`rounded-md bg-zinc-200`, className)}>
+    <Card
+      className={cn(
+        `rounded-md bg-zinc-200 transition-colors group hover:bg-slate-300/70 duration-400 ease-in-out`,
+        className
+      )}
+    >
       <CardHeader className="flex flex-col items-center w-full">
         <AspectRatio ratio={3 / 2}>
           <Image
@@ -32,7 +37,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             alt={recipeName}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover w-auto h-auto rounded-lg"
+            className="object-cover w-auto h-auto rounded-lg group-hover:saturate-[1.25] transition-transform duration-300"
             placeholder="blur"
             blurDataURL={`data:image/svg+xml;base64,${toBase64(
               shimmer(304, 203)

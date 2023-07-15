@@ -1,20 +1,26 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { FileInput } from '@/app/recipes/add/ImageUpload';
-import { Button } from '@/components/ui/button';
-import { ButtonLoading } from '@/components/ui/button-loading';
+import { FileInput } from "@/app/recipes/add/ImageUpload";
+import { Button } from "@/components/ui/button";
+import { ButtonLoading } from "@/components/ui/button-loading";
 import {
-    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { RegisterFormValues, RegisterSchema } from '@/lib/zod/schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { AuthError, User } from '@supabase/supabase-js';
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { AuthError } from "@supabase/supabase-js";
 
 type RegisterFormProps = {
   setView: Dispatch<SetStateAction<string>>;
@@ -48,7 +54,7 @@ export function RegisterForm({ setView }: RegisterFormProps) {
 
   const handleImageUpload = async (file: File | null) => {
     const fileExt = file?.name.split(".").pop();
-    const filePath = `${form.getValues("email")}/${Math.random()}.${fileExt}`;
+    const filePath = `avatar/${Math.random()}.${fileExt}`;
 
     if (file) {
       setIsUploading(true);
@@ -81,7 +87,7 @@ export function RegisterForm({ setView }: RegisterFormProps) {
         data: {
           first_name: values.first_name,
           last_name: values.last_name,
-          avatar_url: imgURL,
+          avatar_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
         },
       },
     });

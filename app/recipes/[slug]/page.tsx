@@ -1,3 +1,4 @@
+import { UserCircle2 } from "lucide-react";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { cookTimeEstimator } from "@/lib/utils";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import { Ingredients } from "./Ingredients";
@@ -83,8 +85,10 @@ export default async function RecipePage({
               author
             )}
             <Avatar className="block md:inline">
-              <AvatarImage src="https://placehold.it/100" />
-              <AvatarFallback>OK</AvatarFallback>
+              <AvatarImage />
+              <AvatarFallback>
+                <UserCircle2 />
+              </AvatarFallback>
             </Avatar>
           </blockquote>
 
@@ -95,6 +99,8 @@ export default async function RecipePage({
           </ul>
         </div>
       </div>
+
+      <div>Estimated cook time: {cookTimeEstimator(ingredients)}</div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <Ingredients

@@ -25,7 +25,7 @@ export default async function Index() {
       <div className="relative w-screen h-32 md:h-48 aspect-auto lg:h-64">
         <Image
           src="https://eebioglnufbnareanhqf.supabase.co/storage/v1/object/public/photos/banner-full.jpeg"
-          alt="Medina Familty Banner"
+          alt="Medina Family Banner"
           fill
           priority
           sizes="(max-width: 768px) 100vw"
@@ -61,9 +61,13 @@ export default async function Index() {
       <h3 className="w-2/3 mx-auto text-2xl font-bold text-center">
         Check out some of our featured recipes:
       </h3>
-      <div className="grid w-full grid-cols-1 md:grid-cols-3">
+      <div className="grid w-full grid-cols-1 md:gap-x-1 md:grid-cols-3 ">
         {recipes?.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} className="col-span-1" />
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            className="w-11/12 col-span-1 mx-auto"
+          />
         ))}
       </div>
     </section>
