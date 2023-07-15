@@ -1,53 +1,29 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  Controller,
-  SubmitHandler,
-  useFieldArray,
-  useForm,
-  UseFormProps,
-} from "react-hook-form";
-import * as z from "zod";
+import { Plus, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Controller, SubmitHandler, useFieldArray, useForm, UseFormProps } from 'react-hook-form';
+import * as z from 'zod';
 
-import { TagCombobox } from "@/app/recipes/add/TagCombobox";
-import { Button } from "@/components/ui/button";
+import { TagCombobox } from '@/app/recipes/add/TagCombobox';
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { maxAmount, minAmount } from "@/lib/constants";
-import { cn, genId, toSlug } from "@/lib/utils";
-import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema";
-import {
-  Database,
-  Ingredient,
-  Step,
-  Tag,
-  UnitMeasurement,
-} from "@/types/supabase";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createClientComponentClient,
-  User,
-} from "@supabase/auth-helpers-nextjs";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { maxAmount, minAmount } from '@/lib/constants';
+import { cn, genId, toSlug } from '@/lib/utils';
+import { AddRecipeFormValues, RecipeFormSchema } from '@/lib/zod/schema';
+import { Database, Ingredient, Step, Tag, UnitMeasurement } from '@/types/supabase';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
 
-import { FileInput } from "./ImageUpload";
+import { FileInput } from './ImageUpload';
 
 function useZodForm<TSchema extends z.ZodType>(
   props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
@@ -66,10 +42,11 @@ function useZodForm<TSchema extends z.ZodType>(
 }
 
 type AddRecipeFormProps = {
+  className: string;
   user: User | null;
 };
 
-export function AddRecipeForm({ user }: AddRecipeFormProps) {
+export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
   const [uniqueTags, setUniqueTags] = useState<Tag[]>([]);
@@ -216,7 +193,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
 
     const updatedValues = {
       ...values,
-      author: user?.email?.toString(),
+      author: user?.user_metadata.first_name,
       user_id: user?.id,
       slug: toSlug(values.recipeName),
       img: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
@@ -241,7 +218,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="grid w-5/6 grid-cols-12 mx-auto gap-y-6"
+        className={cn(``, className)}
       >
         <div className="grid grid-cols-1 col-span-12 lg:grid-cols-2">
           <FormField
@@ -280,7 +257,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="h-1 my-2 rounded-lg bg-slate-400" />
+        <Separator className="h-1 my-2 rounded-lg" />
 
         <div className="col-span-12 space-y-6">
           <div className="">
@@ -396,7 +373,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             })}
             <Button
               type="button"
-              className="mx-auto my-4 bg-blue-600"
+              className="mx-auto my-4"
               onClick={() =>
                 ingFieldArray.append({
                   id: genId(),
@@ -411,7 +388,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          <Separator className="h-1 my-2 rounded-lg bg-slate-400" />
+          <Separator className="h-1 my-2 rounded-lg" />
 
           {/* NOTE: STEPS FIELD ARRAY */}
           <div className="">
@@ -457,7 +434,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             })}
             <Button
               type="button"
-              className="mx-auto my-4 bg-blue-600"
+              className="mx-auto my-4"
               onClick={() =>
                 stepFieldArray.append({
                   id: genId(),
@@ -470,7 +447,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          <Separator className="h-1 my-2 rounded-lg bg-slate-400" />
+          <Separator className="h-1 my-2 rounded-lg" />
 
           {/* NOTE: TAGS FIELD ARRAY */}
           <div className="">
@@ -517,7 +494,7 @@ export function AddRecipeForm({ user }: AddRecipeFormProps) {
             })}
             <Button
               type="button"
-              className="mx-auto my-4 bg-blue-600"
+              className="mx-auto my-4"
               onClick={() =>
                 tagFieldArray.append({
                   id: genId(),

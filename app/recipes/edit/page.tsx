@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { TypographyH1 } from '@/components/typography/TypographyH1';
+import { TypographyP } from '@/components/typography/TypographyP';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function EditRecipePage() {
@@ -15,8 +17,8 @@ export default async function EditRecipePage() {
 
   return (
     <section>
-      <h1>Profile</h1>
-      <p>{user?.email}</p>
+      <TypographyH1>Profile</TypographyH1>
+      <TypographyP>{user?.email}</TypographyP>
     </section>
   );
 }

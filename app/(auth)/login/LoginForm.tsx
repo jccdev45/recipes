@@ -8,11 +8,12 @@ import {
     Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { LoginFormValues, LoginSchema } from '@/lib/zod/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export function LoginForm() {
+export function LoginForm({ className }: { className?: string }) {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
@@ -43,7 +44,10 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form
-        className="flex flex-col justify-center flex-1 w-full gap-2 text-foreground"
+        className={cn(
+          `border shadow-xl rounded-lg border-slate-400 bg-bgackground dark:bg-stone-900 text-foreground`,
+          className
+        )}
         onSubmit={form.handleSubmit(handleSignIn)}
       >
         <FormField

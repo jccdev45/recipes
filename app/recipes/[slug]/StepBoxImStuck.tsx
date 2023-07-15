@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 type StepPropsImStuck = { className: string; id?: string; step: string };
 
@@ -24,7 +24,7 @@ export function StepBoxImStuck({ className, id, step }: StepPropsImStuck) {
       <Checkbox id={id} checked={isChecked} className="m-0" />
       <Label
         htmlFor={id}
-        className="m-0 cursor-pointer"
+        className="m-0 text-base cursor-pointer"
         onClick={() => setIsChecked((isChecked) => !isChecked)}
       >
         {step}

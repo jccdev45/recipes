@@ -1,21 +1,19 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ListRestart } from "lucide-react";
-import { number2fraction } from "number2fraction";
-import { Fragment, useEffect, useState } from "react";
+import { ArrowDown, ArrowUp, ListRestart } from 'lucide-react';
+import { number2fraction } from 'number2fraction';
+import { Fragment, useEffect, useState } from 'react';
 
-import { maxAmount, minAmount } from "@/lib/constants";
-import {
-  cn,
-  improperFractionToMixedFraction,
-  scaleIngredients,
-} from "@/lib/utils";
-import { Ingredient } from "@/types/supabase";
+import { TypographyH3 } from '@/components/typography/TypographyH3';
+import { TypographyH4 } from '@/components/typography/TypographyH4';
+import { TypographyList } from '@/components/typography/TypographyList';
+import { cn, scaleIngredients } from '@/lib/utils';
+import { Ingredient } from '@/types/supabase';
 
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Separator } from "../../../components/ui/separator";
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Separator } from '../../../components/ui/separator';
 
 type IngredientsProps = {
   className: string;
@@ -33,9 +31,11 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   }, [serving]);
 
   return (
-    <div className={cn(`prose`, className)}>
-      <h3 className="">Ingredients</h3>
-      <h6>Enter a whole number then fine tune with the arrow buttons.</h6>
+    <div className={cn(``, className)}>
+      <TypographyH3>Ingredients</TypographyH3>
+      <TypographyH4>
+        Enter a whole number then fine tune with the arrow buttons.
+      </TypographyH4>
       <span className="flex items-center justify-center w-2/3 mx-auto gap-x-4">
         <span className="flex items-center justify-center">
           <Input
@@ -51,10 +51,10 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
             className="w-16 text-lg"
           />
           <span>
-            <Button variant="outline" size="icon">
+            <Button variant="ghost" size="icon">
               <ArrowUp onClick={() => setServing(serving + 0.5)} />
             </Button>
-            <Button variant="outline" size="icon" disabled={serving === 0}>
+            <Button variant="ghost" size="icon" disabled={serving === 0}>
               <ArrowDown onClick={() => setServing(serving - 0.5)} />
             </Button>
           </span>
@@ -62,8 +62,8 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
         </span>
       </span>
 
-      <ul className="">
-        {adjusted.map(({ id, ingredient, amount, unitMeasurement }, index) => (
+      <TypographyList>
+        {adjusted.map(({ id, ingredient, amount, unitMeasurement }) => (
           <Fragment key={id}>
             <li className="flex items-center justify-start gap-x-1">
               {unitMeasurement === "unit" || serving === 0 ? (
@@ -72,12 +72,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                 <div className="m-0 w-[12%]">
                   {amount === Math.floor(amount)
                     ? amount
-                    : // improperFractionToMixedFraction(
-                      //   math.format(math.fraction(amount), {
-                      //     fraction: "ratio",
-                      //   })
-                      // )
-                      number2fraction(amount, true)}
+                    : number2fraction(amount, true)}
                 </div>
               )}
               <Label className="w-5/6 my-auto space-x-2" htmlFor={ingredient}>
@@ -94,7 +89,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
             <Separator className="my-1 border border-gray-300" />
           </Fragment>
         ))}
-      </ul>
+      </TypographyList>
     </div>
   );
 }

@@ -1,7 +1,7 @@
-import { ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-import { Ingredient } from "@/types/supabase";
+import { Ingredient } from '@/types/supabase';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -146,4 +146,12 @@ export function cookTimeEstimator(ingredients: Ingredient[]) {
 
   const cookTimeStr = `${hours} hour(s) ${minutes} minute(s)`;
   return hours === 0 ? `${minutes} minutes` : cookTimeStr;
+}
+
+export function trimAvatarUrl(fullUrl: string) {
+  const match = fullUrl.match(/public\/(.+)/);
+  if (match) {
+    return match[1];
+  }
+  return "";
 }

@@ -104,26 +104,23 @@ export interface Database {
         Row: {
           first_name: string | null;
           last_name: string | null;
-          email: string | null;
           id: string;
           avatar_url: string | null;
-          userId: string | null;
+          user_id: string | null;
         };
         Insert: {
           first_name?: string | null;
           last_name?: string | null;
-          email?: string | null;
           id: string;
           avatar_url?: string | null;
-          userId?: string | null;
+          user_id?: string | null;
         };
         Update: {
           first_name?: string | null;
           last_name?: string | null;
-          email?: string | null;
           id?: string;
           avatar_url?: string | null;
-          userId?: string | null;
+          user_id?: string | null;
         };
         Relationships: [];
       };

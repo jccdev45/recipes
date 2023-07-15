@@ -1,19 +1,14 @@
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { cn, shimmer, toBase64 } from "@/lib/utils";
-import { Recipe } from "@/types/supabase";
+    Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+} from '@/components/ui/card';
+import { cn, shimmer, toBase64 } from '@/lib/utils';
+import { Recipe } from '@/types/supabase';
 
-import { AspectRatio } from "../../components/ui/aspect-ratio";
-import { Badge } from "../../components/ui/badge";
+import { AspectRatio } from '../../components/ui/aspect-ratio';
+import { Badge } from '../../components/ui/badge';
 
 type RecipeCardProps = {
   recipe: Recipe;
@@ -26,7 +21,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
   return (
     <Card
       className={cn(
-        `rounded-md bg-zinc-200 transition-colors group hover:bg-slate-300/70 duration-400 ease-in-out`,
+        `rounded-md transition-all group dark:hover:bg-slate-800 duration-300 ease-in-out`,
         className
       )}
     >
@@ -37,7 +32,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             alt={recipeName}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover w-auto h-auto rounded-lg group-hover:saturate-[1.25] transition-transform duration-300"
+            className="object-cover w-auto h-auto rounded-lg group-hover:saturate-[1.1] transition-transform duration-300 m-0"
             placeholder="blur"
             blurDataURL={`data:image/svg+xml;base64,${toBase64(
               shimmer(304, 203)
@@ -59,14 +54,14 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             author
           )}
         </CardDescription>
-        <CardFooter>
-          {tags.map(({ tag, id }) => (
-            <Badge key={id} className="mx-1">
-              {tag}
-            </Badge>
-          ))}
-        </CardFooter>
       </CardHeader>
+      <CardFooter className="justify-end">
+        {tags.map(({ tag, id }) => (
+          <Badge key={id} className="mx-1">
+            {tag}
+          </Badge>
+        ))}
+      </CardFooter>
     </Card>
   );
 }

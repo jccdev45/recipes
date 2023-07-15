@@ -1,18 +1,21 @@
-import { UserCircle2 } from "lucide-react";
-import { cookies } from "next/headers";
-import Image from "next/image";
-import Link from "next/link";
+import { UserCircle2 } from 'lucide-react';
+import { cookies } from 'next/headers';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { CommentsSection } from "@/components/Comments";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { cookTimeEstimator } from "@/lib/utils";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { CommentsSection } from '@/components/Comments';
+import { TypographyH1 } from '@/components/typography/TypographyH1';
+import { TypographyList } from '@/components/typography/TypographyList';
+import { TypographyBlockquote } from '@/components/typography/TypographyQuote';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cookTimeEstimator, shimmer, toBase64 } from '@/lib/utils';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-import { Ingredients } from "./Ingredients";
-import { Steps } from "./Steps";
+import { Ingredients } from './Ingredients';
+import { Steps } from './Steps';
 
 import type { Database, Recipe } from "@/types/supabase";
 export default async function RecipePage({
@@ -33,7 +36,7 @@ export default async function RecipePage({
     .single();
   if (!recipe) {
     return (
-      <div className="w-16 h-16 border-4 border-blue-400 border-solid rounded-full border-t-transparent animate-spin"></div>
+      <TypographyH1>No recipe found, please try one mo again</TypographyH1>
     );
   }
   const {
@@ -46,34 +49,30 @@ export default async function RecipePage({
     steps,
     tags,
     user_id,
-  } = recipe as Recipe;
+  } = recipe;
 
   return (
     <section className="w-full p-4">
-      {error && <div>{JSON.stringify(error)}</div>}
-
       <div className="flex flex-col items-center lg:flex-row lg:justify-center">
         <div className="w-3/4 h-full mx-auto rounded-lg lg:w-1/3">
           <AspectRatio ratio={5 / 4}>
             <Image
               src={img || "http://unsplash.it/g/300/300?gravity=center"}
               alt={recipeName}
-              // width={250}
-              // height={250}
               fill
               className="object-cover w-auto h-auto m-0 rounded-md"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              // placeholder="blur"
-              // blurDataURL={`data:image/svg+xml;base64,${toBase64(
-              //   shimmer(304, 203)
-              // )}`}
+              placeholder="blur"
+              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                shimmer(444, 355)
+              )}`}
             />
           </AspectRatio>
         </div>
         <div className="flex-col items-center justify-center w-full prose-sm text-center lg:w-1/2 md:prose-base lg:prose-lg">
-          <h1>{recipeName}</h1>
-          <blockquote className="flex flex-col items-center md:flex-row md:gap-x-2 md:justify-center">
-            <span className="italic">"{quote}"</span>
+          <TypographyH1>{recipeName}</TypographyH1>
+          <TypographyBlockquote className="flex flex-col items-center md:flex-row md:gap-x-2 md:justify-center">
+            "{quote}"
             {user_id ? (
               <Link
                 href={`/profile/${user_id}`}
@@ -90,17 +89,17 @@ export default async function RecipePage({
                 <UserCircle2 />
               </AvatarFallback>
             </Avatar>
-          </blockquote>
+          </TypographyBlockquote>
 
-          <ul className="flex items-center justify-center gap-x-1">
+          <TypographyList className="flex items-center justify-center gap-x-1">
             {tags.map(({ id, tag }) => (
               <Badge key={id}>{tag}</Badge>
             ))}
-          </ul>
+          </TypographyList>
         </div>
       </div>
 
-      <div>Estimated cook time: {cookTimeEstimator(ingredients)}</div>
+      {/* <div>Estimated cook time: {cookTimeEstimator(ingredients)}</div> */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <Ingredients

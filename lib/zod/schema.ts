@@ -1,6 +1,34 @@
-import * as z from 'zod';
+import * as z from "zod";
 
-import { maxAmount, minAmount } from '../constants';
+import { maxAmount, minAmount } from "../constants";
+
+const sharedFields = {
+  auth: {
+    email: z.string().email({ message: "Must be a valid email" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" })
+      .max(32, { message: "Password must be less than 32 characters" })
+      .regex(/[a-z]/, {
+        message: "Password must contain at least one lowercase letter",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password must contain at least one uppercase letter",
+      })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+  },
+  user: {
+    first_name: z
+      .string()
+      .min(2, { message: "First name must be at least 2 characters" })
+      .max(50, { message: "First name must be less than 50 characters" }),
+    last_name: z
+      .string()
+      .min(2, { message: "Last name must be at least 2 characters" })
+      .max(50, { message: "Last name must be less than 50 characters" })
+      .optional(),
+  },
+};
 
 export const IngredientSchema = z.array(
   z.object({
@@ -55,38 +83,15 @@ export const RecipeFormSchema = z.object({
   tags: TagSchema,
 });
 
-const sharedFields = {
-  email: z.string().email({ message: "Must be a valid email" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .max(32, { message: "Password must be less than 32 characters" })
-    .regex(/[a-z]/, {
-      message: "Password must contain at least one lowercase letter",
-    })
-    .regex(/[A-Z]/, {
-      message: "Password must contain at least one uppercase letter",
-    })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
-};
-
 export const LoginSchema = z.object({
-  ...sharedFields,
+  ...sharedFields.auth,
 });
 
 export const RegisterSchema = z
   .object({
-    ...sharedFields,
+    ...sharedFields.auth,
+    ...sharedFields.user,
     confirm_password: z.string(),
-    first_name: z
-      .string()
-      .min(2, { message: "First name must be at least 2 characters" })
-      .max(50, { message: "First name must be less than 50 characters" }),
-    last_name: z
-      .string()
-      .min(2, { message: "Last name must be at least 2 characters" })
-      .max(50, { message: "Last name must be less than 50 characters" })
-      .optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",

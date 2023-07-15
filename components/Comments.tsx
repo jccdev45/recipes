@@ -12,6 +12,8 @@ import { Comment as CommentType, Database } from '@/types/supabase';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
 
+import { TypographyH4 } from './typography/TypographyH4';
+import { TypographyP } from './typography/TypographyP';
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
     AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -92,10 +94,10 @@ export function CommentsSection({
   };
 
   return (
-    <div className={cn(`prose space-y-8 max-w-full`, className)}>
+    <div className={cn(`space-y-8 max-w-full`, className)}>
       <Form {...form}>
         <form
-          className="flex flex-col w-full max-w-2xl p-4 my-0 rounded-lg bg-gradient-to-bl from-zinc-200 to-zinc-300"
+          className="flex flex-col w-full max-w-2xl p-4 my-0 rounded-lg"
           onSubmit={handleSubmit(handleSubmitComment)}
         >
           <FormField
@@ -143,7 +145,7 @@ export function CommentsSection({
         </div>
       )}
 
-      {comments?.length === 0 && <h4>No comments yet</h4>}
+      {comments?.length === 0 && <TypographyH4>No comments yet</TypographyH4>}
 
       {comments?.map((comment) => (
         <Comment key={comment.id} comment={comment} currentUser={currentUser} />
@@ -212,7 +214,7 @@ function Comment({ comment, currentUser }: CommentProps) {
         <span className="text-sm">
           {new Date(created_at).toLocaleDateString()}
         </span>
-        <p className="prose bg-white">{message}</p>
+        <TypographyP>{message}</TypographyP>
       </div>
 
       <div className="flex items-center justify-center h-10 ml-auto gap-x-2">
