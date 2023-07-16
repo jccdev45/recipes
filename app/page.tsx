@@ -36,9 +36,9 @@ export default async function Index() {
         />
       </div>
 
-      <div className="flex flex-col items-center px-4 py-20 lg:flex-row gap-y-4 lg:gap-0">
-        <div className="w-full lg:w-3/5 lg:translate-x-20">
-          <TypographyH1 className="rounded-md dark:bg-black/80">
+      <div className="flex flex-col items-center px-4 py-10 md:py-14 lg:flex-row gap-y-4 lg:gap-0">
+        <div className="w-full my-6 lg:w-3/5 lg:translate-x-20 md:my-0">
+          <TypographyH1 className="rounded-md dark:bg-black/80 max-w-min">
             Welcome to the Medina Family Recipe Collection!
           </TypographyH1>
           <TypographyP>You like flavor, don't you?</TypographyP>

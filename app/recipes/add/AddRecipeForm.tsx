@@ -223,9 +223,12 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn(``, className)}
+        className={cn(
+          `rounded-lg md:p-6 bg-background dark:bg-stone-900 gap-y-6`,
+          className
+        )}
       >
-        <div className="grid grid-cols-1 col-span-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 col-span-1 lg:grid-cols-2">
           <FormField
             control={control}
             name="recipeName"
@@ -236,7 +239,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                   <Input
                     placeholder="Chicken Parm"
                     {...field}
-                    className="w-full"
+                    className="w-full border border-border"
                   />
                 </FormControl>
                 <FormMessage />
@@ -262,9 +265,9 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="h-1 my-2 rounded-lg" />
+        <Separator className="h-1 col-span-1 my-2 rounded-lg" />
 
-        <div className="col-span-12 space-y-6">
+        <div className="col-span-1 space-y-6">
           <div className="">
             {ingFieldArray.fields.map((feeld, index) => {
               return (
@@ -288,7 +291,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                               min={minAmount}
                               max={maxAmount}
                               placeholder="0.0"
-                              className="col-span-1 p-2 border border-gray-300"
+                              className="col-span-1 p-2 border border-border"
                               {...field}
                               {...register(
                                 `ingredients.${index}.amount` as const,
@@ -315,14 +318,9 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value}
+                            defaultValue={field.value}
                           >
                             <FormControl>
-                              {/* <Input
-                                {...field}
-                                placeholder="teaspoon"
-                                className="col-span-1 p-2 border border-gray-300"
-                              /> */}
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a measurement" />
                               </SelectTrigger>
@@ -354,7 +352,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                             <Input
                               {...field}
                               placeholder="sugar"
-                              className="col-span-1 p-2 border border-gray-300"
+                              className="col-span-1 p-2 border border-border"
                             />
                           </FormControl>
                           <FormMessage />
@@ -365,7 +363,11 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     <Button
                       type="button"
                       variant="destructive"
-                      className="col-span-1"
+                      className={cn(
+                        `col-span-1`,
+                        ingFieldArray.fields.length === 1 &&
+                          `cursor-not-allowed`
+                      )}
                       onClick={() => ingFieldArray.remove(index)}
                       disabled={ingFieldArray.fields.length === 1}
                     >
@@ -405,7 +407,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       control={control}
                       name={`steps.${index}.step`}
                       render={({ field }) => (
-                        <FormItem className="col-span-3 lg:col-span-6">
+                        <FormItem className="col-span-3 lg:col-span-7">
                           <FormLabel
                             className={index === 0 ? `block` : `hidden`}
                           >
@@ -414,7 +416,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                           <FormControl>
                             <Input
                               placeholder="Boil water, eat it"
-                              className="col-span-7 p-2 border border-gray-300"
+                              className="p-2 border border-border"
                               {...field}
                             />
                           </FormControl>
@@ -426,7 +428,11 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     <Button
                       type="button"
                       variant="destructive"
-                      className="col-span-1"
+                      className={cn(
+                        `col-span-1`,
+                        stepFieldArray.fields.length === 1 &&
+                          `cursor-not-allowed`
+                      )}
                       onClick={() => stepFieldArray.remove(index)}
                       disabled={stepFieldArray.fields.length === 1}
                     >
@@ -459,12 +465,12 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             {tagFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid items-end w-full grid-cols-1 lg:grid-cols-5 lg:gap-x-2">
+                  <div className="grid items-end w-full grid-cols-1 lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
                     <Controller
                       control={control}
                       name={`tags.${index}.tag`}
                       render={({ field }) => (
-                        <FormItem className="col-span-4">
+                        <FormItem className="col-span-6">
                           <FormLabel
                             className={index === 0 ? `block` : `hidden`}
                           >
@@ -472,7 +478,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                           </FormLabel>
                           <TagCombobox
                             uniqueTags={uniqueTags}
-                            className="w-1/2 mx-auto"
+                            className="w-full mx-auto"
                             field={field}
                             form={form}
                             update={update}
@@ -486,7 +492,11 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     <Button
                       type="button"
                       variant="destructive"
-                      className="col-span-1"
+                      className={cn(
+                        `col-span-1`,
+                        tagFieldArray.fields.length === 1 &&
+                          `cursor-not-allowed`
+                      )}
                       onClick={() => tagFieldArray.remove(index)}
                       disabled={tagFieldArray.fields.length === 1}
                     >
@@ -499,7 +509,10 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             })}
             <Button
               type="button"
-              className="mx-auto my-4"
+              className={cn(
+                `col-span-1 my-4`,
+                tagFieldArray.fields.length >= 5 && `hover:cursor-not-allowed`
+              )}
               onClick={() =>
                 tagFieldArray.append({
                   id: genId(),
@@ -513,12 +526,22 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          {nameForImage && (
-            <FileInput onFileChange={handleImageUpload} className="" />
+          {!nameForImage && (
+            <FileInput
+              onFileChange={handleImageUpload}
+              className="px-2 py-4 border rounded-md border-border"
+            />
           )}
         </div>
 
-        <Button type="submit" disabled={!isSubmittable}>
+        <Button
+          type="submit"
+          disabled={!isSubmittable}
+          className={cn(
+            `w-1/4 md:w-1/5 ml-auto`,
+            !isSubmittable && `cursor-not-allowed`
+          )}
+        >
           Submit
         </Button>
       </form>

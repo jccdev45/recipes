@@ -28,6 +28,7 @@ import { TypographyList } from "./typography/TypographyList";
 import { TypographyP } from "./typography/TypographyP";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
 
 type MainNavProps = { className: string; user: User | null };
 
@@ -60,8 +61,8 @@ export function MainNav({ user, className }: MainNavProps) {
                     className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     href="/recipes"
                   >
-                    <ChefHat className="w-10 h-10" />
-                    <div className="text-sm font-medium leading-none">
+                    <ChefHat className="w-8 h-8" />
+                    <div className="mx-2 text-sm font-medium leading-none">
                       Recipes
                     </div>
                   </a>
@@ -79,8 +80,8 @@ export function MainNav({ user, className }: MainNavProps) {
                     className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     href="/recipes/add"
                   >
-                    <PlusCircle className="w-10 h-10" />
-                    <div className="text-sm font-medium leading-none">
+                    <PlusCircle className="w-8 h-8" />
+                    <div className="mx-2 text-sm font-medium leading-none">
                       New Recipe
                     </div>
                   </a>
@@ -128,8 +129,8 @@ export function MainNav({ user, className }: MainNavProps) {
                         className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         href={`/profile/${user?.id}`}
                       >
-                        <UserCircle2 className="w-10 h-10" />
-                        <div className="text-sm font-medium leading-none">
+                        <UserCircle2 className="w-8 h-8" />
+                        <div className="mx-2 text-sm font-medium leading-none">
                           Profile
                         </div>
                       </a>
@@ -147,8 +148,8 @@ export function MainNav({ user, className }: MainNavProps) {
                         className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         href={`/profile/${user?.id}/edit`}
                       >
-                        <Edit className="w-10 h-10" />
-                        <div className="text-sm font-medium leading-none">
+                        <Edit className="w-8 h-8" />
+                        <div className="mx-2 text-sm font-medium leading-none">
                           Edit Profile
                         </div>
                       </a>
@@ -157,7 +158,10 @@ export function MainNav({ user, className }: MainNavProps) {
                       Update your information
                     </TypographyP>
                   </li>
-                  <li className="row-span-1">
+
+                  <Separator className="w-full h-2 my-1 rounded-lg bg-foreground" />
+
+                  <li className="row-span-1 ml-auto">
                     <LogoutButton />
                   </li>
                 </ul>

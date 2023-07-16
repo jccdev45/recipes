@@ -1,19 +1,19 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ListRestart } from 'lucide-react';
-import { number2fraction } from 'number2fraction';
-import { Fragment, useEffect, useState } from 'react';
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { number2fraction } from "number2fraction";
+import { Fragment, useEffect, useState } from "react";
 
-import { TypographyH3 } from '@/components/typography/TypographyH3';
-import { TypographyH4 } from '@/components/typography/TypographyH4';
-import { TypographyList } from '@/components/typography/TypographyList';
-import { cn, scaleIngredients } from '@/lib/utils';
-import { Ingredient } from '@/types/supabase';
+import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyLarge } from "@/components/typography/TypographyLarge";
+import { TypographyList } from "@/components/typography/TypographyList";
+import { cn, scaleIngredients } from "@/lib/utils";
+import { Ingredient } from "@/types/supabase";
 
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Separator } from '../../../components/ui/separator';
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Separator } from "../../../components/ui/separator";
 
 type IngredientsProps = {
   className: string;
@@ -33,9 +33,9 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   return (
     <div className={cn(``, className)}>
       <TypographyH3>Ingredients</TypographyH3>
-      <TypographyH4>
-        Enter a whole number then fine tune with the arrow buttons.
-      </TypographyH4>
+      <TypographyLarge>
+        Enter a whole number then fine tune by 1/4 using the arrow buttons
+      </TypographyLarge>
       <span className="flex items-center justify-center w-2/3 mx-auto gap-x-4">
         <span className="flex items-center justify-center">
           <Input
@@ -65,7 +65,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
       <TypographyList>
         {adjusted.map(({ id, ingredient, amount, unitMeasurement }) => (
           <Fragment key={id}>
-            <li className="flex items-center justify-start gap-x-1">
+            <li className="flex items-center justify-start my-1 gap-x-1">
               {unitMeasurement === "unit" || serving === 0 ? (
                 <div className="w-[12%] m-0">-</div>
               ) : (
@@ -75,7 +75,10 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                     : number2fraction(amount, true)}
                 </div>
               )}
-              <Label className="w-5/6 my-auto space-x-2" htmlFor={ingredient}>
+              <Label
+                className="w-5/6 my-auto space-x-2 border-b border-border"
+                htmlFor={ingredient}
+              >
                 <span>
                   {unitMeasurement === "unit"
                     ? `(to taste)`
@@ -86,7 +89,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                 <span className="">{ingredient}</span>
               </Label>
             </li>
-            <Separator className="my-1 border border-gray-300" />
+            {/* <Separator className="my-1 border border-gray-300" /> */}
           </Fragment>
         ))}
       </TypographyList>

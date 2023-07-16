@@ -1,24 +1,24 @@
-import { UserCircle2 } from 'lucide-react';
-import { cookies } from 'next/headers';
-import Image from 'next/image';
-import Link from 'next/link';
+import { UserCircle2 } from "lucide-react";
+import { cookies } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
 
-import { CommentsSection } from '@/components/Comments';
-import { GradientBanner } from '@/components/GradientBanner';
-import { TypographyH1 } from '@/components/typography/TypographyH1';
-import { TypographyList } from '@/components/typography/TypographyList';
-import { TypographyBlockquote } from '@/components/typography/TypographyQuote';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { cookTimeEstimator, shimmer, toBase64 } from '@/lib/utils';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { CommentsSection } from "@/components/Comments";
+import { GradientBanner } from "@/components/GradientBanner";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyList } from "@/components/typography/TypographyList";
+import { TypographyBlockquote } from "@/components/typography/TypographyQuote";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { cookTimeEstimator, shimmer, toBase64 } from "@/lib/utils";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
-import { Ingredients } from './Ingredients';
-import { Steps } from './Steps';
+import { Ingredients } from "./Ingredients";
+import { Steps } from "./Steps";
 
-import type { Database, Recipe } from "@/types/supabase";
+import type { Database } from "@/types/supabase";
 export default async function RecipePage({
   params: { slug },
 }: {
@@ -64,7 +64,7 @@ export default async function RecipePage({
                 src={img || "http://unsplash.it/g/300/300?gravity=center"}
                 alt={recipeName}
                 fill
-                className="object-cover w-auto h-auto m-0 rounded-md"
+                className="object-cover w-auto h-auto m-0 rounded-lg"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 placeholder="blur"
                 blurDataURL={`data:image/svg+xml;base64,${toBase64(

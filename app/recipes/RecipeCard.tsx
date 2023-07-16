@@ -21,7 +21,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
   return (
     <article
       className={cn(
-        `rounded-md transition-all group relative dark:hover:bg-slate-800 duration-300 ease-in-out border border-foreground/40`,
+        `rounded-lg transition-all group relative dark:hover:bg-slate-800 duration-300 ease-in-out border border-foreground/40`,
         className
       )}
     >

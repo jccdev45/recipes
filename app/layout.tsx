@@ -1,12 +1,12 @@
-import './globals.css';
+import "./globals.css";
 
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 
-import { Footer } from '@/components/Footer';
-import { MainNav } from '@/components/MainNav';
-import { ThemeProvider } from '@/components/theme-provider';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Footer } from "@/components/Footer";
+import { MainNav } from "@/components/MainNav";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export const metadata = {
   title: "Medina Recipes",
@@ -35,7 +35,6 @@ export default async function RootLayout({
           />
           <main className="w-full grow">{children}</main>
           <Footer />
-
           <div className="fixed right-8 bottom-8">
             <ThemeToggle />
           </div>
