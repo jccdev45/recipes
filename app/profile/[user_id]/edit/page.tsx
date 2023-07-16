@@ -21,14 +21,15 @@ export default async function EditProfilePage() {
     <section>
       <GradientBanner />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-1/4">
-        <div className="relative w-2/3 col-span-1 m-auto -translate-x-16 -translate-y-16 rounded-lg bg-zinc-300 h-3/4 -z-10 dark:bg-zinc-950">
+      <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4 gap-y-4 md:gap-0">
+        <div className="w-5/6 h-full col-span-1 py-2 m-auto rounded-lg md:-translate-x-16 md:-translate-y-16 bg-neutral-300 -z-10 dark:bg-zinc-950">
           <Image
             src={AccountInfoSvg}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
+            width={250}
+            height={250}
+            // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
             alt="Cartoon depiction of person editing their profile information"
-            className="mx-auto translate-x-20 translate-y-20"
+            className="object-contain mx-auto md:translate-x-20 md:translate-y-20"
           />
         </div>
 

@@ -155,7 +155,7 @@ export function RegisterForm({
     <Form {...form}>
       <form
         className={cn(
-          `border shadow-xl rounded-lg border-slate-400 bg-background dark:bg-stone-900 text-foreground`,
+          `border shadow-xl rounded-lg border-slate-300 bg-background dark:bg-stone-900 text-foreground`,
           className
         )}
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -198,12 +198,12 @@ export function RegisterForm({
           </Button>
         ) : (
           <>
-            <div className="flex items-center gap-x-1">
+            {/* <div className="flex items-center gap-x-1">
               Changes made to:{" "}
               {Object.keys(dirtyFields).map((field) => (
                 <Badge key={field}>{field}</Badge>
               ))}
-            </div>
+            </div> */}
             <div className="flex items-center gap-x-4">
               <AlertDialog>
                 <AlertDialogTrigger className="w-1/4 mx-auto">

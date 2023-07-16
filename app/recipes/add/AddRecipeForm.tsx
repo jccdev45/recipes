@@ -1,29 +1,54 @@
 "use client";
 
-import { Plus, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, SubmitHandler, useFieldArray, useForm, UseFormProps } from 'react-hook-form';
-import * as z from 'zod';
-
-import { TagCombobox } from '@/app/recipes/add/TagCombobox';
-import { Button } from '@/components/ui/button';
+import { Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { maxAmount, minAmount } from '@/lib/constants';
-import { cn, genId, toSlug } from '@/lib/utils';
-import { AddRecipeFormValues, RecipeFormSchema } from '@/lib/zod/schema';
-import { Database, Ingredient, Step, Tag, UnitMeasurement } from '@/types/supabase';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+  UseFormProps,
+} from "react-hook-form";
+import * as z from "zod";
 
-import { FileInput } from './ImageUpload';
+import { TagCombobox } from "@/app/recipes/add/TagCombobox";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import useUniqueTags from "@/hooks/useTags";
+import { maxAmount, minAmount } from "@/lib/constants";
+import { cn, genId, toSlug } from "@/lib/utils";
+import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema";
+import {
+  Database,
+  Ingredient,
+  Step,
+  Tag,
+  UnitMeasurement,
+} from "@/types/supabase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createClientComponentClient,
+  User,
+} from "@supabase/auth-helpers-nextjs";
+
+import { FileInput } from "./ImageUpload";
 
 function useZodForm<TSchema extends z.ZodType>(
   props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
@@ -49,7 +74,7 @@ type AddRecipeFormProps = {
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
-  const [uniqueTags, setUniqueTags] = useState<Tag[]>([]);
+  const { uniqueTags, isLoading, error } = useUniqueTags();
   const [units, setUnits] = useState<UnitMeasurement[]>([]);
   const [imgURL, setImgURL] = useState("");
   const [recipeError, setRecipeError] = useState("");
@@ -57,31 +82,6 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    const getTags = async () => {
-      const { data } = await supabase.from("recipes").select("tags");
-
-      const tags: Tag[] = [];
-
-      if (data) {
-        data.forEach((recipe) => {
-          recipe.tags.forEach((tag) => {
-            const tagExists = tags.some(
-              (existingTag) => existingTag.tag === tag.tag
-            );
-
-            if (!tagExists) {
-              tags.push({
-                id: genId(),
-                tag: tag.tag,
-              });
-            }
-          });
-        });
-      }
-
-      setUniqueTags(tags);
-    };
-
     const getUnits = async (): Promise<void> => {
       const { data } = await supabase.from("recipes").select("ingredients");
 
@@ -115,7 +115,6 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     };
 
     getUnits();
-    getTags();
   }, []);
 
   const form = useZodForm({
@@ -213,6 +212,12 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
 
   const nameForImage =
     !errors.recipeName && form.getValues("recipeName").length > 0;
+
+  if (isLoading) {
+    return (
+      <div className="w-16 h-16 m-auto border-4 border-solid rounded-full border-t-transparent border-border animate-spin"></div>
+    );
+  }
 
   return (
     <Form {...form}>

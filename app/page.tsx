@@ -1,15 +1,15 @@
-import CookingSvg from '/public/images/CookingSvg.svg';
-import { cookies } from 'next/headers';
-import Image from 'next/image';
-import Link from 'next/link';
+import CookingSvg from "/public/images/CookingSvg.svg";
+import { cookies } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
 
-import { RecipeCard } from '@/app/recipes/RecipeCard';
-import { TypographyH1 } from '@/components/typography/TypographyH1';
-import { TypographyH3 } from '@/components/typography/TypographyH3';
-import { TypographyP } from '@/components/typography/TypographyP';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { RecipeCard } from "@/app/recipes/RecipeCard";
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyP } from "@/components/typography/TypographyP";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function Index() {
   const supabase = createServerComponentClient({ cookies });
@@ -32,13 +32,13 @@ export default async function Index() {
           fill
           priority
           sizes="(max-width: 768px) 100vw"
-          className=" md:contain"
+          className="object-cover md:object-none"
         />
       </div>
 
       <div className="flex flex-col items-center px-4 py-20 lg:flex-row gap-y-4 lg:gap-0">
         <div className="w-full lg:w-3/5 lg:translate-x-20">
-          <TypographyH1>
+          <TypographyH1 className="rounded-md dark:bg-black/80">
             Welcome to the Medina Family Recipe Collection!
           </TypographyH1>
           <TypographyP>You like flavor, don't you?</TypographyP>
