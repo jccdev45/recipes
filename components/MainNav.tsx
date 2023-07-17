@@ -29,6 +29,7 @@ import { TypographyP } from "./typography/TypographyP";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import { ThemeToggle } from "./ui/theme-toggle";
 
 type MainNavProps = { className: string; user: User | null };
 
@@ -113,7 +114,7 @@ export function MainNav({ user, className }: MainNavProps) {
                     <UserCircle2 />
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden md:block">
+                <span className="hidden truncate md:block">
                   {user?.user_metadata.first_name}
                 </span>
               </NavigationMenuTrigger>
@@ -168,6 +169,9 @@ export function MainNav({ user, className }: MainNavProps) {
               </NavigationMenuContent>
             </>
           )}
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <ThemeToggle />
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

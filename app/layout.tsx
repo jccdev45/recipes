@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { Footer } from "@/components/Footer";
 import { MainNav } from "@/components/MainNav";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export const metadata = {
@@ -27,17 +26,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="relative flex flex-col min-h-screen">
+      <body className="relative flex flex-col max-w-screen-xl min-h-screen mx-auto">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <MainNav
             user={user}
-            className="py-6 mx-auto md:p-6 max-h-20 shrink"
+            className="py-6 mx-auto md:p-6 max-h-24 shrink"
           />
           <main className="w-full grow">{children}</main>
-          <Footer />
-          <div className="fixed right-8 bottom-8">
-            <ThemeToggle />
-          </div>
+          <Footer className="w-full" user={user} />
         </ThemeProvider>
       </body>
     </html>

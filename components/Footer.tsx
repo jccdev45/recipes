@@ -1,11 +1,20 @@
-import { Github, Heart, Linkedin, UtensilsCrossed } from 'lucide-react';
-import Link from 'next/link';
+import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react";
+import Link from "next/link";
 
-import { TypographyP } from './typography/TypographyP';
+import { cn } from "@/lib/utils";
+import { User } from "@supabase/supabase-js";
 
-export function Footer() {
+import { TypographyP } from "./typography/TypographyP";
+
+export function Footer({
+  className,
+  user,
+}: {
+  className?: string;
+  user: User | null;
+}) {
   return (
-    <footer className="w-full">
+    <footer className={cn(``, className)}>
       <div className="flex flex-col flex-wrap px-5 mx-auto md:items-center lg:items-start md:flex-row md:flex-nowrap">
         <div className="flex-shrink-0 w-64 mx-auto mt-10 text-center md:mx-0 md:text-left md:mt-0">
           <div className="flex items-center justify-center font-medium title-font md:justify-start">
@@ -22,6 +31,7 @@ export function Footer() {
               <Link href="/recipes" className="">
                 Recipes
               </Link>
+              <Link href={`/profile/${user?.id}`}>Profile</Link>
             </nav>
           </div>
         </div>
@@ -32,11 +42,11 @@ export function Footer() {
           <Link
             href="https://jccdev.tech"
             rel="noopener noreferrer"
-            className="flex items-center justify-center underline"
+            className="flex items-center justify-center my-1 underline"
             target="_blank"
           >
-            @jccdev{" "}
-            <Heart className="no-underline bg-gradient-to-br bg-clip-text from-red-500 to-red-800 fill-red-800" />
+            @jccdev
+            <Heart className="ml-1 no-underline bg-gradient-to-br bg-clip-text from-red-500 to-red-800 fill-red-800" />
           </Link>
         </TypographyP>
         <span className="inline-flex justify-center gap-x-2">

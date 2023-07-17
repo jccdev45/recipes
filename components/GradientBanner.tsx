@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 export function GradientBanner() {
   const complementaryColors = [
@@ -51,6 +51,8 @@ export function GradientBanner() {
 
   let color = `${color1} ${color2} ${color3}`;
   return (
-    <div className={cn(`w-screen h-32 md:h-52 bg-gradient-to-l`, color)}></div>
+    <div
+      className={cn(`w-full rounded-sm h-32 md:h-52 bg-gradient-to-l`, color)}
+    ></div>
   );
 }

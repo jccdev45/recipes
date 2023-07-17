@@ -1,17 +1,23 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
-    Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { LoginFormValues, LoginSchema } from '@/lib/zod/schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { LoginFormValues, LoginSchema } from "@/lib/zod/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export function LoginForm({ className }: { className?: string }) {
   const supabase = createClientComponentClient();
@@ -23,7 +29,7 @@ export function LoginForm({ className }: { className?: string }) {
       email: "",
       password: "",
     },
-    mode: "onChange",
+    mode: "onBlur",
   });
 
   const {
@@ -45,7 +51,7 @@ export function LoginForm({ className }: { className?: string }) {
     <Form {...form}>
       <form
         className={cn(
-          `border shadow-xl rounded-lg border-slate-400 bg-bgackground dark:bg-stone-900 text-foreground`,
+          `border border-muted shadow-sm shadow-muted rounded-lg bg-background dark:bg-stone-900 text-foreground`,
           className
         )}
         onSubmit={form.handleSubmit(handleSignIn)}

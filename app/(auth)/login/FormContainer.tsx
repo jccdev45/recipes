@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
-import { TypographyH1 } from '@/components/typography/TypographyH1';
-import { TypographyP } from '@/components/typography/TypographyP';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyP } from "@/components/typography/TypographyP";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
 
 export default function FormContainer({ className }: { className?: string }) {
   const [view, setView] = useState("sign-in");
@@ -32,12 +32,12 @@ export default function FormContainer({ className }: { className?: string }) {
 
       {view === "sign-in" && (
         <>
-          <LoginForm className="flex flex-col justify-center w-5/6 gap-2 px-4 py-12 mx-auto shadow-sm md:w-2/3 shadow-foreground" />
+          <LoginForm className="flex flex-col justify-center w-5/6 gap-2 px-4 py-12 mx-auto md:w-2/3" />
           <TypographyP className="text-center">
             Don't have an account?
             <Button
-              variant="secondary"
-              className="mx-auto underline"
+              variant="outline"
+              className="mx-2 underline"
               onClick={() => setView("sign-up")}
             >
               Sign Up
@@ -56,8 +56,8 @@ export default function FormContainer({ className }: { className?: string }) {
           <TypographyP className="text-center">
             Already have an account?
             <Button
-              variant="secondary"
-              className="mx-auto underline"
+              variant="outline"
+              className="mx-2 underline"
               onClick={() => setView("sign-in")}
             >
               Sign In

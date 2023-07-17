@@ -1,26 +1,38 @@
 "use client";
 
-import Link from 'next/link';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import Link from "next/link";
+import { Dispatch, SetStateAction, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { FileInput } from '@/app/recipes/add/ImageUpload';
+import { FileInput } from "@/app/recipes/add/ImageUpload";
 import {
-    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-    AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { userFormItems } from '@/lib/constants';
-import { cn, trimAvatarUrl } from '@/lib/utils';
-import { RegisterFormValues, RegisterSchema } from '@/lib/zod/schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { User } from '@supabase/supabase-js';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { userFormItems } from "@/lib/constants";
+import { cn, trimAvatarUrl } from "@/lib/utils";
+import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { User } from "@supabase/supabase-js";
 
 type RegisterFormProps = {
   className: string;
@@ -155,7 +167,7 @@ export function RegisterForm({
     <Form {...form}>
       <form
         className={cn(
-          `border shadow-xl rounded-lg border-slate-300 bg-background dark:bg-stone-900 text-foreground`,
+          `border border-muted shadow-sm shadow-muted rounded-lg bg-background dark:bg-stone-900 text-foreground`,
           className
         )}
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -192,7 +204,7 @@ export function RegisterForm({
           <Button
             type="submit"
             disabled={!registerSubmittable || isSubmitting}
-            className="w-1/4 mx-auto"
+            className="w-1/3 mx-auto md:w-1/4"
           >
             Sign Up
           </Button>
@@ -229,7 +241,7 @@ export function RegisterForm({
               <Button
                 type="submit"
                 disabled={!editSubmittable || isSubmitting}
-                className="w-1/4 mx-auto"
+                className="w-1/3 mx-auto md:w-1/4"
               >
                 Update
               </Button>

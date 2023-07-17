@@ -6,6 +6,7 @@ import Link from "next/link";
 import { RecipeCard } from "@/app/recipes/RecipeCard";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
 import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyLarge } from "@/components/typography/TypographyLarge";
 import { TypographyP } from "@/components/typography/TypographyP";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -32,22 +33,26 @@ export default async function Index() {
           fill
           priority
           sizes="(max-width: 768px) 100vw"
-          className="object-cover md:object-none"
+          className="object-cover object-top"
         />
       </div>
 
       <div className="flex flex-col items-center px-4 py-10 md:py-14 lg:flex-row gap-y-4 lg:gap-0">
         <div className="w-full my-6 lg:w-3/5 lg:translate-x-20 md:my-0">
-          <TypographyH1 className="rounded-md dark:bg-black/80 max-w-min">
-            Welcome to the Medina Family Recipe Collection!
+          <TypographyH1 className="rounded-md dark:bg-black/80 max-w-max">
+            Welcome!
           </TypographyH1>
           <TypographyP>You like flavor, don't you?</TypographyP>
-          <TypographyP>
+          <TypographyLarge>
             <strong>Good!</strong> You're in the right place.
-          </TypographyP>
-          {!user && (
+          </TypographyLarge>
+          {!user ? (
             <Button asChild>
               <Link href="/login">Login</Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href="/recipes">Recipes</Link>
             </Button>
           )}
         </div>
