@@ -19,12 +19,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-  NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
 import { User } from "@supabase/supabase-js";
 
 import LogoutButton from "./LogoutButton";
-import { TypographyList } from "./typography/TypographyList";
 import { TypographyP } from "./typography/TypographyP";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";

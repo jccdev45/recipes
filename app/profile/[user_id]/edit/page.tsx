@@ -1,17 +1,15 @@
-import AccountInfoSvg from '/public/images/AccountInfo.svg';
-import { cookies } from 'next/headers';
-import Image from 'next/image';
-import { redirect } from 'next/navigation';
+import AccountInfoSvg from "/public/images/AccountInfo.svg";
+import Image from "next/image";
+import { redirect } from "next/navigation";
 
-import { RegisterForm } from '@/app/(auth)/login/RegisterForm';
-import { GradientBanner } from '@/components/GradientBanner';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { RegisterForm } from "@/app/(auth)/login/RegisterForm";
+import { GradientBanner } from "@/components/GradientBanner";
+import { getAuthUser } from "@/supabase/helpers";
+import { createSupaServer } from "@/supabase/server";
 
 export default async function EditProfilePage() {
-  const supabase = createServerComponentClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = createSupaServer();
+  const user = (await getAuthUser(supabase)) || null;
 
   if (!user) {
     redirect("/login");
@@ -22,7 +20,7 @@ export default async function EditProfilePage() {
       <GradientBanner />
 
       <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4 gap-y-4 md:gap-0">
-        <div className="w-5/6 h-full col-span-1 py-2 m-auto rounded-lg md:-translate-x-16 md:-translate-y-16 bg-neutral-300 -z-10 dark:bg-zinc-950">
+        <div className="w-5/6 h-full col-span-1 py-2 m-auto rounded-lg md:-translate-x-16 md:-translate-y-16">
           <Image
             src={AccountInfoSvg}
             width={250}

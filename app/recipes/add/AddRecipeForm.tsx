@@ -1,8 +1,8 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Controller,
   SubmitHandler,
@@ -32,21 +32,13 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import useUniqueTags from "@/hooks/useTags";
+import useUnits from "@/hooks/useUnits";
 import { maxAmount, minAmount } from "@/lib/constants";
 import { cn, genId, toSlug } from "@/lib/utils";
 import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema";
-import {
-  Database,
-  Ingredient,
-  Step,
-  Tag,
-  UnitMeasurement,
-} from "@/types/supabase";
+import { createSupaClient } from "@/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createClientComponentClient,
-  User,
-} from "@supabase/auth-helpers-nextjs";
+import { User } from "@supabase/auth-helpers-nextjs";
 
 import { FileInput } from "./ImageUpload";
 
@@ -58,7 +50,6 @@ function useZodForm<TSchema extends z.ZodType>(
   const form = useForm<TSchema["_input"]>({
     ...props,
     resolver: zodResolver(props.schema, undefined, {
-      // This makes it so we can use `.transform()`s on the schema without same transform getting applied again when it reaches the server
       raw: true,
     }),
   });
@@ -72,55 +63,20 @@ type AddRecipeFormProps = {
 };
 
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createSupaClient();
   const router = useRouter();
   const { uniqueTags, isLoading, error } = useUniqueTags();
-  const [units, setUnits] = useState<UnitMeasurement[]>([]);
+  const { units, loading } = useUnits();
+
   const [imgURL, setImgURL] = useState("");
   const [recipeError, setRecipeError] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    const getUnits = async (): Promise<void> => {
-      const { data } = await supabase.from("recipes").select("ingredients");
-
-      const units: Set<UnitMeasurement> = new Set();
-
-      if (data) {
-        data.forEach((recipe) => {
-          recipe.ingredients.forEach((unit) => {
-            if (unit.unitMeasurement) {
-              units.add(unit.unitMeasurement);
-            }
-          });
-        });
-      }
-
-      const unitArray: Array<UnitMeasurement> = Array.from(units);
-      const additionalUnits: Array<UnitMeasurement> = [
-        "gram",
-        "milliliter",
-        "whole",
-        "sprig",
-        "pinch",
-      ];
-      additionalUnits.forEach((unit) => {
-        if (!units.has(unit)) {
-          unitArray.push(unit);
-        }
-      });
-
-      setUnits(unitArray);
-    };
-
-    getUnits();
-  }, []);
-
   const form = useZodForm({
     schema: RecipeFormSchema,
     defaultValues: {
-      recipeName: "",
+      recipe_name: "",
       quote: "",
       ingredients: [
         { id: genId(), amount: 0, unitMeasurement: "", ingredient: "" },
@@ -159,7 +115,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const handleImageUpload = async (file: File | null) => {
     const fileExt = file?.name.split(".").pop();
     const filePath = `recipes/${form.getValues(
-      "recipeName"
+      "recipe_name"
     )}/${Math.random()}.${fileExt}`;
 
     if (file) {
@@ -194,7 +150,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       ...values,
       author: user?.user_metadata.first_name,
       user_id: user?.id,
-      slug: toSlug(values.recipeName),
+      slug: toSlug(values.recipe_name),
       img: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
     };
 
@@ -211,13 +167,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   };
 
   const nameForImage =
-    !errors.recipeName && form.getValues("recipeName").length > 0;
-
-  if (isLoading) {
-    return (
-      <div className="w-16 h-16 m-auto border-4 border-solid rounded-full border-t-transparent border-border animate-spin"></div>
-    );
-  }
+    !errors.recipe_name && form.getValues("recipe_name").length > 0;
 
   return (
     <Form {...form}>
@@ -231,7 +181,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         <div className="grid grid-cols-1 col-span-1 lg:grid-cols-2">
           <FormField
             control={control}
-            name="recipeName"
+            name="recipe_name"
             render={({ field }) => (
               <FormItem className="w-full col-span-2 lg:col-span-1">
                 <FormLabel>Name</FormLabel>
@@ -309,6 +259,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     <Controller
                       control={control}
                       name={`ingredients.${index}.unitMeasurement`}
+                      // {({ field: { onChange, onBlur, value, ref }, formState, fieldState })
                       render={({ field }) => (
                         <FormItem className="col-span-3 lg:col-span-2">
                           <FormLabel
@@ -371,7 +322,6 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       onClick={() => ingFieldArray.remove(index)}
                       disabled={ingFieldArray.fields.length === 1}
                     >
-                      <X />
                       Delete
                     </Button>
                   </div>
@@ -429,14 +379,13 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       type="button"
                       variant="destructive"
                       className={cn(
-                        `col-span-1`,
+                        `col-span-1 w-1/4 ml-auto lg:w-full`,
                         stepFieldArray.fields.length === 1 &&
                           `cursor-not-allowed`
                       )}
                       onClick={() => stepFieldArray.remove(index)}
                       disabled={stepFieldArray.fields.length === 1}
                     >
-                      <X />
                       Delete
                     </Button>
                   </div>
@@ -493,14 +442,13 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       type="button"
                       variant="destructive"
                       className={cn(
-                        `col-span-1`,
+                        `col-span-1 w-1/4 ml-auto lg:w-full`,
                         tagFieldArray.fields.length === 1 &&
                           `cursor-not-allowed`
                       )}
                       onClick={() => tagFieldArray.remove(index)}
                       disabled={tagFieldArray.fields.length === 1}
                     >
-                      <X />
                       Delete
                     </Button>
                   </div>
@@ -530,6 +478,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             <FileInput
               onFileChange={handleImageUpload}
               className="px-2 py-4 border rounded-md border-border"
+              type="recipe"
             />
           )}
         </div>
