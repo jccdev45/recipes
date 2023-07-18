@@ -7,7 +7,7 @@ import FormContainer from "./FormContainer";
 
 export default async function LoginPage() {
   return (
-    <section className="">
+    <section className="h-full">
       <GradientBanner />
 
       <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4">

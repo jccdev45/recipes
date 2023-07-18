@@ -1,11 +1,12 @@
 import "./globals.css";
 
-import { cookies } from "next/headers";
-
 import { Footer } from "@/components/Footer";
 import { MainNav } from "@/components/MainNav";
 import { ThemeProvider } from "@/components/theme-provider";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getAuthUser } from "@/supabase/helpers";
+import { createSupaServer } from "@/supabase/server";
+
+import Searchbar from "./recipes/Search";
 
 export const metadata = {
   title: "Medina Recipes",
@@ -18,22 +19,22 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createServerComponentClient({ cookies });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = createSupaServer();
+  const user = (await getAuthUser(supabase)) || null;
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="relative flex flex-col max-w-screen-xl min-h-screen mx-auto">
+      <body className="relative min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <MainNav
-            user={user}
-            className="py-6 mx-auto md:p-6 max-h-24 shrink"
-          />
-          <main className="w-full grow">{children}</main>
-          <Footer className="w-full" user={user} />
+          <div className="flex flex-col justify-between max-w-screen-xl min-h-screen mx-auto">
+            <MainNav
+              user={user}
+              className="py-6 mx-auto md:p-6 max-h-24 shrink"
+            />
+            <Searchbar className="flex items-center w-5/6 mx-auto my-2 md:w-1/2" />
+            <main className="w-full h-full grow">{children}</main>
+            <Footer className="w-full py-8" user={user} />
+          </div>
         </ThemeProvider>
       </body>
     </html>

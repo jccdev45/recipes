@@ -1,31 +1,32 @@
 import CookingSvg from "/public/images/CookingSvg.svg";
-import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
 import { RecipeCard } from "@/app/recipes/RecipeCard";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyH4 } from "@/components/typography/TypographyH4";
 import { TypographyLarge } from "@/components/typography/TypographyLarge";
 import { TypographyP } from "@/components/typography/TypographyP";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getAll, getAuthUser } from "@/supabase/helpers";
+import { createSupaServer } from "@/supabase/server";
+import { Recipe } from "@/types/supabase";
 
 export default async function Index() {
-  const supabase = createServerComponentClient({ cookies });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: recipes } = await supabase
-    .from("recipes")
-    .select()
-    .order("id", { ascending: false })
-    .limit(3);
+  const supabase = createSupaServer();
+  const user = (await getAuthUser(supabase)) || null;
+  const params = {
+    order: {
+      column: "id",
+      options: { ascending: true },
+    },
+    limit: 3,
+  };
+  const data = (await getAll({ db: "recipes", params }, supabase)) as Recipe[];
 
   return (
-    <section className="w-full py-6 md:py-12">
+    <section className="w-full">
       <div className="relative h-32 md:h-48 aspect-auto lg:h-64">
         <Image
           src="https://eebioglnufbnareanhqf.supabase.co/storage/v1/object/public/photos/banner-full.jpeg"
@@ -43,7 +44,7 @@ export default async function Index() {
             Welcome!
           </TypographyH1>
           <TypographyP>You like flavor, don't you?</TypographyP>
-          <TypographyLarge>
+          <TypographyLarge className="my-2">
             <strong>Good!</strong> You're in the right place.
           </TypographyLarge>
           {!user ? (
@@ -69,17 +70,19 @@ export default async function Index() {
 
       <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-slate-300" />
 
-      <center className="my-4">
-        <TypographyH3>Check out some of our featured recipes:</TypographyH3>
-      </center>
-      <div className="grid w-full grid-cols-1 gap-y-2 md:gap-x-1 md:grid-cols-3 ">
-        {recipes?.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            className="w-11/12 col-span-1 mx-auto"
-          />
-        ))}
+      <div className="p-2">
+        <TypographyH4 className="my-4 text-center">
+          Featured recipes:
+        </TypographyH4>
+        <div className="grid w-full grid-cols-1 gap-y-2 md:gap-x-1 md:grid-cols-3 ">
+          {data?.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              className="w-11/12 col-span-1 mx-auto"
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

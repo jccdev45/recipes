@@ -59,40 +59,56 @@ export interface Database {
           recipe_id?: number;
           user_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       recipes: {
         Row: {
+          created_at: string;
           author: string;
           id: number;
           img: string | null;
           ingredients: Ingredient[];
+          last_updated: string;
           quote: string | null;
-          recipeName: string;
+          recipe_name: string;
+          search_vector: unknown | null;
           slug: string;
           steps: Step[];
           tags: Tag[];
           user_id: string | null;
         };
         Insert: {
+          created_at?: string;
           author?: string;
           id?: never;
           img?: string | null;
           ingredients: Ingredient[];
+          last_updated?: string;
           quote?: string | null;
-          recipeName: string;
+          recipe_name: string;
+          search_vector?: unknown | null;
           slug: string;
           steps: Step[];
           tags: Tag[];
           user_id?: string | null;
         };
         Update: {
+          created_at?: string;
           author?: string;
           id?: never;
           img?: string | null;
           ingredients?: Ingredient[];
+          last_updated?: string;
           quote?: string | null;
-          recipeName?: string;
+          recipe_name?: string;
+          search_vector?: unknown | null;
           slug?: string;
           steps?: Step[];
           tags?: Tag[];
@@ -102,34 +118,59 @@ export interface Database {
       };
       profiles: {
         Row: {
+          created_at: string;
           first_name: string | null;
           last_name: string | null;
           id: string;
           avatar_url: string | null;
+          last_updated: string;
           user_id: string | null;
         };
         Insert: {
+          created_at?: string;
           first_name?: string | null;
           last_name?: string | null;
           id: string;
           avatar_url?: string | null;
+          last_updated?: string;
           user_id?: string | null;
         };
         Update: {
+          created_at?: string;
           first_name?: string | null;
           last_name?: string | null;
           id?: string;
           avatar_url?: string | null;
+          last_updated?: string;
           user_id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      delete_avatar: {
+        Args: {
+          avatar_url: string;
+        };
+        Returns: Record<string, unknown>;
+      };
+      delete_storage_object: {
+        Args: {
+          bucket: string;
+          object: string;
+        };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: {
       [_ in never]: never;

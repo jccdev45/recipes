@@ -16,7 +16,7 @@ type RecipeCardProps = {
 };
 
 export function RecipeCard({ recipe, className }: RecipeCardProps) {
-  const { author, id, img, quote, recipeName, slug, tags, user_id } = recipe;
+  const { author, id, img, quote, recipe_name, slug, tags, user_id } = recipe;
 
   return (
     <article
@@ -28,7 +28,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
       <AspectRatio ratio={4 / 3}>
         <Image
           src={img || `https://placehold.it/350`}
-          alt={recipeName}
+          alt={recipe_name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover w-auto h-auto rounded-lg group-hover:saturate-[1.1] transition-transform duration-300 m-0"
@@ -50,7 +50,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
         <div className="flex items-center justify-between">
           <TypographyH4>
             <Link href={`/recipes/${slug}`} className="hover:underline">
-              {recipeName}
+              {recipe_name}
             </Link>
           </TypographyH4>
 
@@ -71,7 +71,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
       {/* <CardFooter className="justify-end">
         <CardTitle>
           <Link href={`/recipes/${slug}`} className="underline">
-            {recipeName}
+            {recipe_name}
           </Link>
         </CardTitle>
         <CardDescription>

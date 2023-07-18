@@ -1,3 +1,5 @@
+export const apiUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1`;
+
 export const userFormItems = [
   {
     id: 1,

@@ -76,7 +76,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                 </div>
               )}
               <Label
-                className="w-5/6 my-auto space-x-2 border-b border-border"
+                className="w-5/6 my-auto space-x-2 text-base border-b border-border"
                 htmlFor={ingredient}
               >
                 <span>

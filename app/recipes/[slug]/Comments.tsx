@@ -1,36 +1,56 @@
 "use client";
 
-import { Heart, UserCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Heart, UserCircle2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { cn } from '@/lib/utils';
-import { CommentFormValues, CommentSchema } from '@/lib/zod/schema';
-import { Comment as CommentType, Database } from '@/types/supabase';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
+import { cn } from "@/lib/utils";
+import { CommentFormValues, CommentSchema } from "@/lib/zod/schema";
+import { createSupaClient } from "@/supabase/client";
+import { getAll } from "@/supabase/helpers";
+import { Comment as CommentType } from "@/types/supabase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { User } from "@supabase/auth-helpers-nextjs";
 
-import { TypographyH4 } from './typography/TypographyH4';
-import { TypographyP } from './typography/TypographyP';
+import { TypographyH4 } from "../../../components/typography/TypographyH4";
+import { TypographyP } from "../../../components/typography/TypographyP";
 import {
-    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-    AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
-} from './ui/alert-dialog';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Skeleton } from './ui/skeleton';
-import { Textarea } from './ui/textarea';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../../components/ui/alert-dialog";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../components/ui/avatar";
+import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../../components/ui/form";
+import { Skeleton } from "../../../components/ui/skeleton";
+import { Textarea } from "../../../components/ui/textarea";
 
 type CommentsSectionProps = {
   className: string;
   currentUser: User | null;
   recipe_id: number;
 };
-const supabase = createClientComponentClient<Database>();
+const supabase = createSupaClient();
 
 export function CommentsSection({
   className,
@@ -38,15 +58,24 @@ export function CommentsSection({
   recipe_id,
 }: CommentsSectionProps) {
   const [comments, setComments] = useState<Array<CommentType>>([]);
-  const router = useRouter();
 
   useEffect(() => {
     const getComments = async () => {
-      const { data: comments } = await supabase
-        .from("comments")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .eq("recipe_id", recipe_id);
+      const params = {
+        db: "comments",
+        params: {
+          filters: {
+            column: "recipe_id",
+            value: recipe_id,
+          },
+          order: {
+            column: "created_at",
+            ascending: false,
+          },
+        },
+      };
+
+      const comments: CommentType[] | null = await getAll(params, supabase);
 
       if (comments) {
         setComments(comments);
@@ -94,10 +123,10 @@ export function CommentsSection({
   };
 
   return (
-    <div className={cn(`space-y-8 max-w-full`, className)}>
+    <div className={cn(`space-y-8 p-4`, className)}>
       <Form {...form}>
         <form
-          className="flex flex-col w-full max-w-2xl p-4 my-0 rounded-lg"
+          className="flex flex-col w-full max-w-2xl my-0 rounded-lg"
           onSubmit={handleSubmit(handleSubmitComment)}
         >
           <FormField
@@ -145,7 +174,7 @@ export function CommentsSection({
         </div>
       )}
 
-      {comments?.length === 0 && <TypographyH4>No comments yet</TypographyH4>}
+      {/* {comments?.length === 0 && <TypographyH4>No comments yet</TypographyH4>} */}
 
       {comments?.map((comment) => (
         <Comment key={comment.id} comment={comment} currentUser={currentUser} />
@@ -160,6 +189,7 @@ type CommentProps = {
 };
 
 function Comment({ comment, currentUser }: CommentProps) {
+  const router = useRouter();
   const {
     author,
     avatar_url,
@@ -188,16 +218,27 @@ function Comment({ comment, currentUser }: CommentProps) {
   };
 
   const handleDelete = async () => {
-    const { data, error } = await supabase
-      .from("comments")
-      .delete()
-      .eq("id", id)
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .delete()
+        .eq("id", id)
+        .select();
+
+      if (data) {
+        router.refresh();
+      }
+      if (error) {
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return null;
+    }
   };
 
   return (
-    <div className="flex p-2 border rounded-md border-zinc-300 my-0.5 shadow-md bg-zinc-200 relative w-1/2">
-      <Avatar>
+    <div className="relative flex w-1/2 p-2 border rounded-md shadow-md bg-background dark:bg-slate-900 border-foreground/40">
+      <Avatar className="mr-2">
         <AvatarImage src={avatar_url || ``} />
         <AvatarFallback>
           <UserCircle2 />

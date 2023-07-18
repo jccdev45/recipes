@@ -1,21 +1,23 @@
-import { UserCircle2 } from 'lucide-react';
-import { ChangeEvent, useRef, useState } from 'react';
+import { Pizza, UserCircle2 } from "lucide-react";
+import { ChangeEvent, useRef, useState } from "react";
 
-import { Button } from '@/components/ui/button';
-import { ButtonLoading } from '@/components/ui/button-loading';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { ButtonLoading } from "@/components/ui/button-loading";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface FileInputProps {
   className?: string;
   isUploading?: boolean;
   onFileChange: (file: File | null) => void;
+  type?: string;
 }
 
 export function FileInput({
   className,
   isUploading,
   onFileChange,
+  type,
 }: FileInputProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -51,7 +53,11 @@ export function FileInput({
         <ButtonLoading className="w-1/3 mx-auto" />
       ) : (
         <Button type="button" className="text-sm" onClick={handleChooseFile}>
-          <UserCircle2 className="m-0.5" />
+          {type === "recipe" ? (
+            <Pizza className="m-0.5" />
+          ) : (
+            <UserCircle2 className="m-0.5" />
+          )}
           <span className="mx-1">Image</span>
         </Button>
       )}
