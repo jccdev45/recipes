@@ -1,7 +1,7 @@
 import { Edit, UserCircle2, UserX } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { RecipeCard } from "@/app/recipes/RecipeCard";
 import { GradientBanner } from "@/components/GradientBanner";
@@ -24,6 +24,10 @@ export default async function ProfilePage({
 }) {
   const supabase = createSupaServer();
   const { data } = await supabase.auth.getUser();
+
+  if (!data.user) {
+    redirect("/login");
+  }
 
   const userParams = {
     filters: {
