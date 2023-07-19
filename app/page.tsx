@@ -19,7 +19,7 @@ export default async function Index() {
   const params = {
     order: {
       column: "id",
-      options: { ascending: true },
+      options: { ascending: false },
     },
     limit: 3,
   };
@@ -57,7 +57,7 @@ export default async function Index() {
             </Button>
           )}
         </div>
-        <div className="w-5/6 rounded-full -z-10 md:w-2/3 lg:w-2/5 bg-stone-300/90 md:-translate-x-1/4">
+        <div className="w-5/6 rounded-full -z-10 md:w-2/3 lg:w-2/5 bg-stone-300/90 dark:bg-stone-900 md:-translate-x-1/4">
           <Image
             src={CookingSvg}
             alt="Cartoon style depiction of man sitting on large chef hat, with spoon and salt/pepper shakers"
@@ -68,7 +68,7 @@ export default async function Index() {
         </div>
       </div>
 
-      <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-slate-300" />
+      <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-foreground" />
 
       <div className="p-2">
         <TypographyH4 className="my-4 text-center">
