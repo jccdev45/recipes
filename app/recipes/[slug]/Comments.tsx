@@ -137,7 +137,7 @@ export function CommentsSection({
                 <FormLabel>Leave a comment</FormLabel>
                 <FormControl>
                   <Textarea
-                    className="bg-white"
+                    className=""
                     placeholder={
                       currentUser
                         ? "Wow great recipe!"
@@ -204,16 +204,19 @@ function Comment({ comment, currentUser }: CommentProps) {
   const [liked, setLiked] = useState(likes);
 
   const handleLike = async () => {
-    if (liked_by.includes(user_id)) return;
+    if (liked_by.includes(user_id)) {
+      return;
+    } else {
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ likes: likes + 1, liked_by: [...liked_by, user_id] })
+        .eq("id", id)
+        .select();
 
-    const { data, error } = await supabase
-      .from("comments")
-      .update({ likes: likes + 1, liked_by: [...liked_by, user_id] })
-      .eq("id", id)
-      .select();
-
-    if (data) {
-      setLiked(data?.[0].likes);
+      if (data) {
+        // setLiked(data?.[0].likes);
+        console.log(data);
+      }
     }
   };
 
@@ -237,7 +240,7 @@ function Comment({ comment, currentUser }: CommentProps) {
   };
 
   return (
-    <div className="relative flex w-1/2 p-2 border rounded-md shadow-md bg-background dark:bg-slate-900 border-foreground/40">
+    <div className="relative flex w-full p-2 border rounded-md shadow-md md:w-1/2 bg-background dark:bg-slate-900 border-foreground/40">
       <Avatar className="mr-2">
         <AvatarImage src={avatar_url || ``} />
         <AvatarFallback>
@@ -248,17 +251,17 @@ function Comment({ comment, currentUser }: CommentProps) {
       <div className="flex flex-col w-full m-0">
         <Link
           href={`/profile/${user_id}`}
-          className="font-bold underline gap-x-4"
+          className="font-bold underline gap-x-4 max-w-max"
         >
           {author}
         </Link>
-        <span className="text-sm">
+        <span className="text-sm max-w-max">
           {new Date(created_at).toLocaleDateString()}
         </span>
         <TypographyP>{message}</TypographyP>
       </div>
 
-      <div className="flex items-center justify-center h-10 ml-auto gap-x-2">
+      {/* <div className="flex items-center justify-center h-10 ml-auto gap-x-2">
         <Heart
           color="red"
           className={cn(
@@ -268,7 +271,7 @@ function Comment({ comment, currentUser }: CommentProps) {
           onClick={handleLike}
         />
         <span className="">{liked}</span>
-      </div>
+      </div> */}
 
       {currentUser?.id === user_id && (
         <AlertDialog>
