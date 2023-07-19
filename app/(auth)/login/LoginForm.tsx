@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
+import { TypographyH3 } from "@/components/typography/TypographyH3";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -56,6 +57,7 @@ export function LoginForm({ className }: { className?: string }) {
         )}
         onSubmit={form.handleSubmit(handleSignIn)}
       >
+        <TypographyH3 className="text-center">Login</TypographyH3>
         <FormField
           control={form.control}
           name="email"
@@ -96,7 +98,7 @@ export function LoginForm({ className }: { className?: string }) {
         <Button
           type="submit"
           disabled={!isSubmittable || isSubmitting}
-          className="w-1/3 mx-auto"
+          className="w-1/2 mx-auto"
         >
           Submit
         </Button>

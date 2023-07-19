@@ -39,7 +39,7 @@ export default async function Index() {
       </div>
 
       <div className="flex flex-col items-center px-4 py-10 md:py-14 lg:flex-row gap-y-4 lg:gap-0">
-        <div className="w-full my-6 lg:w-3/5 lg:translate-x-20 md:my-0">
+        <div className="w-full px-8 my-6 lg:w-3/5 lg:translate-x-20 md:my-0">
           <TypographyH1 className="rounded-md dark:bg-black/80 max-w-max">
             Welcome!
           </TypographyH1>
@@ -57,7 +57,7 @@ export default async function Index() {
             </Button>
           )}
         </div>
-        <div className="w-5/6 rounded-full -z-10 md:w-2/3 lg:w-2/5 bg-stone-300/90 dark:bg-stone-900 md:-translate-x-1/4">
+        <div className="w-5/6 rounded-full -z-10 md:w-1/2 lg:w-2/5 bg-stone-300/90 dark:bg-stone-900 lg:-translate-x-1/4">
           <Image
             src={CookingSvg}
             alt="Cartoon style depiction of man sitting on large chef hat, with spoon and salt/pepper shakers"

@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FileInput } from "@/app/recipes/add/ImageUpload";
+import { TypographyH3 } from "@/components/typography/TypographyH3";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -172,6 +173,7 @@ export function RegisterForm({
         )}
         onSubmit={form.handleSubmit(handleSubmit)}
       >
+        <TypographyH3 className="text-center">Sign Up</TypographyH3>
         {userFormItems.map(({ id, fieldName, placeholder, label }) => (
           <FormField
             key={id}
@@ -204,7 +206,7 @@ export function RegisterForm({
           <Button
             type="submit"
             disabled={!registerSubmittable || isSubmitting}
-            className="w-1/3 mx-auto md:w-1/4"
+            className="w-1/2 mx-auto"
           >
             Sign Up
           </Button>

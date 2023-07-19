@@ -32,7 +32,7 @@ export default function FormContainer({ className }: { className?: string }) {
 
       {view === "sign-in" && (
         <>
-          <LoginForm className="flex flex-col justify-center w-5/6 gap-2 px-4 py-12 mx-auto md:w-2/3" />
+          <LoginForm className="flex flex-col justify-center w-5/6 gap-2 px-4 py-12 mx-auto md:w-3/4" />
           <TypographyP className="text-center">
             Don't have an account?
             <Button
@@ -51,7 +51,7 @@ export default function FormContainer({ className }: { className?: string }) {
           <RegisterForm
             setView={setView}
             type="register"
-            className="flex flex-col justify-center w-5/6 gap-2 p-4 mx-auto md:w-2/3"
+            className="flex flex-col justify-center w-5/6 gap-2 p-4 mx-auto md:w-3/4"
           />
           <TypographyP className="text-center">
             Already have an account?
