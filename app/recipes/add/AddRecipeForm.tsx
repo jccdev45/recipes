@@ -72,6 +72,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const [recipeError, setRecipeError] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const form = useZodForm({
     schema: RecipeFormSchema,
@@ -146,23 +147,33 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   ) => {
     e?.preventDefault();
 
-    const updatedValues = {
-      ...values,
-      author: user?.user_metadata.first_name,
-      user_id: user?.id,
-      slug: toSlug(values.recipe_name),
-      img: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
-    };
+    if (!imgURL && !isConfirmed) {
+      setRecipeError(
+        "You haven't selected an image, are you sure you want to continue? (you can still upload one later)"
+      );
+      return;
+    } else {
+      const updatedValues = {
+        ...values,
+        author: user?.user_metadata.first_name,
+        user_id: user?.id,
+        slug: toSlug(values.recipe_name),
+        img:
+          imgURL.length > 0
+            ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
+            : "http://loremflickr.com/g/500/500/food",
+      };
 
-    const { data, error } = await supabase
-      .from("recipes")
-      .insert(updatedValues)
-      .select();
+      const { data, error } = await supabase
+        .from("recipes")
+        .insert(updatedValues)
+        .select();
 
-    if (!error) {
-      reset();
-      router.push(`/recipes/${data?.[0].slug}`);
-      router.refresh();
+      if (!error) {
+        reset();
+        router.push(`/recipes/${data?.[0].slug}`);
+        router.refresh();
+      }
     }
   };
 
@@ -474,12 +485,33 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          {!nameForImage && (
-            <FileInput
-              onFileChange={handleImageUpload}
-              className="px-2 py-4 border rounded-md border-border"
-              type="recipe"
-            />
+          {nameForImage && (
+            <>
+              <FileInput
+                onFileChange={handleImageUpload}
+                className={cn(
+                  `px-2 py-4 border rounded-md border-border`,
+                  recipeError && `border-destructive`
+                )}
+                type="recipe"
+              />
+              {uploadError && <p className="text-destructive">{uploadError}</p>}
+              {recipeError && (
+                <p className="text-destructive">
+                  {recipeError}
+                  <Button
+                    className="mx-4"
+                    variant="default"
+                    onClick={() => {
+                      setRecipeError("");
+                      setIsConfirmed(true);
+                    }}
+                  >
+                    Continue
+                  </Button>
+                </p>
+              )}
+            </>
           )}
         </div>
 

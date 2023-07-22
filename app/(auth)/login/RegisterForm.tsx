@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -90,7 +91,10 @@ export function RegisterForm({
   const handleImageUpload = async (file: File | null) => {
     const fileExt = file?.name.split(".").pop();
     const filePath = `avatar/${Math.random()}.${fileExt}`;
-    const trimmedUpdatePath = trimAvatarUrl(user?.user_metadata.avatar_url);
+    let trimmedUpdatePath;
+
+    if (type !== "register")
+      trimmedUpdatePath = trimAvatarUrl(user?.user_metadata.avatar_url);
 
     if (file) {
       setIsUploading(true);
@@ -103,6 +107,7 @@ export function RegisterForm({
             })
           : await supabase.storage
               .from("photos")
+              // @ts-expect-error
               .update(trimmedUpdatePath, file, {
                 cacheControl: "3600",
                 upsert: false,
@@ -129,7 +134,10 @@ export function RegisterForm({
       data: {
         first_name: values.first_name,
         last_name: values.last_name,
-        avatar_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`,
+        avatar_url:
+          imgURL.length > 0
+            ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
+            : `http://loremflickr.com/g/500/500/user`,
       },
     };
 
@@ -160,9 +168,6 @@ export function RegisterForm({
       setAuthError(error.message);
     }
   };
-
-  authError && <div>{authError}</div>;
-  uploadError && <div>{uploadError}</div>;
 
   return (
     <Form {...form}>
@@ -196,11 +201,24 @@ export function RegisterForm({
           />
         ))}
 
+        {imgURL.length > 0 ? (
+          <Image
+            width={200}
+            height={200}
+            objectFit="cover"
+            src={imgURL}
+            alt={form.getValues("first_name")}
+          />
+        ) : (
+          ``
+        )}
+
         <FileInput
           isUploading={isUploading}
           onFileChange={handleImageUpload}
           className="flex items-center w-full p-3 my-3 border border-gray-500 rounded-md"
         />
+        {uploadError && <div>{uploadError}</div>}
 
         {type === "register" ? (
           <Button
@@ -250,6 +268,7 @@ export function RegisterForm({
             </div>
           </>
         )}
+        {authError && <div>{authError}</div>}
       </form>
     </Form>
   );

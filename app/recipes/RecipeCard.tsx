@@ -54,7 +54,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             </Link>
           </TypographyH4>
 
-          <Heart />
+          {/* <Heart /> */}
         </div>
 
         <TypographySmall>
@@ -68,23 +68,6 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
           )}
         </TypographySmall>
       </div>
-      {/* <CardFooter className="justify-end">
-        <CardTitle>
-          <Link href={`/recipes/${slug}`} className="underline">
-            {recipe_name}
-          </Link>
-        </CardTitle>
-        <CardDescription>
-          "{quote}" -
-          {user_id ? (
-            <Link href={`/profile/${user_id}`} className="underline">
-              {author}
-            </Link>
-          ) : (
-            author
-          )}
-        </CardDescription>
-      </CardFooter> */}
     </article>
   );
 }

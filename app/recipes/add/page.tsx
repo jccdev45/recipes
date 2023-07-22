@@ -34,7 +34,7 @@ export default async function AddRecipePage() {
             alt="Cartoonish depiction of two people whisking a bowl (not sure why it takes two but okay)"
             width={300}
             height={300}
-            className="w-5/6 mx-auto translate-x-0 lg:translate-x-8 md:w-full"
+            className="w-5/6 mx-auto translate-x-0 lg:translate-x-8 md:w-2/3"
           />
         </div>
       </div>

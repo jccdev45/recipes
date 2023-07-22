@@ -10,18 +10,18 @@ export default async function LoginPage() {
     <section className="h-full">
       <GradientBanner />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4">
-        <div className="relative hidden w-2/3 col-span-1 m-auto rounded-lg md:block md:-translate-x-16 md:-translate-y-16 h-3/4 -z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4 px-8">
+        <div className="relative hidden w-2/3 col-span-1 m-auto rounded-lg md:block h-3/4 -z-10 md:h-full md:w-5/6">
           <Image
             src={AuthSvg}
             alt="Cartoon depiction of person standing on laptop with lock icon, representing logging in"
-            className="mx-auto md:translate-x-20 md:translate-y-20"
+            className="mx-auto"
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw translate-x-8"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
           />
         </div>
 
-        <FormContainer className="col-span-1" />
+        <FormContainer className="col-span-1 px-4" />
       </div>
     </section>
   );

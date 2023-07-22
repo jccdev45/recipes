@@ -8,6 +8,7 @@ const nextConfig = {
       "eebioglnufbnareanhqf.supabase.co",
       "placehold.it",
       "unsplash.it",
+      "loremflickr.com",
     ],
   },
 };

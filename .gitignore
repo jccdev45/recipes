@@ -33,4 +33,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/app/favicon_package_v0.16
+/public/favicon_package_v0.16

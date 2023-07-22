@@ -48,9 +48,6 @@ export default async function ProfilePage({
     supabase
   )) as Recipe[] | null;
 
-  // const avatar_url = user && user.avatar_url;
-  // const first_name = user && user.first_name;
-  // const last_name = user && user?.last_name;
   const { first_name, last_name, avatar_url, created_at, last_updated } =
     user || {};
 
@@ -58,18 +55,12 @@ export default async function ProfilePage({
     <section className="h-full">
       <GradientBanner />
 
-      {
-        !user &&
-          // <TypographyH2 className="mx-auto my-8 text-center max-w-max">
-          // <UserX className="inline w-10 h-10" /> User not found
-          notFound()
-        // </TypographyH2>
-      }
+      {!user && notFound()}
 
       {user && (
-        <div className="flex flex-col justify-between w-5/6 mx-auto md:px-8 md:flex-row">
+        <div className="flex flex-col justify-between w-5/6 mx-auto md:px-8">
           {/* TODO: add change avatar dialog */}
-          <div className="w-full md:w-4/5 -translate-y-1/4">
+          <div className="w-full -translate-y-1/4">
             <div className="w-24 h-24">
               <AspectRatio ratio={1 / 1}>
                 <Image
@@ -105,8 +96,10 @@ export default async function ProfilePage({
               </Link>
             </Button>
           </div>
-          <aside className="grid w-full grid-cols-1 md:w-1/4">
-            <TypographyH3>{first_name}'s recipes</TypographyH3>
+          <TypographyH3>
+            {first_name ? `Recipes by: ${first_name}` : `Recipes:`}
+          </TypographyH3>
+          <aside className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
             {recipes?.map((recipe) => {
               return (
                 <RecipeCard

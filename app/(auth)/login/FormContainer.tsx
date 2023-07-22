@@ -12,6 +12,7 @@ import { RegisterForm } from "./RegisterForm";
 
 export default function FormContainer({ className }: { className?: string }) {
   const [view, setView] = useState("sign-in");
+  const formStyle = `flex flex-col justify-center w-full gap-2 mx-auto shadow shadow-foreground/30 border border-border`;
 
   return (
     <div className={cn(``, className)}>
@@ -32,7 +33,7 @@ export default function FormContainer({ className }: { className?: string }) {
 
       {view === "sign-in" && (
         <>
-          <LoginForm className="flex flex-col justify-center w-5/6 gap-2 px-4 py-12 mx-auto md:w-3/4" />
+          <LoginForm className={cn(`px-4 py-12`, formStyle)} />
           <TypographyP className="text-center">
             Don't have an account?
             <Button
@@ -51,7 +52,7 @@ export default function FormContainer({ className }: { className?: string }) {
           <RegisterForm
             setView={setView}
             type="register"
-            className="flex flex-col justify-center w-5/6 gap-2 p-4 mx-auto md:w-3/4"
+            className={cn(`p-4`, formStyle)}
           />
           <TypographyP className="text-center">
             Already have an account?
