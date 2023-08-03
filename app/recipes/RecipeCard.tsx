@@ -2,13 +2,11 @@ import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { TypographyH4 } from "@/components/typography/TypographyH4";
-import { TypographySmall } from "@/components/typography/TypographySmall";
+import { TypographyH4, TypographySmall } from "@/components/typography";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Badge } from "@/components/ui/badge";
 import { cn, shimmer, toBase64 } from "@/lib/utils";
 import { Recipe } from "@/types/supabase";
-
-import { AspectRatio } from "../../components/ui/aspect-ratio";
-import { Badge } from "../../components/ui/badge";
 
 type RecipeCardProps = {
   recipe: Recipe;

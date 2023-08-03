@@ -4,7 +4,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 
-import { TypographyP } from "./typography/TypographyP";
+import { TypographyP } from "./typography";
 
 export function Footer({
   className,

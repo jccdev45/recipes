@@ -9,6 +9,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
+import { FormControl } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -16,8 +17,6 @@ import {
 } from "@/components/ui/popover";
 import { cn, genId } from "@/lib/utils";
 import { Tag } from "@/types/supabase";
-
-import { FormControl } from "../../../components/ui/form";
 
 type TagProps = {
   className: string;

@@ -6,7 +6,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FileInput } from "@/app/recipes/add/ImageUpload";
-import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyH3 } from "@/components/typography";
 import {
   AlertDialog,
   AlertDialogAction,

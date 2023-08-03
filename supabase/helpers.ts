@@ -1,20 +1,6 @@
 import { Recipe } from "@/types/supabase";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
-export async function getAuthUser(
-  supabase: SupabaseClient
-): Promise<User | undefined | null> {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
-}
-
 interface QueryParams {
   filters?: { column: string; value: any };
   order?: {
@@ -30,6 +16,20 @@ export interface GetAllOptions {
   db: string;
   params?: QueryParams;
   column?: string;
+}
+
+export async function getAuthUser(
+  supabase: SupabaseClient
+): Promise<User | undefined | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
 }
 
 export async function getAll(

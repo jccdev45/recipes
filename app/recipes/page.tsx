@@ -1,7 +1,7 @@
 import queryString from "query-string";
 
 import { GradientBanner } from "@/components/GradientBanner";
-import { TypographyH1 } from "@/components/typography/TypographyH1";
+import { TypographyH1 } from "@/components/typography";
 import { apiUrl } from "@/lib/constants";
 import { Recipe } from "@/types/supabase";
 

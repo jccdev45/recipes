@@ -3,10 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { RecipeCard } from "@/app/recipes/RecipeCard";
-import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyH4 } from "@/components/typography/TypographyH4";
-import { TypographyLarge } from "@/components/typography/TypographyLarge";
-import { TypographyP } from "@/components/typography/TypographyP";
+import {
+  TypographyH1,
+  TypographyH4,
+  TypographyLarge,
+  TypographyP,
+} from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getAll, getAuthUser } from "@/supabase/helpers";

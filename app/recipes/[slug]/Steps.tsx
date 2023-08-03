@@ -1,5 +1,4 @@
-import { TypographyH3 } from "@/components/typography/TypographyH3";
-import { TypographyList } from "@/components/typography/TypographyList";
+import { TypographyH3, TypographyList } from "@/components/typography";
 import { cn } from "@/lib/utils";
 import { Step } from "@/types/supabase";
 

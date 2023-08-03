@@ -4,16 +4,16 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { number2fraction } from "number2fraction";
 import { Fragment, useEffect, useState } from "react";
 
-import { TypographyH3 } from "@/components/typography/TypographyH3";
-import { TypographyList } from "@/components/typography/TypographyList";
-import { TypographyP } from "@/components/typography/TypographyP";
+import {
+  TypographyH3,
+  TypographyList,
+  TypographyP,
+} from "@/components/typography";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn, scaleIngredients } from "@/lib/utils";
 import { Ingredient } from "@/types/supabase";
-
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Separator } from "../../../components/ui/separator";
 
 type IngredientsProps = {
   className: string;

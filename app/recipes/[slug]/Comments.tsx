@@ -6,16 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { cn } from "@/lib/utils";
-import { CommentFormValues, CommentSchema } from "@/lib/zod/schema";
-import { createSupaClient } from "@/supabase/client";
-import { getAll } from "@/supabase/helpers";
-import { Comment as CommentType } from "@/types/supabase";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { User } from "@supabase/auth-helpers-nextjs";
-
-import { TypographyH4 } from "../../../components/typography/TypographyH4";
-import { TypographyP } from "../../../components/typography/TypographyP";
+import { TypographyH4, TypographyP } from "@/components/typography";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,14 +17,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../../components/ui/alert-dialog";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../../components/ui/avatar";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -41,9 +28,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../components/ui/form";
-import { Skeleton } from "../../../components/ui/skeleton";
-import { Textarea } from "../../../components/ui/textarea";
+} from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { CommentFormValues, CommentSchema } from "@/lib/zod/schema";
+import { createSupaClient } from "@/supabase/client";
+import { getAll } from "@/supabase/helpers";
+import { Comment as CommentType } from "@/types/supabase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { User } from "@supabase/auth-helpers-nextjs";
 
 type CommentsSectionProps = {
   className: string;

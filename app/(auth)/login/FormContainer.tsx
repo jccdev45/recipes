@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyP } from "@/components/typography/TypographyP";
+import { TypographyH1, TypographyP } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

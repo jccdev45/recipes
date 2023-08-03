@@ -23,7 +23,7 @@ import {
 import { User } from "@supabase/supabase-js";
 
 import LogoutButton from "./LogoutButton";
-import { TypographyP } from "./typography/TypographyP";
+import { TypographyP } from "./typography";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";

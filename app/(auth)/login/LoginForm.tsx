@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyH3 } from "@/components/typography";
 import { Button } from "@/components/ui/button";
 import {
   Form,

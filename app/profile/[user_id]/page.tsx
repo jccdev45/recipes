@@ -6,9 +6,11 @@ import { notFound, redirect } from "next/navigation";
 
 import { RecipeCard } from "@/app/recipes/RecipeCard";
 import { GradientBanner } from "@/components/GradientBanner";
-import { TypographyH2 } from "@/components/typography/TypographyH2";
-import { TypographyH3 } from "@/components/typography/TypographyH3";
-import { TypographyH4 } from "@/components/typography/TypographyH4";
+import {
+  TypographyH2,
+  TypographyH3,
+  TypographyH4,
+} from "@/components/typography";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { apiUrl } from "@/lib/constants";

@@ -1,9 +1,8 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { TypographyH1 } from '@/components/typography/TypographyH1';
-import { TypographyP } from '@/components/typography/TypographyP';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { TypographyH1, TypographyP } from "@/components/typography";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function EditRecipePage() {
   const supabase = createServerComponentClient({ cookies });

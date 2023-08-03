@@ -6,9 +6,11 @@ import { Suspense } from "react";
 
 import { CommentsSection } from "@/app/recipes/[slug]/Comments";
 import { GradientBanner } from "@/components/GradientBanner";
-import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { TypographyList } from "@/components/typography/TypographyList";
-import { TypographyBlockquote } from "@/components/typography/TypographyQuote";
+import {
+  TypographyBlockquote,
+  TypographyH1,
+  TypographyList,
+} from "@/components/typography";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
