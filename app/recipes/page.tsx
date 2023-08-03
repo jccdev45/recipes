@@ -1,25 +1,25 @@
+import queryString from "query-string";
+
 import { GradientBanner } from "@/components/GradientBanner";
 import { TypographyH1 } from "@/components/typography/TypographyH1";
-import { getAll, searchRecipes } from "@/supabase/helpers";
-import { createSupaServer } from "@/supabase/server";
+import { apiUrl } from "@/lib/constants";
 import { Recipe } from "@/types/supabase";
 
 import { RecipeCard } from "./RecipeCard";
-import Searchbar from "./Search";
-
-export const revalidate = 60;
 
 export default async function RecipesPage({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | undefined };
 }) {
-  const supabase = createSupaServer();
   const search = searchParams?.search;
+  const params = {
+    search,
+  };
+  const query = `${apiUrl}/recipes?${queryString.stringify(params)}`;
 
-  const recipes: Recipe[] | null = search
-    ? await searchRecipes(supabase, search)
-    : await getAll({ db: "recipes" }, supabase);
+  const res = await fetch(query);
+  const recipes: Recipe[] = await res.json();
 
   if (!recipes) {
     return <TypographyH1 className="mx-auto">No recipes found</TypographyH1>;

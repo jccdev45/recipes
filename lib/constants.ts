@@ -1,4 +1,7 @@
-export const apiUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1`;
+export const apiUrl =
+  process.env.NODE_ENV === "development"
+    ? `http://localhost:3000/api`
+    : `https://family-recipes-v2.vercel.app/api`;
 
 export const userFormItems = [
   {

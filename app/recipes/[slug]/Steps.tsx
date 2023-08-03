@@ -1,9 +1,9 @@
-import { TypographyH3 } from '@/components/typography/TypographyH3';
-import { TypographyList } from '@/components/typography/TypographyList';
-import { cn } from '@/lib/utils';
-import { Step } from '@/types/supabase';
+import { TypographyH3 } from "@/components/typography/TypographyH3";
+import { TypographyList } from "@/components/typography/TypographyList";
+import { cn } from "@/lib/utils";
+import { Step } from "@/types/supabase";
 
-import { StepBoxImStuck } from './StepBoxImStuck';
+import { StepBoxImStuck } from "./StepBoxImStuck";
 
 type StepsProps = {
   className: string;

@@ -5,8 +5,8 @@ import { number2fraction } from "number2fraction";
 import { Fragment, useEffect, useState } from "react";
 
 import { TypographyH3 } from "@/components/typography/TypographyH3";
-import { TypographyLarge } from "@/components/typography/TypographyLarge";
 import { TypographyList } from "@/components/typography/TypographyList";
+import { TypographyP } from "@/components/typography/TypographyP";
 import { cn, scaleIngredients } from "@/lib/utils";
 import { Ingredient } from "@/types/supabase";
 
@@ -33,9 +33,11 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   return (
     <div className={cn(``, className)}>
       <TypographyH3>Ingredients</TypographyH3>
-      <TypographyLarge>
-        Enter a whole number then fine tune by 1/4 using the arrow buttons
-      </TypographyLarge>
+      <TypographyP>
+        Enter a serving amount or use the arrows to adjust by 1/2 (servings are
+        *very* approximated as not all recipes were recorded with serving size,
+        use your best judgment)
+      </TypographyP>
       <span className="flex items-center justify-center w-2/3 mx-auto gap-x-4">
         <span className="flex items-center justify-center">
           <Input

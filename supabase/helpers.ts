@@ -1,12 +1,9 @@
 import { Recipe } from "@/types/supabase";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
-// import { createSupaServer } from "./server";
-
 export async function getAuthUser(
   supabase: SupabaseClient
 ): Promise<User | undefined | null> {
-  // const supabase = createSupaServer();
   try {
     const {
       data: { user },
@@ -26,7 +23,6 @@ interface QueryParams {
       ascending: boolean;
     };
   };
-  // range?: object;
   limit?: number;
 }
 
@@ -67,7 +63,6 @@ export async function getOne(
   db: string,
   params?: QueryParams
 ): Promise<any> {
-  // const supabase = createSupaServer();
   try {
     let query = supabase.from(db).select();
     if (params) {
@@ -77,12 +72,6 @@ export async function getOne(
     }
     const { data } = await query.single();
     return data;
-    // const { data } = await supabase
-    //   .from(db)
-    //   .select()
-    //   .match({ toMatch })
-    //   .single();
-    // return data;
   } catch (error) {
     console.error("Error: ", error);
     return null;
@@ -93,7 +82,6 @@ export async function searchRecipes(
   supabase: SupabaseClient,
   searchTerm: string
 ): Promise<Recipe[] | null> {
-  // const supabase = createSupaServer();
   try {
     const { data } = await supabase
       .from("recipes")
