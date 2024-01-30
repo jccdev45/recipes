@@ -1,28 +1,28 @@
-import queryString from "query-string";
+import queryString from "query-string"
 
-import { GradientBanner } from "@/components/GradientBanner";
-import { TypographyH1 } from "@/components/typography";
-import { apiUrl } from "@/lib/constants";
-import { Recipe } from "@/types/supabase";
+import { Recipe } from "@/types/supabase"
+import { apiUrl } from "@/lib/constants"
+import { TypographyH1 } from "@/components/ui/typography"
+import { GradientBanner } from "@/components/GradientBanner"
 
-import { RecipeCard } from "./RecipeCard";
+import { RecipeCard } from "./RecipeCard"
 
 export default async function RecipesPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | undefined };
+  searchParams?: { [key: string]: string | undefined }
 }) {
-  const search = searchParams?.search;
+  const search = searchParams?.search
   const params = {
     search,
-  };
-  const query = `${apiUrl}/recipes?${queryString.stringify(params)}`;
+  }
+  const query = `${apiUrl}/recipes?${queryString.stringify(params)}`
 
-  const res = await fetch(query);
-  const recipes: Recipe[] = await res.json();
+  const res = await fetch(query)
+  const recipes: Recipe[] = await res.json()
 
   if (!recipes) {
-    return <TypographyH1 className="mx-auto">No recipes found</TypographyH1>;
+    return <TypographyH1 className="mx-auto">No recipes found</TypographyH1>
   }
 
   return (
@@ -41,5 +41,5 @@ export default async function RecipesPage({
         </div>
       </div>
     </section>
-  );
+  )
 }

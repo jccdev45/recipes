@@ -1,54 +1,55 @@
-import { Edit, UserCircle2 } from "lucide-react";
-import { Metadata, ResolvingMetadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { Metadata, ResolvingMetadata } from "next"
+import { cookies } from "next/headers"
+import Image from "next/image"
+import Link from "next/link"
+import { notFound, redirect } from "next/navigation"
+import { getAll } from "@/supabase/helpers"
+import { createClient } from "@/supabase/server"
+import { Edit, UserCircle2 } from "lucide-react"
 
-import { RecipeCard } from "@/app/recipes/RecipeCard";
-import { GradientBanner } from "@/components/GradientBanner";
+import { Recipe, User } from "@/types/supabase"
+import { apiUrl } from "@/lib/constants"
+import { shimmer, toBase64 } from "@/lib/utils"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Button } from "@/components/ui/button"
 import {
   TypographyH2,
   TypographyH3,
   TypographyH4,
-} from "@/components/typography";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Button } from "@/components/ui/button";
-import { apiUrl } from "@/lib/constants";
-import { shimmer, toBase64 } from "@/lib/utils";
-import { getAll } from "@/supabase/helpers";
-import { createSupaServer } from "@/supabase/server";
-import { Recipe, User } from "@/types/supabase";
+} from "@/components/ui/typography"
+import { GradientBanner } from "@/components/GradientBanner"
+import { RecipeCard } from "@/app/recipes/RecipeCard"
 
 type Props = {
-  params: { user_id: string };
-};
+  params: { user_id: string }
+}
 
 export async function generateMetadata(
   { params: { user_id } }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   // fetch data
-  const res = await fetch(`${apiUrl}/profiles/${user_id}`);
-  const user: User = await res.json();
-  const previousTitle = (await parent).title?.absolute || "";
+  const res = await fetch(`${apiUrl}/profiles/${user_id}`)
+  const user: User = await res.json()
+  const previousTitle = (await parent).title?.absolute || ""
 
   return {
     title: `${previousTitle} | ${
       user?.first_name ? user.first_name : user.user_id
     }`,
-  };
+  }
 }
 
 export default async function ProfilePage({
   params: { user_id },
 }: {
-  params: { user_id: string };
+  params: { user_id: string }
 }) {
-  const supabase = createSupaServer();
-  const { data } = await supabase.auth.getUser();
+  const supabase = createClient(cookies())
+  const { data } = await supabase.auth.getUser()
 
   if (!data.user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const recipeParams = {
@@ -56,16 +57,16 @@ export default async function ProfilePage({
       column: "user_id",
       value: user_id,
     },
-  };
+  }
 
-  const user = await fetch(`${apiUrl}/profiles/${user_id}`);
+  const user = await fetch(`${apiUrl}/profiles/${user_id}`)
   const recipes: Recipe[] | null = await getAll(
     { db: "recipes", params: recipeParams },
     supabase
-  );
+  )
 
   const { first_name, last_name, avatar_url, created_at, last_updated } =
-    ((await user.json()) as User) || {};
+    ((await user.json()) as User) || {}
 
   return (
     <section className="h-full">
@@ -106,7 +107,7 @@ export default async function ProfilePage({
 
             {created_at && (
               <TypographyH4>
-                Joined: {new Date(created_at).toLocaleDateString()}
+                Joined: {new Date(created_at).toLocaleDateString("en-US")}
               </TypographyH4>
             )}
 
@@ -127,11 +128,11 @@ export default async function ProfilePage({
                   className="w-full col-span-1 mx-auto"
                   recipe={recipe}
                 />
-              );
+              )
             })}
           </aside>
         </div>
       )}
     </section>
-  );
+  )
 }

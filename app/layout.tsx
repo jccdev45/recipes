@@ -4,9 +4,10 @@ import { Footer } from "@/components/Footer";
 import { MainNav } from "@/components/MainNav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getAuthUser } from "@/supabase/helpers";
-import { createSupaServer } from "@/supabase/server";
+import { createClient } from "@/supabase/server";
 
 import Searchbar from "./recipes/Search";
+import { cookies } from "next/headers";
 
 export const metadata = {
   title: "Medina Recipes",
@@ -19,7 +20,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createSupaServer();
+  const supabase = createClient(cookies());
   const user = (await getAuthUser(supabase)) || null;
 
   return (

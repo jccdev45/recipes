@@ -1,19 +1,26 @@
-"use client";
+"use client"
 
-import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/supabase/client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { User } from "@supabase/supabase-js"
+import { Plus } from "lucide-react"
 import {
   Controller,
   SubmitHandler,
   useFieldArray,
   useForm,
   UseFormProps,
-} from "react-hook-form";
-import * as z from "zod";
+} from "react-hook-form"
+import * as z from "zod"
 
-import { TagCombobox } from "@/app/recipes/add/TagCombobox";
-import { Button } from "@/components/ui/button";
+import { maxAmount, minAmount } from "@/lib/constants"
+import { cn, genId, toSlug } from "@/lib/utils"
+import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema"
+import useUniqueTags from "@/hooks/useTags"
+import useUnits from "@/hooks/useUnits"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -21,30 +28,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import useUniqueTags from "@/hooks/useTags";
-import useUnits from "@/hooks/useUnits";
-import { maxAmount, minAmount } from "@/lib/constants";
-import { cn, genId, toSlug } from "@/lib/utils";
-import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema";
-import { createSupaClient } from "@/supabase/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { User } from "@supabase/auth-helpers-nextjs";
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { TagCombobox } from "@/app/recipes/add/TagCombobox"
 
-import { FileInput } from "./ImageUpload";
+import { FileInput } from "./ImageUpload"
 
 function useZodForm<TSchema extends z.ZodType>(
   props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
-    schema: TSchema;
+    schema: TSchema
   }
 ) {
   const form = useForm<TSchema["_input"]>({
@@ -52,27 +52,27 @@ function useZodForm<TSchema extends z.ZodType>(
     resolver: zodResolver(props.schema, undefined, {
       raw: true,
     }),
-  });
+  })
 
-  return form;
+  return form
 }
 
 type AddRecipeFormProps = {
-  className: string;
-  user: User | null;
-};
+  className: string
+  user: User | null
+}
 
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
-  const supabase = createSupaClient();
-  const router = useRouter();
-  const { uniqueTags, isLoading, error } = useUniqueTags();
-  const { units, loading } = useUnits();
+  const supabase = createClient()
+  const router = useRouter()
+  const { uniqueTags, isLoading, error } = useUniqueTags()
+  const { units, loading } = useUnits()
 
-  const [imgURL, setImgURL] = useState("");
-  const [recipeError, setRecipeError] = useState("");
-  const [uploadError, setUploadError] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [imgURL, setImgURL] = useState("")
+  const [recipeError, setRecipeError] = useState("")
+  const [uploadError, setUploadError] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
 
   const form = useZodForm({
     schema: RecipeFormSchema,
@@ -86,7 +86,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       tags: [{ id: genId(), tag: "" }],
     },
     mode: "onChange",
-  });
+  })
 
   const {
     handleSubmit,
@@ -94,30 +94,30 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     control,
     formState: { isValid, errors, isValidating, isDirty },
     reset,
-  } = form;
+  } = form
 
   const ingFieldArray = useFieldArray({
     name: "ingredients",
     control,
-  });
+  })
   const stepFieldArray = useFieldArray({
     name: "steps",
     control,
-  });
+  })
   const tagFieldArray = useFieldArray({
     name: "tags",
     control,
-  });
+  })
 
   const update = (index: number, obj: { id: string; tag: string }) => {
-    tagFieldArray.update(index, obj);
-  };
+    tagFieldArray.update(index, obj)
+  }
 
   const handleImageUpload = async (file: File | null) => {
-    const fileExt = file?.name.split(".").pop();
+    const fileExt = file?.name.split(".").pop()
     const filePath = `recipes/${form.getValues(
       "recipe_name"
-    )}/${Math.random()}.${fileExt}`;
+    )}/${Math.random()}.${fileExt}`
 
     if (file) {
       const { data, error } = await supabase.storage
@@ -125,33 +125,33 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
-        });
+        })
 
       if (error) {
-        setUploadError(error.message);
+        setUploadError(error.message)
       } else {
-        setImgURL(data.path);
-        setIsUploading(false);
-        setUploadError("");
+        setImgURL(data.path)
+        setIsUploading(false)
+        setUploadError("")
       }
     } else {
-      setUploadError("No file selected");
+      setUploadError("No file selected")
     }
-  };
+  }
 
-  const isSubmittable = !!isDirty && !!isValid;
+  const isSubmittable = !!isDirty && !!isValid
 
   const onSubmit: SubmitHandler<AddRecipeFormValues> = async (
     values: AddRecipeFormValues,
     e
   ) => {
-    e?.preventDefault();
+    e?.preventDefault()
 
     if (!imgURL && !isConfirmed) {
       setRecipeError(
         "You haven't selected an image, are you sure you want to continue? (you can still upload one later)"
-      );
-      return;
+      )
+      return
     } else {
       const updatedValues = {
         ...values,
@@ -162,23 +162,23 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           imgURL.length > 0
             ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
             : "http://loremflickr.com/g/500/500/food",
-      };
+      }
 
       const { data, error } = await supabase
         .from("recipes")
         .insert(updatedValues)
-        .select();
+        .select()
 
       if (!error) {
-        reset();
-        router.push(`/recipes/${data?.[0].slug}`);
-        router.refresh();
+        reset()
+        router.push(`/recipes/${data?.[0].slug}`)
+        router.refresh()
       }
     }
-  };
+  }
 
   const nameForImage =
-    !errors.recipe_name && form.getValues("recipe_name").length > 0;
+    !errors.recipe_name && form.getValues("recipe_name").length > 0
 
   return (
     <Form {...form}>
@@ -337,7 +337,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     </Button>
                   </div>
                 </div>
-              );
+              )
             })}
             <Button
               type="button"
@@ -401,7 +401,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     </Button>
                   </div>
                 </div>
-              );
+              )
             })}
             <Button
               type="button"
@@ -464,7 +464,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     </Button>
                   </div>
                 </div>
-              );
+              )
             })}
             <Button
               type="button"
@@ -503,8 +503,8 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                     className="mx-4"
                     variant="default"
                     onClick={() => {
-                      setRecipeError("");
-                      setIsConfirmed(true);
+                      setRecipeError("")
+                      setIsConfirmed(true)
                     }}
                   >
                     Continue
@@ -527,5 +527,5 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         </Button>
       </form>
     </Form>
-  );
+  )
 }

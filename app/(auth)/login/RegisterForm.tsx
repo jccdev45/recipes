@@ -1,12 +1,16 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import Link from "next/link";
-import { Dispatch, SetStateAction, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Dispatch, SetStateAction, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { createClient } from "@/supabase/client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { User } from "@supabase/supabase-js"
+import { useForm } from "react-hook-form"
 
-import { FileInput } from "@/app/recipes/add/ImageUpload";
-import { TypographyH3 } from "@/components/typography";
+import { userFormItems } from "@/lib/constants"
+import { cn, trimAvatarUrl } from "@/lib/utils"
+import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +21,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -27,25 +31,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { userFormItems } from "@/lib/constants";
-import { cn, trimAvatarUrl } from "@/lib/utils";
-import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { User } from "@supabase/supabase-js";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { TypographyH3 } from "@/components/ui/typography"
+import { FileInput } from "@/app/recipes/add/ImageUpload"
 
 type RegisterFormProps = {
-  className: string;
-  setView?: Dispatch<SetStateAction<string>>;
-  type: "register" | "edit-profile";
-  user?: User | null;
-};
+  className: string
+  setView?: Dispatch<SetStateAction<string>>
+  type: "register" | "edit-profile"
+  user?: User | null
+}
 
 type FormItems = {
-  fieldName: "";
-};
+  fieldName: ""
+}
 
 export function RegisterForm({
   className,
@@ -53,12 +53,12 @@ export function RegisterForm({
   type,
   user,
 }: RegisterFormProps) {
-  const supabase = createClientComponentClient();
+  const supabase = createClient()
 
-  const [imgURL, setImgURL] = useState("");
-  const [authError, setAuthError] = useState("");
-  const [uploadError, setUploadError] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
+  const [imgURL, setImgURL] = useState("")
+  const [authError, setAuthError] = useState("")
+  const [uploadError, setUploadError] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(RegisterSchema),
@@ -79,25 +79,25 @@ export function RegisterForm({
             last_name: user?.user_metadata.last_name,
           },
     mode: "onChange",
-  });
+  })
 
   const {
     formState: { errors, isValid, isDirty, isSubmitting, dirtyFields },
-  } = form;
+  } = form
 
-  const registerSubmittable = !!isValid && !!isDirty;
-  const editSubmittable = !!isDirty && !!errors && !!isValid;
+  const registerSubmittable = !!isValid && !!isDirty
+  const editSubmittable = !!isDirty && !!errors && !!isValid
 
   const handleImageUpload = async (file: File | null) => {
-    const fileExt = file?.name.split(".").pop();
-    const filePath = `avatar/${Math.random()}.${fileExt}`;
-    let trimmedUpdatePath;
+    const fileExt = file?.name.split(".").pop()
+    const filePath = `avatar/${Math.random()}.${fileExt}`
+    let trimmedUpdatePath = ""
 
     if (type !== "register")
-      trimmedUpdatePath = trimAvatarUrl(user?.user_metadata.avatar_url);
+      trimmedUpdatePath = trimAvatarUrl(user?.user_metadata.avatar_url)
 
     if (file) {
-      setIsUploading(true);
+      setIsUploading(true)
 
       const { data, error } =
         type === "register"
@@ -107,29 +107,28 @@ export function RegisterForm({
             })
           : await supabase.storage
               .from("photos")
-              // @ts-expect-error
               .update(trimmedUpdatePath, file, {
                 cacheControl: "3600",
                 upsert: false,
-              });
+              })
 
       if (error) {
-        setUploadError(error.message);
+        setUploadError(error.message)
       } else {
-        setImgURL(data.path);
-        setIsUploading(false);
-        setUploadError("");
+        setImgURL(data.path)
+        setIsUploading(false)
+        setUploadError("")
       }
     } else {
-      setUploadError("No file selected");
+      setUploadError("No file selected")
     }
-  };
+  }
 
   const handleSubmit = async (values: RegisterFormValues) => {
     const authValues = {
       email: values.email,
       password: values.password,
-    };
+    }
     const dataValues = {
       data: {
         first_name: values.first_name,
@@ -139,7 +138,7 @@ export function RegisterForm({
             ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
             : `http://loremflickr.com/g/500/500/user`,
       },
-    };
+    }
 
     const { data, error } =
       type === "register"
@@ -153,21 +152,21 @@ export function RegisterForm({
         : await supabase.auth.updateUser({
             ...authValues,
             ...dataValues,
-          });
+          })
 
     if (data && type === "register") {
-      setView && setView("check-email");
+      setView && setView("check-email")
     }
 
     if (data && type === "edit-profile") {
-      setView && setView("change-email");
+      setView && setView("change-email")
     }
 
     if (error) {
-      console.log(error);
-      setAuthError(error.message);
+      console.log(error)
+      setAuthError(error.message)
     }
-  };
+  }
 
   return (
     <Form {...form}>
@@ -271,5 +270,5 @@ export function RegisterForm({
         {authError && <div>{authError}</div>}
       </form>
     </Form>
-  );
+  )
 }

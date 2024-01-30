@@ -1,28 +1,26 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation"
+import { createClient } from "@/supabase/client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 
-import { TypographyH3 } from "@/components/typography";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"
+import { LoginFormValues, LoginSchema } from "@/lib/zod/schema"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { LoginFormValues, LoginSchema } from "@/lib/zod/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { TypographyH3 } from "@/components/ui/typography"
 
 export function LoginForm({ className }: { className?: string }) {
-  const supabase = createClientComponentClient();
-  const router = useRouter();
+  const router = useRouter()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -31,22 +29,26 @@ export function LoginForm({ className }: { className?: string }) {
       password: "",
     },
     mode: "onBlur",
-  });
+  })
 
   const {
     formState: { errors, isValid, isDirty, isSubmitting },
-  } = form;
+  } = form
 
-  const isSubmittable = !!isValid && !!isDirty;
+  const isSubmittable = !!isValid && !!isDirty
 
   const handleSignIn = async (values: LoginFormValues) => {
+    const supabase = createClient()
+
     await supabase.auth.signInWithPassword({
       email: values.email,
       password: values.password,
-    });
-    router.push("/");
-    router.refresh();
-  };
+    })
+    router.push("/")
+    router.refresh()
+
+    // return redirect("/")
+  }
 
   return (
     <Form {...form}>
@@ -104,5 +106,5 @@ export function LoginForm({ className }: { className?: string }) {
         </Button>
       </form>
     </Form>
-  );
+  )
 }

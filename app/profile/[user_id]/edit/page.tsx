@@ -5,10 +5,11 @@ import { redirect } from "next/navigation";
 import { RegisterForm } from "@/app/(auth)/login/RegisterForm";
 import { GradientBanner } from "@/components/GradientBanner";
 import { getAuthUser } from "@/supabase/helpers";
-import { createSupaServer } from "@/supabase/server";
+import { createClient } from "@/supabase/server";
+import { cookies } from "next/headers";
 
 export default async function EditProfilePage() {
-  const supabase = createSupaServer();
+  const supabase = createClient(cookies());
   const user = (await getAuthUser(supabase)) || null;
 
   if (!user) {

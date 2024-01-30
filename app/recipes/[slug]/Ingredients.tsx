@@ -1,34 +1,34 @@
-"use client";
+"use client"
 
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { number2fraction } from "number2fraction";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react"
+import { ArrowDown, ArrowUp } from "lucide-react"
+import { number2fraction } from "number2fraction"
 
+import { Ingredient } from "@/types/supabase"
+import { cn, scaleIngredients } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   TypographyH3,
   TypographyList,
   TypographyP,
-} from "@/components/typography";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn, scaleIngredients } from "@/lib/utils";
-import { Ingredient } from "@/types/supabase";
+} from "@/components/ui/typography"
 
 type IngredientsProps = {
-  className: string;
-  ingredients: Ingredient[];
-};
+  className: string
+  ingredients: Ingredient[]
+}
 
 export function Ingredients({ ingredients, className }: IngredientsProps) {
-  const [adjusted, setAdjusted] = useState<Ingredient[]>(ingredients);
-  const [serving, setServing] = useState(1);
+  const [adjusted, setAdjusted] = useState<Ingredient[]>(ingredients)
+  const [serving, setServing] = useState(1)
 
   useEffect(() => {
-    const newIngs = scaleIngredients(ingredients, serving);
+    const newIngs = scaleIngredients(ingredients, serving)
 
-    setAdjusted(newIngs);
-  }, [serving]);
+    setAdjusted(newIngs)
+  }, [serving])
 
   return (
     <div className={cn(``, className)}>
@@ -46,9 +46,9 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
             value={serving}
             onChange={(e) => {
               if (isNaN(Number(e.target.value))) {
-                return;
+                return
               }
-              setServing(Number(e.target.value));
+              setServing(Number(e.target.value))
             }}
             className="w-16 text-lg"
           />
@@ -66,35 +66,32 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
 
       <TypographyList>
         {adjusted.map(({ id, ingredient, amount, unitMeasurement }) => (
-          <Fragment key={id}>
-            <li className="flex items-center justify-start my-1 gap-x-1">
-              {unitMeasurement === "unit" || serving === 0 ? (
-                <div className="w-[12%] m-0">-</div>
-              ) : (
-                <div className="m-0 w-[12%]">
-                  {amount === Math.floor(amount)
-                    ? amount
-                    : number2fraction(amount, true)}
-                </div>
-              )}
-              <Label
-                className="w-5/6 my-auto space-x-2 text-base border-b border-border"
-                htmlFor={ingredient}
-              >
-                <span>
-                  {unitMeasurement === "unit"
-                    ? `(to taste)`
-                    : amount > 1
+          <li key={id} className="flex items-center justify-start my-1 gap-x-1">
+            {unitMeasurement === "unit" || serving === 0 ? (
+              <div className="w-[12%] m-0">-</div>
+            ) : (
+              <div className="m-0 w-[12%]">
+                {amount === Math.floor(amount)
+                  ? amount
+                  : number2fraction(amount, true)}
+              </div>
+            )}
+            <Label
+              className="w-5/6 my-auto space-x-2 text-base border-b border-border"
+              htmlFor={ingredient}
+            >
+              <span>
+                {unitMeasurement === "unit"
+                  ? `(to taste)`
+                  : amount > 1
                     ? `${unitMeasurement}s`
                     : unitMeasurement}
-                </span>
-                <span className="">{ingredient}</span>
-              </Label>
-            </li>
-            {/* <Separator className="my-1 border border-gray-300" /> */}
-          </Fragment>
+              </span>
+              <span className="">{ingredient}</span>
+            </Label>
+          </li>
         ))}
       </TypographyList>
     </div>
-  );
+  )
 }

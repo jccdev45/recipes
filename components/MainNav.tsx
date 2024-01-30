@@ -1,5 +1,7 @@
-"use client";
+"use client"
 
+import Link from "next/link"
+import { User } from "@supabase/supabase-js"
 import {
   ChefHat,
   Edit,
@@ -8,9 +10,10 @@ import {
   PlusCircle,
   UserCircle2,
   UtensilsCrossed,
-} from "lucide-react";
-import Link from "next/link";
+} from "lucide-react"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,17 +22,14 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { User } from "@supabase/supabase-js";
+} from "@/components/ui/navigation-menu"
+import { Separator } from "@/components/ui/separator"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { TypographyP } from "@/components/ui/typography"
 
-import LogoutButton from "./LogoutButton";
-import { TypographyP } from "./typography";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { ThemeToggle } from "./ui/theme-toggle";
+import LogoutButton from "./LogoutButton"
 
-type MainNavProps = { className: string; user: User | null };
+type MainNavProps = { className: string; user: User | null }
 
 export function MainNav({ user, className }: MainNavProps) {
   return (
@@ -173,5 +173,5 @@ export function MainNav({ user, className }: MainNavProps) {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  );
+  )
 }

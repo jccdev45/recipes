@@ -1,20 +1,23 @@
-import { Heart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+"use client"
 
-import { TypographyH4, TypographySmall } from "@/components/typography";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Badge } from "@/components/ui/badge";
-import { cn, shimmer, toBase64 } from "@/lib/utils";
-import { Recipe } from "@/types/supabase";
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+
+import { Recipe } from "@/types/supabase"
+import { cn, shimmer, toBase64 } from "@/lib/utils"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Badge } from "@/components/ui/badge"
+import { TypographyLarge, TypographySmall } from "@/components/ui/typography"
 
 type RecipeCardProps = {
-  recipe: Recipe;
-  className: string;
-};
+  recipe: Recipe
+  className: string
+}
 
 export function RecipeCard({ recipe, className }: RecipeCardProps) {
-  const { author, id, img, quote, recipe_name, slug, tags, user_id } = recipe;
+  const { author, id, img, quote, recipe_name, slug, tags, user_id } = recipe
+  const path = usePathname()
 
   return (
     <article
@@ -44,28 +47,39 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
         ))}
       </div>
 
-      <div className="absolute inset-x-0 w-11/12 p-1 mx-auto text-white rounded-md drop-shadow-md bg-slate-800/70 bottom-1 dark:text-foreground backdrop-blur">
+      <div className="absolute inset-x-0 w-11/12 p-3 mx-auto text-white rounded-md drop-shadow-md bg-slate-800/70 bottom-1 dark:text-foreground backdrop-blur">
         <div className="flex items-center justify-between">
-          <TypographyH4>
-            <Link href={`/recipes/${slug}`} className="hover:underline">
+          <TypographyLarge>
+            <Link
+              href={`/recipes/${slug}`}
+              className={cn(
+                "overflow-hidden underline lg:no-underline transition-all duration-300 ease-in-out hover:underline text-ellipsis whitespace-nowrap",
+                path !== "/recipes" && "text-center"
+              )}
+            >
               {recipe_name}
             </Link>
-          </TypographyH4>
+          </TypographyLarge>
 
           {/* <Heart /> */}
         </div>
 
-        <TypographySmall>
-          <em>"{quote}" - </em>
-          {user_id ? (
-            <Link href={`/profile/${user_id}`} className="hover:underline">
-              {author}
-            </Link>
-          ) : (
-            author
-          )}
-        </TypographySmall>
+        {path === "/recipes" && (
+          <TypographySmall>
+            <em>"{quote}" - </em>
+            {user_id ? (
+              <Link
+                href={`/profile/${user_id}`}
+                className="block mr-auto transition-all duration-300 ease-in-out hover:underline"
+              >
+                {author}
+              </Link>
+            ) : (
+              author
+            )}
+          </TypographySmall>
+        )}
       </div>
     </article>
-  );
+  )
 }

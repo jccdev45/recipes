@@ -1,17 +1,16 @@
-import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react";
-import Link from "next/link";
+import Link from "next/link"
+import { User } from "@supabase/supabase-js"
+import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { User } from "@supabase/supabase-js";
-
-import { TypographyP } from "./typography";
+import { cn } from "@/lib/utils"
+import { TypographyP } from "@/components/ui/typography"
 
 export function Footer({
   className,
   user,
 }: {
-  className?: string;
-  user: User | null;
+  className?: string
+  user: User | null
 }) {
   return (
     <footer className={cn(``, className)}>
@@ -67,5 +66,5 @@ export function Footer({
         </span>
       </div>
     </footer>
-  );
+  )
 }

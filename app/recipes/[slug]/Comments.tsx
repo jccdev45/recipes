@@ -1,12 +1,18 @@
-"use client";
+"use client"
 
-import { Heart, UserCircle2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/supabase/client"
+import { getAll } from "@/supabase/helpers"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { User } from "@supabase/supabase-js"
+import { Heart, UserCircle2 } from "lucide-react"
+import { useForm } from "react-hook-form"
 
-import { TypographyH4, TypographyP } from "@/components/typography";
+import { Comment as CommentType } from "@/types/supabase"
+import { cn } from "@/lib/utils"
+import { CommentFormValues, CommentSchema } from "@/lib/zod/schema"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,10 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/alert-dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -28,30 +34,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { CommentFormValues, CommentSchema } from "@/lib/zod/schema";
-import { createSupaClient } from "@/supabase/client";
-import { getAll } from "@/supabase/helpers";
-import { Comment as CommentType } from "@/types/supabase";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { User } from "@supabase/auth-helpers-nextjs";
+} from "@/components/ui/form"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+import { TypographyH4, TypographyP } from "@/components/ui/typography"
 
 type CommentsSectionProps = {
-  className: string;
-  currentUser: User | null;
-  recipe_id: number;
-};
-const supabase = createSupaClient();
+  className: string
+  currentUser: User
+  recipe_id: number
+}
+const supabase = createClient()
 
 export function CommentsSection({
   className,
   currentUser,
   recipe_id,
 }: CommentsSectionProps) {
-  const [comments, setComments] = useState<Array<CommentType>>([]);
+  const [comments, setComments] = useState<CommentType[]>([])
 
   useEffect(() => {
     const getComments = async () => {
@@ -67,54 +67,54 @@ export function CommentsSection({
             ascending: false,
           },
         },
-      };
+      }
 
-      const comments: CommentType[] | null = await getAll(params, supabase);
+      const comments: CommentType[] | null = await getAll(params, supabase)
 
       if (comments) {
-        setComments(comments);
+        setComments(comments)
       }
-    };
+    }
 
-    getComments();
-  }, [supabase, setComments]);
+    getComments()
+  }, [supabase, setComments])
 
   const form = useForm<CommentFormValues>({
     resolver: zodResolver(CommentSchema),
     defaultValues: {
       message: "",
     },
-  });
+  })
 
   const {
     handleSubmit,
     formState: { errors, isDirty, isValid, isSubmitting },
-  } = form;
-  const isSubmittable = !!isValid && !!isDirty;
+  } = form
+  const isSubmittable = !!isValid && !!isDirty
 
   // TODO: ADD LOADING STATES FOR COMMENT SUBMIT
   const handleSubmitComment = async (values: CommentFormValues) => {
     const author = currentUser?.user_metadata.first_name
       ? currentUser?.user_metadata.first_name
-      : currentUser?.email;
+      : currentUser?.email
 
     const newValues = {
       author: author.toString(),
-      avatar_url: null,
+      avatar_url: currentUser.user_metadata.avatar_url,
       message: values.message,
       liked_by: [""],
       likes: 0,
       recipe_id: recipe_id,
-      user_id: currentUser?.id,
-    };
+      user_id: currentUser && currentUser.id,
+    }
 
-    const { data, error } = await supabase.from("comments").insert(newValues);
+    const { data, error } = await supabase.from("comments").insert(newValues)
 
     if (data) {
-      setComments([...comments, data]);
-      form.reset();
+      setComments([...comments, data])
+      form.reset()
     }
-  };
+  }
 
   return (
     <div className={cn(`space-y-8 p-4`, className)}>
@@ -132,6 +132,7 @@ export function CommentsSection({
                 <FormControl>
                   <Textarea
                     className=""
+                    disabled={!currentUser}
                     placeholder={
                       currentUser
                         ? "Wow great recipe!"
@@ -174,16 +175,16 @@ export function CommentsSection({
         <Comment key={comment.id} comment={comment} currentUser={currentUser} />
       ))}
     </div>
-  );
+  )
 }
 
 type CommentProps = {
-  comment: CommentType;
-  currentUser: User | null;
-};
+  comment: CommentType
+  currentUser: User | null
+}
 
 function Comment({ comment, currentUser }: CommentProps) {
-  const router = useRouter();
+  const router = useRouter()
   const {
     author,
     avatar_url,
@@ -194,26 +195,26 @@ function Comment({ comment, currentUser }: CommentProps) {
     message,
     recipe_id,
     user_id,
-  } = comment;
-  const [liked, setLiked] = useState(likes);
+  } = comment
+  const [liked, setLiked] = useState(likes)
 
   // TODO: EXTRACT + COMPLETE FUNCTIONALITY
   const handleLike = async () => {
     if (liked_by.includes(user_id)) {
-      return;
+      return
     } else {
       const { data, error } = await supabase
         .from("comments")
         .update({ likes: likes + 1, liked_by: [...liked_by, user_id] })
         .eq("id", id!)
-        .select();
+        .select()
 
       if (data) {
         // setLiked(data?.[0].likes);
-        console.log(data);
+        console.log(data)
       }
     }
-  };
+  }
 
   // TODO: EXTRACT
   const handleDelete = async () => {
@@ -222,18 +223,18 @@ function Comment({ comment, currentUser }: CommentProps) {
         .from("comments")
         .delete()
         .eq("id", id!)
-        .select();
+        .select()
 
       if (data) {
-        router.refresh();
+        router.refresh()
       }
       if (error) {
       }
     } catch (error) {
-      console.error("Error: ", error);
-      return null;
+      console.error("Error: ", error)
+      return null
     }
-  };
+  }
 
   return (
     <div className="relative flex w-full p-2 border rounded-md shadow-md md:w-1/2 bg-background dark:bg-slate-900 border-foreground/40">
@@ -252,7 +253,7 @@ function Comment({ comment, currentUser }: CommentProps) {
           {author}
         </Link>
         <span className="text-sm max-w-max">
-          {new Date(created_at).toLocaleDateString()}
+          {new Date(created_at).toLocaleDateString("en-US")}
         </span>
         <TypographyP>{message}</TypographyP>
       </div>
@@ -287,7 +288,10 @@ function Comment({ comment, currentUser }: CommentProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="shadow-sm bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="shadow-sm bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
                 Confirm
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -295,5 +299,5 @@ function Comment({ comment, currentUser }: CommentProps) {
         </AlertDialog>
       )}
     </div>
-  );
+  )
 }
