@@ -34,3 +34,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /public/favicon_package_v0.16
+notes.txt

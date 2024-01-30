@@ -197,6 +197,7 @@ function Comment({ comment, currentUser }: CommentProps) {
   } = comment;
   const [liked, setLiked] = useState(likes);
 
+  // TODO: EXTRACT + COMPLETE FUNCTIONALITY
   const handleLike = async () => {
     if (liked_by.includes(user_id)) {
       return;
@@ -204,7 +205,7 @@ function Comment({ comment, currentUser }: CommentProps) {
       const { data, error } = await supabase
         .from("comments")
         .update({ likes: likes + 1, liked_by: [...liked_by, user_id] })
-        .eq("id", id)
+        .eq("id", id!)
         .select();
 
       if (data) {
@@ -214,12 +215,13 @@ function Comment({ comment, currentUser }: CommentProps) {
     }
   };
 
+  // TODO: EXTRACT
   const handleDelete = async () => {
     try {
       const { data, error } = await supabase
         .from("comments")
         .delete()
-        .eq("id", id)
+        .eq("id", id!)
         .select();
 
       if (data) {

@@ -1,14 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
   images: {
-    domains: [
-      "eebioglnufbnareanhqf.supabase.co",
-      "placehold.it",
-      "unsplash.it",
-      "loremflickr.com",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: "eebioglnufbnareanhqf.supabase.co",
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: "placehold.it",
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: "unsplash.it",
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: "loremflickr.com",
+        port: ''
+      },
     ],
   },
 };
