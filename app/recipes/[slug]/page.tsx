@@ -5,8 +5,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getAuthUser } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
+import { Recipe } from "@/supabase/types"
 
-import { Recipe } from "@/types/supabase"
 import { apiUrl } from "@/lib/constants"
 import { shimmer, toBase64 } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -65,18 +65,18 @@ export default async function RecipePage({ params: { slug } }: Props) {
   } = recipe
 
   return (
-    <section className="w-full h-full">
+    <section className="h-full w-full">
       <GradientBanner />
 
-      <div className="p-4 -translate-y-16 md:-translate-y-24">
+      <div className="-translate-y-16 p-4 md:-translate-y-24">
         <div className="flex flex-col items-center lg:flex-row lg:justify-center">
-          <div className="w-5/6 h-full mx-auto rounded-lg lg:w-2/5">
+          <div className="mx-auto h-full w-5/6 rounded-lg lg:w-2/5">
             <AspectRatio ratio={5 / 4}>
               <Image
                 src={img || "http://unsplash.it/g/300/300?gravity=center"}
                 alt={recipe_name || "Generic fallback"}
                 fill
-                className="object-cover w-auto h-auto m-0 rounded-lg"
+                className="m-0 h-auto w-auto rounded-lg object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 placeholder="blur"
                 blurDataURL={`data:image/svg+xml;base64,${toBase64(
@@ -85,9 +85,9 @@ export default async function RecipePage({ params: { slug } }: Props) {
               />
             </AspectRatio>
           </div>
-          <div className="flex-col items-center justify-center w-full h-full text-center lg:w-1/2">
+          <div className="h-full w-full flex-col items-center justify-center text-center lg:w-1/2">
             <TypographyH1>{recipe_name}</TypographyH1>
-            <TypographyBlockquote className="flex flex-col items-center md:flex-row md:gap-x-2 md:justify-center">
+            <TypographyBlockquote className="flex flex-col items-center md:flex-row md:justify-center md:gap-x-2">
               "{quote}"
               <figure className="flex items-center justify-center gap-x-4">
                 {user_id ? (
@@ -114,21 +114,21 @@ export default async function RecipePage({ params: { slug } }: Props) {
           {ingredients && (
             <Ingredients
               ingredients={ingredients}
-              className="flex flex-col col-span-full lg:col-span-1"
+              className="col-span-full flex flex-col lg:col-span-1"
             />
           )}
           {steps && (
             <Steps
               steps={steps}
-              className="flex flex-col col-span-full lg:col-span-1"
+              className="col-span-full flex flex-col lg:col-span-1"
             />
           )}
         </div>
-        <Separator className="h-1 my-2 rounded-lg bg-slate-400" />
+        <Separator className="my-2 h-1 rounded-lg bg-slate-400" />
         <CommentsSection
           currentUser={user!}
           recipe_id={id}
-          className="flex flex-col w-full max-w-full"
+          className="flex w-full max-w-full flex-col"
         />
       </div>
     </section>

@@ -1,10 +1,10 @@
 "use client"
 
 import { Fragment, useEffect, useState } from "react"
+import { Ingredient } from "@/supabase/types"
 import { ArrowDown, ArrowUp } from "lucide-react"
 import { number2fraction } from "number2fraction"
 
-import { Ingredient } from "@/types/supabase"
 import { cn, scaleIngredients } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,7 +38,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
         *very* approximated as not all recipes were recorded with serving size,
         use your best judgment)
       </TypographyP>
-      <span className="flex items-center justify-center w-2/3 mx-auto gap-x-4">
+      <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
         <span className="flex items-center justify-center">
           <Input
             pattern="[0-9]+"
@@ -66,9 +66,9 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
 
       <TypographyList>
         {adjusted.map(({ id, ingredient, amount, unitMeasurement }) => (
-          <li key={id} className="flex items-center justify-start my-1 gap-x-1">
+          <li key={id} className="my-1 flex items-center justify-start gap-x-1">
             {unitMeasurement === "unit" || serving === 0 ? (
-              <div className="w-[12%] m-0">-</div>
+              <div className="m-0 w-[12%]">-</div>
             ) : (
               <div className="m-0 w-[12%]">
                 {amount === Math.floor(amount)
@@ -77,7 +77,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
               </div>
             )}
             <Label
-              className="w-5/6 my-auto space-x-2 text-base border-b border-border"
+              className="my-auto w-5/6 space-x-2 border-b border-border text-base"
               htmlFor={ingredient}
             >
               <span>

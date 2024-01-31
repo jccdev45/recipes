@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/supabase/client"
 import { getAll } from "@/supabase/helpers"
-
-import { Recipe, UnitMeasurement } from "@/types/supabase"
+import { Recipe, UnitMeasurement } from "@/supabase/types"
 
 export default function useUnits() {
   const supabase = createClient()

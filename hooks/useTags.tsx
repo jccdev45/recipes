@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/supabase/client"
+import { Database, Tag } from "@/supabase/types"
 
-import { Database, Tag } from "@/types/supabase"
 import { genId } from "@/lib/utils"
 
 export default function useUniqueTags() {

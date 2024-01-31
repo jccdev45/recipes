@@ -4,8 +4,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { getAll } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
+import { Recipe } from "@/supabase/types"
 
-import { Recipe } from "@/types/supabase"
 import { shimmer, toBase64 } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -40,7 +40,7 @@ export default async function Index() {
 
   return (
     <section className="w-full">
-      <div className="relative h-40 md:h-48 aspect-auto lg:h-64">
+      <div className="relative aspect-auto h-40 md:h-48 lg:h-64">
         <Image
           src="https://eebioglnufbnareanhqf.supabase.co/storage/v1/object/public/photos/banner-full.jpeg"
           alt="Medina Family Banner"
@@ -55,9 +55,9 @@ export default async function Index() {
         />
       </div>
 
-      <div className="flex flex-col items-center px-4 py-10 md:justify-evenly md:py-14 md:flex-row gap-y-4 lg:gap-0">
-        <div className="flex flex-col items-start justify-center w-full gap-2 px-8 my-6 md:w-1/3 md:my-0">
-          <TypographyH1 className="rounded-md dark:bg-black/80 max-w-max">
+      <div className="flex flex-col items-center gap-y-4 px-4 py-10 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
+        <div className="my-6 flex w-full flex-col items-start justify-center gap-2 px-8 md:my-0 md:w-1/3">
+          <TypographyH1 className="max-w-max rounded-md dark:bg-black/80">
             Welcome!
           </TypographyH1>
           <div>
@@ -87,17 +87,17 @@ export default async function Index() {
         </div>
       </div>
 
-      <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-foreground" />
+      <Separator className="mx-auto my-8 h-2 w-5/6 rounded-lg bg-foreground" />
 
       <div className="p-2">
         <TypographyH2 className="my-4 text-center">Get a taste:</TypographyH2>
-        <div className="grid w-full grid-cols-1 gap-y-2 md:gap-x-1 md:grid-cols-3 ">
+        <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1 ">
           <Suspense fallback={<RecipesFallback />}>
             {data?.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                className="w-11/12 col-span-1 mx-auto"
+                className="col-span-1 mx-auto w-11/12"
               />
             ))}
           </Suspense>
@@ -110,9 +110,9 @@ export default async function Index() {
 function RecipesFallback() {
   return (
     <>
-      <Skeleton className="w-11/12 col-span-1 mx-auto"></Skeleton>
-      <Skeleton className="w-11/12 col-span-1 mx-auto"></Skeleton>
-      <Skeleton className="w-11/12 col-span-1 mx-auto"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
     </>
   )
 }

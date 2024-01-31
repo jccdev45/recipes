@@ -2,8 +2,7 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { createClient } from "@/supabase/actions"
 import { getOne } from "@/supabase/helpers"
-
-import { Recipe } from "@/types/supabase"
+import { Recipe } from "@/supabase/types"
 
 export const dynamic = "force-dynamic"
 

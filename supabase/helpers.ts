@@ -1,6 +1,5 @@
+import { Recipe } from "@/supabase/types"
 import { SupabaseClient, User } from "@supabase/supabase-js"
-
-import { Recipe } from "@/types/supabase"
 
 interface QueryParams {
   filters?: { column: string; value: any }

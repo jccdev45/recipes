@@ -1,6 +1,6 @@
+import { Recipe } from "@/supabase/types"
 import queryString from "query-string"
 
-import { Recipe } from "@/types/supabase"
 import { apiUrl } from "@/lib/constants"
 import { TypographyH1 } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/GradientBanner"
@@ -29,13 +29,13 @@ export default async function RecipesPage({
     <section className="h-full">
       <GradientBanner />
 
-      <div className="flex flex-col w-5/6 h-full max-w-6xl py-16 mx-auto -translate-y-32 md:py-0 gap-y-8">
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 gap-y-4 lg:gap-4">
+      <div className="mx-auto flex h-full w-5/6 max-w-6xl -translate-y-32 flex-col gap-y-8 py-16 md:py-0">
+        <div className="grid grid-cols-1 gap-2 gap-y-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {recipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              className="hover:shadow-xl hover:scale-[1.01] col-span-1 shadow-lg"
+              className="col-span-1 shadow-lg hover:scale-[1.01] hover:shadow-xl"
             />
           ))}
         </div>

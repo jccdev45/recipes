@@ -5,12 +5,12 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 import { getAll } from "@/supabase/helpers"
+import { Comment as CommentType } from "@/supabase/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@supabase/supabase-js"
 import { Heart, UserCircle2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 
-import { Comment as CommentType } from "@/types/supabase"
 import { cn } from "@/lib/utils"
 import { CommentFormValues, CommentSchema } from "@/lib/zod/schema"
 import {
@@ -120,7 +120,7 @@ export function CommentsSection({
     <div className={cn(`space-y-8 p-4`, className)}>
       <Form {...form}>
         <form
-          className="flex flex-col w-full max-w-2xl my-0 rounded-lg"
+          className="my-0 flex w-full max-w-2xl flex-col rounded-lg"
           onSubmit={handleSubmit(handleSubmitComment)}
         >
           <FormField
@@ -158,13 +158,13 @@ export function CommentsSection({
 
       {!comments && (
         <div className="flex">
-          <Skeleton className="w-10 h-10" />
+          <Skeleton className="h-10 w-10" />
 
           <div>
-            <Skeleton className="w-10 h-4" />
-            <Skeleton className="w-12 h-4" />
-            <Skeleton className="w-16 h-4" />
-            <Skeleton className="w-6 h-6" />
+            <Skeleton className="h-4 w-10" />
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-6 w-6" />
           </div>
         </div>
       )}
@@ -237,7 +237,7 @@ function Comment({ comment, currentUser }: CommentProps) {
   }
 
   return (
-    <div className="relative flex w-full p-2 border rounded-md shadow-md md:w-1/2 bg-background dark:bg-slate-900 border-foreground/40">
+    <div className="relative flex w-full rounded-md border border-foreground/40 bg-background p-2 shadow-md dark:bg-slate-900 md:w-1/2">
       <Avatar className="mr-2">
         <AvatarImage src={avatar_url || ``} />
         <AvatarFallback>
@@ -245,14 +245,14 @@ function Comment({ comment, currentUser }: CommentProps) {
         </AvatarFallback>
       </Avatar>
 
-      <div className="flex flex-col w-full m-0">
+      <div className="m-0 flex w-full flex-col">
         <Link
           href={`/profile/${user_id}`}
-          className="font-bold underline gap-x-4 max-w-max"
+          className="max-w-max gap-x-4 font-bold underline"
         >
           {author}
         </Link>
-        <span className="text-sm max-w-max">
+        <span className="max-w-max text-sm">
           {new Date(created_at).toLocaleDateString("en-US")}
         </span>
         <TypographyP>{message}</TypographyP>
@@ -290,7 +290,7 @@ function Comment({ comment, currentUser }: CommentProps) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="shadow-sm bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
               >
                 Confirm
               </AlertDialogAction>
