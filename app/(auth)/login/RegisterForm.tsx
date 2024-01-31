@@ -7,6 +7,7 @@ import { createClient } from "@/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@supabase/supabase-js"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 import { userFormItems } from "@/lib/constants"
 import { cn, trimAvatarUrl } from "@/lib/utils"
@@ -22,7 +23,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -41,10 +41,6 @@ type RegisterFormProps = {
   setView?: Dispatch<SetStateAction<string>>
   type: "register" | "edit-profile"
   user?: User | null
-}
-
-type FormItems = {
-  fieldName: ""
 }
 
 export function RegisterForm({
@@ -89,6 +85,10 @@ export function RegisterForm({
   const editSubmittable = !!isDirty && !!errors && !!isValid
 
   const handleImageUpload = async (file: File | null) => {
+    if (!file) {
+      return toast.warning("No file selected")
+    }
+
     const fileExt = file?.name.split(".").pop()
     const filePath = `avatar/${Math.random()}.${fileExt}`
     let trimmedUpdatePath = ""
@@ -96,32 +96,82 @@ export function RegisterForm({
     if (type !== "register")
       trimmedUpdatePath = trimAvatarUrl(user?.user_metadata.avatar_url)
 
-    if (file) {
+    try {
       setIsUploading(true)
 
-      const { data, error } =
-        type === "register"
-          ? await supabase.storage.from("photos").upload(filePath, file, {
-              cacheControl: "3600",
-              upsert: false,
-            })
-          : await supabase.storage
-              .from("photos")
-              .update(trimmedUpdatePath, file, {
-                cacheControl: "3600",
-                upsert: false,
-              })
-
-      if (error) {
-        setUploadError(error.message)
-      } else {
-        setImgURL(data.path)
-        setIsUploading(false)
-        setUploadError("")
+      const fileOptions = {
+        cacheControl: "3600",
+        upsert: false,
       }
-    } else {
-      setUploadError("No file selected")
+
+      if (type === "register") {
+        const { data, error } = await supabase.storage
+          .from("photos")
+          .upload(filePath, file, fileOptions)
+
+        if (error) {
+          return toast.error("Something went wrong line 113", {
+            description: error.message,
+          })
+        }
+
+        setImgURL(data.path)
+      } else {
+        // TODO: FIX CHANGE PROFILE PICTURE
+        const { data, error } = await supabase.storage
+          .from("photos")
+          .update(trimmedUpdatePath, file, fileOptions)
+
+        if (error) {
+          return toast.error("Something went wrong line 125", {
+            description: error.message,
+          })
+        }
+        setImgURL(data.path)
+      }
+    } catch (error) {
+      setIsUploading(false)
+
+      return toast.error("Something went wrong line 134", {
+        description: (error as Error).message,
+      })
     }
+
+    setIsUploading(false)
+
+    return toast.success("Image uploaded successfully")
+
+    // if (file) {
+    //   setIsUploading(true)
+
+    //   const { data, error } =
+    //     type === "register"
+    //       ? await supabase.storage.from("photos").upload(filePath, file, {
+    //           cacheControl: "3600",
+    //           upsert: false,
+    //         })
+    //       : await supabase.storage
+    //           .from("photos")
+    //           .update(trimmedUpdatePath, file, {
+    //             cacheControl: "3600",
+    //             upsert: false,
+    //           })
+
+    //   if (error) {
+    //     // setUploadError(error.message)
+    //     return toast.error("Something went wrong", {
+    //       description: error.message,
+    //     })
+    //   } else {
+    //     setImgURL(data.path)
+    //     setIsUploading(false)
+    //     setUploadError("")
+
+    //     return toast.success("Image uploaded successfully")
+    //   }
+    // } else {
+    //   return toast("No file selected")
+    // }
   }
 
   const handleSubmit = async (values: RegisterFormValues) => {
@@ -172,33 +222,43 @@ export function RegisterForm({
     <Form {...form}>
       <form
         className={cn(
-          `border border-muted shadow-sm shadow-muted rounded-lg bg-background dark:bg-stone-900 text-foreground`,
+          `rounded-lg border border-muted bg-background text-foreground shadow-sm shadow-muted dark:bg-stone-900`,
           className
         )}
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <TypographyH3 className="text-center">Sign Up</TypographyH3>
-        {userFormItems.map(({ id, fieldName, placeholder, label }) => (
-          <FormField
-            key={id}
-            control={form.control}
-            // @ts-expect-error
-            name={fieldName}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{label}</FormLabel>
-                <FormControl>
-                  <Input
-                    className="px-4 py-2 mb-6 border rounded-md shadow-inner bg-inherit"
-                    placeholder={placeholder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ))}
+        <TypographyH3 className="text-center">
+          {type === "register" ? `Sign Up` : `Edit Profile`}
+        </TypographyH3>
+        <div className="grid auto-cols-auto gap-2">
+          {userFormItems.map(({ id, fieldName, placeholder, label }) => (
+            <FormField
+              key={id}
+              control={form.control}
+              // TODO: FIX TYPE ERROR
+              // @ts-expect-error
+              name={fieldName}
+              render={({ field }) => (
+                <FormItem
+                  className={cn(
+                    "col-span-2 lg:col-span-1",
+                    fieldName === "email" && `lg:col-span-2`
+                  )}
+                >
+                  <FormLabel>{label}</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="mb-6 rounded-md border bg-inherit px-4 py-2 shadow-inner"
+                      placeholder={placeholder}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
 
         {imgURL.length > 0 ? (
           <Image
@@ -215,7 +275,7 @@ export function RegisterForm({
         <FileInput
           isUploading={isUploading}
           onFileChange={handleImageUpload}
-          className="flex items-center w-full p-3 my-3 border border-gray-500 rounded-md"
+          className="my-3 flex w-full items-center rounded-md border border-muted p-3"
         />
         {uploadError && <div>{uploadError}</div>}
 
@@ -223,7 +283,7 @@ export function RegisterForm({
           <Button
             type="submit"
             disabled={!registerSubmittable || isSubmitting}
-            className="w-1/2 mx-auto"
+            className="mx-auto w-1/2"
           >
             Sign Up
           </Button>
@@ -237,9 +297,11 @@ export function RegisterForm({
             </div> */}
             <div className="flex items-center gap-x-4">
               <AlertDialog>
-                <AlertDialogTrigger className="w-1/4 mx-auto">
-                  Cancel
-                </AlertDialogTrigger>
+                <Button asChild variant="secondary">
+                  <AlertDialogTrigger className="mx-auto w-1/4">
+                    Cancel
+                  </AlertDialogTrigger>
+                </Button>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -248,10 +310,12 @@ export function RegisterForm({
                       still want to exit?
                     </AlertDialogDescription>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction>
-                        <Link href={`/profile/${user?.id}`}>Confirm</Link>
-                      </AlertDialogAction>
+                      <AlertDialogCancel>Nah</AlertDialogCancel>
+                      <Button asChild variant="destructive">
+                        <AlertDialogAction>
+                          <Link href={`/profile/${user?.id}`}>Yeah</Link>
+                        </AlertDialogAction>
+                      </Button>
                     </AlertDialogFooter>
                   </AlertDialogHeader>
                 </AlertDialogContent>
@@ -260,7 +324,7 @@ export function RegisterForm({
               <Button
                 type="submit"
                 disabled={!editSubmittable || isSubmitting}
-                className="w-1/3 mx-auto md:w-1/4"
+                className="mx-auto w-1/3 md:w-1/4"
               >
                 Update
               </Button>

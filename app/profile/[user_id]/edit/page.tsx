@@ -1,43 +1,43 @@
-import AccountInfoSvg from "/public/images/AccountInfo.svg";
-import Image from "next/image";
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers"
+import Image from "next/image"
+import { redirect } from "next/navigation"
+import { getAuthUser } from "@/supabase/helpers"
+import { createClient } from "@/supabase/server"
 
-import { RegisterForm } from "@/app/(auth)/login/RegisterForm";
-import { GradientBanner } from "@/components/GradientBanner";
-import { getAuthUser } from "@/supabase/helpers";
-import { createClient } from "@/supabase/server";
-import { cookies } from "next/headers";
+import { GradientBanner } from "@/components/GradientBanner"
+import { RegisterForm } from "@/app/(auth)/login/RegisterForm"
+
+import AccountInfoSvg from "/public/images/AccountInfo.svg"
 
 export default async function EditProfilePage() {
-  const supabase = createClient(cookies());
-  const user = (await getAuthUser(supabase)) || null;
+  const supabase = createClient(cookies())
+  const user = (await getAuthUser(supabase)) || null
 
   if (!user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   return (
-    <section>
+    <section className="">
       <GradientBanner />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 -translate-y-[12%] md:-translate-y-1/4 gap-y-4 md:gap-0">
-        <div className="w-5/6 h-full col-span-1 py-2 m-auto rounded-lg md:-translate-x-16 md:-translate-y-16">
+      <div className="grid -translate-y-[12%] grid-cols-1 gap-y-4 md:-translate-y-1/4 md:grid-cols-3 md:gap-0">
+        <div className="relative -z-10 col-span-1 mx-auto hidden h-3/4 w-2/3 rounded-lg md:block md:w-5/6">
           <Image
             src={AccountInfoSvg}
-            width={250}
-            height={250}
-            // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 25vw"
             alt="Cartoon depiction of person editing their profile information"
-            className="object-contain mx-auto md:translate-x-20 md:translate-y-20"
+            className="mx-auto"
           />
         </div>
 
         <RegisterForm
           type="edit-profile"
           user={user}
-          className="flex flex-col justify-center flex-1 w-5/6 max-w-lg col-span-1 gap-2 p-4 mx-auto"
+          className="col-span-1 mx-auto flex w-5/6 flex-1 flex-col gap-2 p-4 md:col-span-2 md:w-3/4"
         />
       </div>
     </section>
-  );
+  )
 }

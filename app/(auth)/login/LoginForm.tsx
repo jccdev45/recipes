@@ -1,13 +1,16 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader } from "lucide-react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { LoginFormValues, LoginSchema } from "@/lib/zod/schema"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -20,33 +23,44 @@ import { Input } from "@/components/ui/input"
 import { TypographyH3 } from "@/components/ui/typography"
 
 export function LoginForm({ className }: { className?: string }) {
-  const router = useRouter()
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-    mode: "onBlur",
+    mode: "onSubmit",
   })
+  const router = useRouter()
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const {
     formState: { errors, isValid, isDirty, isSubmitting },
   } = form
 
-  const isSubmittable = !!isValid && !!isDirty
+  const isSubmittable = !!isDirty
 
   const handleSignIn = async (values: LoginFormValues) => {
+    setIsLoading(true)
+
     const supabase = createClient()
 
-    await supabase.auth.signInWithPassword({
+    const result = await supabase.auth.signInWithPassword({
       email: values.email,
       password: values.password,
     })
+
+    if (result.error) {
+      setIsLoading(false)
+      return toast.error("Something went wrong", {
+        description: "There was a problem logging in, please try again",
+      })
+    }
+
+    setIsLoading(false)
     router.push("/")
     router.refresh()
-
     // return redirect("/")
   }
 
@@ -54,7 +68,7 @@ export function LoginForm({ className }: { className?: string }) {
     <Form {...form}>
       <form
         className={cn(
-          `border border-muted shadow-sm shadow-muted rounded-lg bg-background dark:bg-stone-900 text-foreground`,
+          `rounded-lg border border-muted bg-background text-foreground shadow-sm shadow-muted dark:bg-stone-900`,
           className
         )}
         onSubmit={form.handleSubmit(handleSignIn)}
@@ -65,16 +79,25 @@ export function LoginForm({ className }: { className?: string }) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <FormControl>
                 <Input
+                  id="email"
                   type="email"
-                  className="px-4 py-2 mb-6 border rounded-md bg-inherit"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  disabled={isLoading}
+                  className="mb-6 rounded-md border bg-inherit px-4 py-2"
                   placeholder="you@example.com"
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              {errors?.email ? (
+                <FormMessage className="text-xs" />
+              ) : (
+                <div className="h-2"></div>
+              )}
             </FormItem>
           )}
         />
@@ -83,26 +106,28 @@ export function LoginForm({ className }: { className?: string }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel htmlFor="password">Password</FormLabel>
               <FormControl>
                 <Input
+                  id="password"
                   type="password"
-                  className="px-4 py-2 mb-6 border rounded-md bg-inherit"
+                  className="mb-6 rounded-md border bg-inherit px-4 py-2"
                   placeholder="••••••••"
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              {/* <FormMessage /> */}
             </FormItem>
           )}
         />
 
         <Button
           type="submit"
-          disabled={!isSubmittable || isSubmitting}
-          className="w-1/2 mx-auto"
+          disabled={isLoading || !isSubmittable || isSubmitting}
+          className={cn(buttonVariants(), "mx-auto w-1/2")}
         >
-          Submit
+          {isLoading && <Loader className="mr-2 size-4 animate-spin" />}
+          Login
         </Button>
       </form>
     </Form>

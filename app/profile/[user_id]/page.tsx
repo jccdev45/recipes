@@ -34,9 +34,9 @@ export async function generateMetadata(
   const previousTitle = (await parent).title?.absolute || ""
 
   return {
-    title: `${previousTitle} | ${
+    title: `${
       user?.first_name ? user.first_name : user.user_id
-    }`,
+    } | profile | ${previousTitle}`,
   }
 }
 
@@ -75,29 +75,30 @@ export default async function ProfilePage({
       {!user && notFound()}
 
       {user && (
-        <div className="flex flex-col justify-between w-5/6 mx-auto md:px-8">
+        <div className="mx-auto flex w-5/6 flex-col justify-between md:px-8">
           {/* TODO: add change avatar dialog */}
           <div className="w-full -translate-y-1/4">
-            <div className="w-24 h-24">
-              <AspectRatio ratio={1 / 1}>
-                {avatar_url ? (
-                  <Image
-                    src={avatar_url}
-                    // width={100}
-                    // height={100}
-                    fill
-                    alt={`${first_name} ${last_name}`}
-                    className="border-2 rounded-full border-foreground"
-                    placeholder="blur"
-                    blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                      shimmer(100, 100)
-                    )}`}
-                  />
-                ) : (
-                  <UserCircle2 />
-                )}
-              </AspectRatio>
+            <div className="h-24 w-24">
+              {/* <AspectRatio ratio={1 / 1}> */}
+              {avatar_url ? (
+                <Image
+                  src={avatar_url}
+                  width={200}
+                  height={200}
+                  alt={`${first_name} ${last_name}`}
+                  className="aspect-square size-24 rounded-full border-2 border-foreground object-cover"
+                  placeholder="blur"
+                  blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                    shimmer(96, 96)
+                  )}`}
+                />
+              ) : (
+                <UserCircle2 />
+              )}
+              {/* </AspectRatio> */}
             </div>
+
+            {/* TODO: ADJUST TYPOGRAPHY & LAYOUT */}
             <TypographyH2>
               {first_name} {last_name}
             </TypographyH2>
@@ -112,24 +113,32 @@ export default async function ProfilePage({
             )}
 
             <Button asChild>
-              <Link href={`/profile/${user_id}/edit`} className="flex my-4">
+              <Link href={`/profile/${user_id}/edit`} className="my-4 flex">
                 <Edit /> Edit Profile
               </Link>
             </Button>
           </div>
           <TypographyH3>
-            {first_name ? `Recipes by: ${first_name}` : `Recipes:`}
+            Recipes:
+            {/* {first_name ? `Recipes by: ${first_name}` : ``} */}
           </TypographyH3>
           <aside className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {recipes?.map((recipe) => {
-              return (
-                <RecipeCard
-                  key={recipe.id}
-                  className="w-full col-span-1 mx-auto"
-                  recipe={recipe}
-                />
-              )
-            })}
+            {recipes?.length ? (
+              recipes.map((recipe) => {
+                return (
+                  <RecipeCard
+                    key={recipe.id}
+                    className="col-span-1 mx-auto w-full"
+                    recipe={recipe}
+                  />
+                )
+              })
+            ) : (
+              <>
+                This is where {first_name}'s recipes would be...
+                <em>IF THEY ADDED ANY</em>
+              </>
+            )}
           </aside>
         </div>
       )}
