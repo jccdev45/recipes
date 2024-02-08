@@ -40,7 +40,7 @@ export default async function Index() {
 
   return (
     <section className="w-full">
-      <div className="relative aspect-auto h-40 md:h-48 lg:h-64">
+      {/* <div className="relative h-40 aspect-auto md:h-48 lg:h-64">
         <Image
           src="https://eebioglnufbnareanhqf.supabase.co/storage/v1/object/public/photos/banner-full.jpeg"
           alt="Medina Family Banner"
@@ -53,7 +53,7 @@ export default async function Index() {
             shimmer(1000, 250)
           )}`}
         />
-      </div>
+      </div> */}
 
       <div className="flex flex-col items-center gap-y-4 px-4 py-10 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
         <div className="my-6 flex w-full flex-col items-start justify-center gap-2 px-8 md:my-0 md:w-1/3">
@@ -87,11 +87,11 @@ export default async function Index() {
         </div>
       </div>
 
-      <Separator className="mx-auto my-8 h-2 w-5/6 rounded-lg bg-foreground" />
+      {/* <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-foreground" /> */}
 
       <div className="p-2">
         <TypographyH2 className="my-4 text-center">Get a taste:</TypographyH2>
-        <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1 ">
+        <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1">
           <Suspense fallback={<RecipesFallback />}>
             {data?.map((recipe) => (
               <RecipeCard

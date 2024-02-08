@@ -22,7 +22,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
   return (
     <article
       className={cn(
-        `group relative rounded-lg border border-foreground/40 transition-all duration-300 ease-in-out dark:hover:bg-slate-800`,
+        `group relative rounded-lg border border-foreground/40 shadow transition-all duration-300 ease-in-out dark:hover:bg-slate-800`,
         className
       )}
     >
