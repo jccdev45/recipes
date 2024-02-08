@@ -235,9 +235,15 @@ export function RegisterForm({
             <FormField
               key={id}
               control={form.control}
-              // TODO: FIX TYPE ERROR
-              // @ts-expect-error
-              name={fieldName}
+              // TODO: FIX THIS TYPE WEIRDNESS
+              name={
+                fieldName as
+                  | "first_name"
+                  | "last_name"
+                  | "email"
+                  | "confirm_password"
+                  | "password"
+              }
               render={({ field }) => (
                 <FormItem
                   className={cn(

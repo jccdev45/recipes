@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
 import { NextResponse, type NextRequest } from "next/server"
-import { createClient } from "@/supabase/actions"
+import { createClient } from "@/supabase/server"
 import { type EmailOtpType } from "@supabase/supabase-js"
 
 export async function GET(request: NextRequest) {
