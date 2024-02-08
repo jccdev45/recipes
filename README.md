@@ -1,48 +1,54 @@
-# Supabase Starter
 
-This starter configures Supabase Auth to use cookies, making the user's session available throughout the entire Next.js app - Client Components, Server Components, Route Handlers, Server Actions and Middleware.
+# Family Recipes
 
-## Deploy your own
+A simple recipe collection app built with NextJS and Supabase, providing full-stack functionality including authentication, storage, and database management.
 
-The Vercel deployment will guide you through creating a Supabase account and project. After installation of the Supabase integration, all relevant environment variables will be set up so that the project is usable immediately after deployment 🚀
+## Description
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&integration-ids=oac_jUduyjQgOyzev1fjrW83NYOv)
+This is a full-stack web application designed to help my family organize and manage our collection of family recipes. The app is built using NextJS and Supabase, offering a seamless user experience with robust features for recipe management, meal planning, and shopping list creation. The integration with Supabase provides secure authentication, efficient storage, and reliable database management, ensuring a smooth and reliable performance.
 
-## How to use
+## Features
 
-1. Create a [new Supabase project](https://database.new)
-1. Run `npx create-next-app -e with-supabase` to create a Next.js app using the Supabase Starter template
-1. Use `cd` to change into the app's directory
-1. Run `npm install` to install dependencies
-1. Rename `.env.local.example` to `.env.local` and update the values for `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-1. Run `npm run dev` to start the local development server
+- User-friendly interface for adding, editing, and organizing recipes
+- Seamless meal planning functionality with the ability to create a weekly plan and generate a shopping list
+- Integration with external APIs for ingredient searches and shopping cart management
+- Secure user authentication and authorization through Supabase
+- Efficient storage and management of recipe data using Supabase's storage and database services
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## Tech Stack
 
-### Create a Supabase client
+**Frontend:** React, NextJS, TailwindCSS, shadcn-ui
 
-Check out the [`/app/_examples`](./app/_examples/) folder for an example of creating a Supabase client in:
+**Backend:** Supabase (Auth, Database, Storage)
 
-- [Client Components](./app/_examples/client-component/page.tsx)
-- [Server Components](./app/_examples/server-component/page.tsx)
-- [Route Handlers](./app/_examples/route-handler/route.ts)
-- [Server Actions](./app/_examples/server-action/page.tsx)
+## Installation
 
-### Create `todo` table and seed with data (optional)
+- Clone the repository
 
-Navigate to [your project's SQL Editor](https://app.supabase.com/project/_/sql), click `New query`, paste the contents of the [init.sql](./supabase/migrations/20230618024722_init.sql) file and click `RUN`.
+```bash
+git clone https://github.com/jccdev45/family-recipes.git
+```
 
-This will create a basic `todos` table, enable Row Level Security (RLS), and write RLS policies enabling `select` and `insert` actions for `authenticated` users.
+- Install dependencies
 
-To seed your `todos` table with some dummy data, run the contents of the [seed.sql](./supabase/seed.sql) file.
+```bash
+npm install
+```
 
-## Feedback and issues
+- Set up Supabase credentials
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+  - Create a `.env.local` file in the project root
+  - Add your Supabase credentials
+- Run the development server
 
-## More Supabase examples
+```bash
+npm run dev
+```
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
-- [Next.js Auth Helpers Docs](https://supabase.com/docs/guides/auth/auth-helpers/nextjs)
+- Open <http://localhost:3000> in your browser to see the app
+
+## Contributing
+
+Contributions are always welcome!
+
+Eventually I will include a `contributing.md` file for more info.
