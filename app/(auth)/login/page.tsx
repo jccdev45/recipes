@@ -1,9 +1,9 @@
-import AuthSvg from "/public/images/Login.svg";
-import Image from "next/image";
+import Image from "next/image"
 
-import { GradientBanner } from "@/components/GradientBanner";
+import { GradientBanner } from "@/components/GradientBanner"
 
-import FormContainer from "./FormContainer";
+import FormContainer from "./FormContainer"
+import AuthSvg from "/public/images/Login.svg"
 
 export default async function LoginPage() {
   return (
@@ -24,5 +24,5 @@ export default async function LoginPage() {
         <FormContainer className="col-span-1 px-4" />
       </div>
     </section>
-  );
+  )
 }

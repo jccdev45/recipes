@@ -16,6 +16,26 @@ module.exports = {
       },
     },
     extend: {
+      boxShadow: {
+        sm: "1px 2px",
+        DEFAULT: "3px 4px",
+        md: "5px 7px",
+        lg: "15px 20px",
+        xl: "25px 30px",
+        none: "0 0 #0000",
+      },
+      spacing: {
+        smX: "1px",
+        smY: "2px",
+        baseX: "3px",
+        baseY: "4px",
+        mdX: "5px",
+        mdY: "7px",
+        lgX: "15px",
+        lgY: "20px",
+        xlX: "25px",
+        xlY: "30px",
+      },
       typography: {
         DEFAULT: {
           css: {
@@ -80,4 +100,4 @@ module.exports = {
     },
   },
   plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],
-};
+}

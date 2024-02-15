@@ -1,52 +1,43 @@
-import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react";
-import Link from "next/link";
+import Link from "next/link"
+import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { User } from "@supabase/supabase-js";
+import { cn } from "@/lib/utils"
+import { TypographyP } from "@/components/ui/typography"
 
-import { TypographyP } from "./typography";
-
-export function Footer({
-  className,
-  user,
-}: {
-  className?: string;
-  user: User | null;
-}) {
+export function Footer({ className }: { className?: string }) {
   return (
     <footer className={cn(``, className)}>
-      <div className="flex flex-col flex-wrap px-5 mx-auto md:items-center lg:items-start md:flex-row md:flex-nowrap">
-        <div className="flex-shrink-0 w-64 mx-auto mt-10 text-center md:mx-0 md:text-left md:mt-0">
-          <div className="flex items-center justify-center font-medium title-font md:justify-start">
-            <UtensilsCrossed className="w-20 h-20" />
+      <div className="mx-auto flex flex-col flex-wrap px-5 md:flex-row md:flex-nowrap md:items-center lg:items-start">
+        <div className="mx-auto mt-10 w-64 flex-shrink-0 text-center md:mx-0 md:mt-0 md:text-left">
+          <div className="title-font flex items-center justify-center font-medium md:justify-start">
+            <UtensilsCrossed className="h-20 w-20" />
             <span className="ml-3 text-xl">Medina Family Recipes</span>
           </div>
         </div>
-        <div className="flex flex-wrap flex-grow order-first -mb-10 text-center md:pr-20 md:text-left">
-          <div className="w-full px-4 lg:w-1/4 md:w-1/2">
-            <nav className="flex flex-col mb-10">
+        <div className="order-first -mb-10 flex flex-grow flex-wrap text-center md:pr-20 md:text-left">
+          <div className="w-full px-4 md:w-1/2 lg:w-1/4">
+            <nav className="mb-10 flex flex-col">
               <Link href="/" className="">
                 Home
               </Link>
               <Link href="/recipes" className="">
                 Recipes
               </Link>
-              <Link href={`/profile/${user?.id}`}>Profile</Link>
             </nav>
           </div>
         </div>
       </div>
-      <div className="container flex flex-col items-center justify-center w-full px-5 py-4 mx-auto md:max-w-sm">
+      <div className="container mx-auto flex w-full flex-col items-center justify-center px-5 py-4 md:max-w-sm">
         <TypographyP className="text-center">
           Made (with love) by{" "}
           <Link
-            href="https://jccdev.tech"
+            href="https://jccdev.vercel.app"
             rel="noopener noreferrer"
-            className="flex items-center justify-center my-1 underline"
+            className="my-1 flex items-center justify-center underline"
             target="_blank"
           >
             @jccdev
-            <Heart className="ml-1 no-underline bg-gradient-to-br bg-clip-text from-red-500 to-red-800 fill-red-800" />
+            <Heart className="ml-1 bg-gradient-to-br from-red-500 to-red-800 bg-clip-text fill-red-800 no-underline" />
           </Link>
         </TypographyP>
         <span className="inline-flex justify-center gap-x-2">
@@ -67,5 +58,5 @@ export function Footer({
         </span>
       </div>
     </footer>
-  );
+  )
 }

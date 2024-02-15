@@ -1,21 +1,21 @@
-import { Recipe } from "@/types/supabase";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { Recipe } from "@/supabase/types"
+import { SupabaseClient, User } from "@supabase/supabase-js"
 
 interface QueryParams {
-  filters?: { column: string; value: any };
+  filters?: { column: string; value: any }
   order?: {
-    column: string;
+    column: string
     options?: {
-      ascending: boolean;
-    };
-  };
-  limit?: number;
+      ascending: boolean
+    }
+  }
+  limit?: number
 }
 
 export interface GetAllOptions {
-  db: string;
-  params?: QueryParams;
-  column?: string;
+  db: string
+  params?: QueryParams
+  column?: string
 }
 
 export async function getAuthUser(
@@ -24,38 +24,39 @@ export async function getAuthUser(
   try {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    return user;
+    } = await supabase.auth.getUser()
+    return user
   } catch (error) {
-    console.error("Error:", error);
-    return null;
+    console.error("Error:", error)
+    return null
   }
 }
 
 export async function getAll(
   options: GetAllOptions,
   supabase: SupabaseClient
+  // TODO: add proper typing
 ): Promise<any[] | null> {
-  const { db, column, params } = options;
+  const { db, column, params } = options
 
   try {
-    let query = supabase.from(db).select(column && column);
+    let query = supabase.from(db).select(column && column)
     if (params) {
       if (params.filters) {
-        query = query.eq(params.filters.column, params.filters.value);
+        query = query.eq(params.filters.column, params.filters.value)
       }
       if (params.order) {
-        query = query.order(params.order.column, params.order.options);
+        query = query.order(params.order.column, params.order.options)
       }
       if (params.limit) {
-        query = query.limit(params.limit);
+        query = query.limit(params.limit)
       }
     }
-    const { data } = await query;
-    return data;
+    const { data } = await query
+    return data
   } catch (error) {
-    console.error("Error: ", error);
-    return null;
+    console.error("Error: ", error)
+    return null
   }
 }
 export async function getOne(
@@ -64,17 +65,17 @@ export async function getOne(
   params?: QueryParams
 ): Promise<any> {
   try {
-    let query = supabase.from(db).select();
+    let query = supabase.from(db).select()
     if (params) {
       if (params.filters) {
-        query = query.eq(params.filters.column, params.filters.value);
+        query = query.eq(params.filters.column, params.filters.value)
       }
     }
-    const { data } = await query.single();
-    return data;
+    const { data } = await query.single()
+    return data
   } catch (error) {
-    console.error("Error: ", error);
-    return null;
+    console.error("Error: ", error)
+    return null
   }
 }
 
@@ -86,10 +87,10 @@ export async function searchRecipes(
     const { data } = await supabase
       .from("recipes")
       .select()
-      .textSearch("search_vector", searchTerm);
-    return data;
+      .textSearch("search_vector", searchTerm)
+    return data
   } catch (error) {
-    console.error("Error: ", error);
-    return null;
+    console.error("Error: ", error)
+    return null
   }
 }

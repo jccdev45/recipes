@@ -1,13 +1,14 @@
-import { TypographyH3, TypographyList } from "@/components/typography";
-import { cn } from "@/lib/utils";
-import { Step } from "@/types/supabase";
+import { Step } from "@/supabase/types"
 
-import { StepBoxImStuck } from "./StepBoxImStuck";
+import { cn } from "@/lib/utils"
+import { TypographyH3, TypographyList } from "@/components/ui/typography"
+
+import { StepBoxImStuck } from "./StepBoxImStuck"
 
 type StepsProps = {
-  className: string;
-  steps: Step[];
-};
+  className: string
+  steps: Step[]
+}
 
 export function Steps({ steps, className }: StepsProps) {
   return (
@@ -16,9 +17,9 @@ export function Steps({ steps, className }: StepsProps) {
       {/* TODO: ADD DRAGGABLE */}
       <TypographyList className="flex flex-col">
         {steps.map(({ id, step }) => (
-          <StepBoxImStuck key={id} id={id} step={step} className="space-x-2" />
+          <StepBoxImStuck key={id} step={step} className="space-x-2" />
         ))}
       </TypographyList>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import * as z from "zod";
+import * as z from "zod"
 
-import { maxAmount, minAmount } from "../constants";
+import { maxAmount, minAmount } from "../constants"
 
 const sharedFields = {
   auth: {
@@ -28,7 +28,7 @@ const sharedFields = {
       .max(50, { message: "Last name must be less than 50 characters" })
       .optional(),
   },
-};
+}
 
 export const IngredientSchema = z.array(
   z.object({
@@ -39,13 +39,11 @@ export const IngredientSchema = z.array(
       .max(50, { message: "Ingredient must be less than 500 characters" }),
     amount: z
       .number()
-      .min(minAmount, { message: "Amount must be greater than 0.1" })
-      .max(maxAmount, { message: "Amount must be less than 1000" }),
+      .min(minAmount, { message: `Amount must be greater than ${minAmount}` })
+      .max(maxAmount, { message: `Amount must be less than ${maxAmount}` }),
     unitMeasurement: z.string(),
-    // .min(3, { message: "Unit must be at least 3 characters" })
-    // .max(50),
   })
-);
+)
 
 export const StepSchema = z.array(
   z.object({
@@ -55,7 +53,7 @@ export const StepSchema = z.array(
       .min(3, { message: "Step must be at least 3 characters" })
       .max(500, { message: "Step must be less than 500 characters" }),
   })
-);
+)
 
 export const TagSchema = z
   .array(
@@ -67,7 +65,7 @@ export const TagSchema = z
         .max(15, { message: "Tag must be less than 15 characters" }),
     })
   )
-  .max(5, { message: "No more than 5 tags" });
+  .max(5, { message: "No more than 5 tags" })
 
 export const RecipeFormSchema = z.object({
   recipe_name: z
@@ -81,11 +79,11 @@ export const RecipeFormSchema = z.object({
   ingredients: IngredientSchema,
   steps: StepSchema,
   tags: TagSchema,
-});
+})
 
 export const LoginSchema = z.object({
   ...sharedFields.auth,
-});
+})
 
 export const RegisterSchema = z
   .object({
@@ -96,16 +94,16 @@ export const RegisterSchema = z
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",
     path: ["confirm_password"],
-  });
+  })
 
 export const CommentSchema = z.object({
   message: z
     .string()
     .min(1, { message: "Must be at least 1 character " })
     .max(500, { message: "Max 500 characters" }),
-});
+})
 
-export type AddRecipeFormValues = z.infer<typeof RecipeFormSchema>;
-export type CommentFormValues = z.infer<typeof CommentSchema>;
-export type LoginFormValues = z.infer<typeof LoginSchema>;
-export type RegisterFormValues = z.infer<typeof RegisterSchema>;
+export type AddRecipeFormValues = z.infer<typeof RecipeFormSchema>
+export type CommentFormValues = z.infer<typeof CommentSchema>
+export type LoginFormValues = z.infer<typeof LoginSchema>
+export type RegisterFormValues = z.infer<typeof RegisterSchema>

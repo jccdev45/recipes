@@ -1,31 +1,31 @@
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useState } from "react"
+import { Tag } from "@/supabase/types"
+import { CheckIcon, ChevronsUpDown } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
+import { cn, genId } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
-import { FormControl } from "@/components/ui/form";
+} from "@/components/ui/command"
+import { FormControl } from "@/components/ui/form"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn, genId } from "@/lib/utils";
-import { Tag } from "@/types/supabase";
+} from "@/components/ui/popover"
 
 type TagProps = {
-  className: string;
-  field: any;
-  form: any;
-  index: number;
-  update: (index: number, obj: { id: string; tag: string }) => void;
-  uniqueTags: Tag[];
-};
+  className: string
+  field: any
+  form: any
+  index: number
+  update: (index: number, obj: { id: string; tag: string }) => void
+  uniqueTags: Tag[]
+}
 
 export function TagCombobox({
   className,
@@ -35,7 +35,7 @@ export function TagCombobox({
   update,
   uniqueTags,
 }: TagProps) {
-  const [tagValue, setTagValue] = useState("");
+  const [tagValue, setTagValue] = useState("")
 
   return (
     <Popover>
@@ -45,7 +45,7 @@ export function TagCombobox({
             {field.value
               ? uniqueTags.find(({ tag }) => tag === field.value)?.tag
               : "Select tag..."}
-            <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </FormControl>
       </PopoverTrigger>
@@ -59,8 +59,8 @@ export function TagCombobox({
                 key={id}
                 value={tag}
                 onSelect={(currentValue) => {
-                  setTagValue(currentValue === tagValue ? "" : currentValue);
-                  update(index, { id: genId(), tag: currentValue });
+                  setTagValue(currentValue === tagValue ? "" : currentValue)
+                  update(index, { id: genId(), tag: currentValue })
                   // setTagOpen(false);
                 }}
               >
@@ -77,5 +77,5 @@ export function TagCombobox({
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

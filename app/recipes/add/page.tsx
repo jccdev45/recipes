@@ -3,12 +3,13 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { GradientBanner } from "@/components/GradientBanner";
-import { createSupaServer } from "@/supabase/server";
+import { createClient } from "@/supabase/server";
 
 import { AddRecipeForm } from "./AddRecipeForm";
+import { cookies } from "next/headers";
 
 export default async function AddRecipePage() {
-  const supabase = createSupaServer();
+  const supabase = createClient(cookies());
 
   const {
     data: { user },

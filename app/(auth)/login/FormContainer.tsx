@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 
-import { TypographyH1, TypographyP } from "@/components/typography";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { TypographyH1, TypographyP } from "@/components/ui/typography"
 
-import { LoginForm } from "./LoginForm";
-import { RegisterForm } from "./RegisterForm";
+import { LoginForm } from "./LoginForm"
+import { RegisterForm } from "./RegisterForm"
 
 export default function FormContainer({ className }: { className?: string }) {
-  const [view, setView] = useState("sign-in");
-  const formStyle = `flex flex-col justify-center w-full gap-2 mx-auto shadow shadow-foreground/30 border border-border`;
+  const [view, setView] = useState("sign-in")
+  const formStyle = `flex flex-col justify-center w-full gap-2 mx-auto shadow shadow-foreground/30 border border-border`
 
   return (
     <div className={cn(``, className)}>
@@ -66,5 +66,5 @@ export default function FormContainer({ className }: { className?: string }) {
         </>
       )}
     </div>
-  );
+  )
 }

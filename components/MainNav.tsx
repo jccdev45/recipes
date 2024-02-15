@@ -1,5 +1,8 @@
-"use client";
+"use client"
 
+import Link from "next/link"
+import { AvatarProps } from "@radix-ui/react-avatar"
+import { User } from "@supabase/supabase-js"
 import {
   ChefHat,
   Edit,
@@ -8,9 +11,10 @@ import {
   PlusCircle,
   UserCircle2,
   UtensilsCrossed,
-} from "lucide-react";
-import Link from "next/link";
+} from "lucide-react"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,29 +23,27 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { User } from "@supabase/supabase-js";
+} from "@/components/ui/navigation-menu"
+import { Separator } from "@/components/ui/separator"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { TypographyP } from "@/components/ui/typography"
 
-import LogoutButton from "./LogoutButton";
-import { TypographyP } from "./typography";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { ThemeToggle } from "./ui/theme-toggle";
+import LogoutButton from "./LogoutButton"
 
-type MainNavProps = { className: string; user: User | null };
+interface MainNavProps extends AvatarProps {
+  className: string
+  user: User | null
+}
 
-export function MainNav({ user, className }: MainNavProps) {
+export function MainNav({ user, className, ...props }: MainNavProps) {
   return (
     <NavigationMenu className={className}>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <Home />
-              <span className="hidden md:block">Home</span>
-            </NavigationMenuLink>
-          </Link>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()} href="/">
+            <Home />
+            <span className="hidden md:block">Home</span>
+          </NavigationMenuLink>
         </NavigationMenuItem>
 
         <NavigationMenuItem>
@@ -50,23 +52,23 @@ export function MainNav({ user, className }: MainNavProps) {
             <span className="hidden md:block">Recipes</span>
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid gap-3 p-4 md:grid-cols-1 w-72">
+            <ul className="grid w-72 gap-3 p-4 md:grid-cols-1">
               <li className="col-span-1 row-span-1">
                 <NavigationMenuLink
                   className={navigationMenuTriggerStyle()}
                   asChild
                 >
                   <a
-                    className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    className="space-4 block select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     href="/recipes"
                   >
-                    <ChefHat className="w-8 h-8" />
+                    <ChefHat className="h-8 w-8" />
                     <div className="mx-2 text-sm font-medium leading-none">
                       Recipes
                     </div>
                   </a>
                 </NavigationMenuLink>
-                <TypographyP className="block text-sm line-clamp-2 text-muted-foreground">
+                <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
                   The complete collection
                 </TypographyP>
               </li>
@@ -76,16 +78,16 @@ export function MainNav({ user, className }: MainNavProps) {
                   asChild
                 >
                   <a
-                    className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    className="space-4 block select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     href="/recipes/add"
                   >
-                    <PlusCircle className="w-8 h-8" />
+                    <PlusCircle className="h-8 w-8" />
                     <div className="mx-2 text-sm font-medium leading-none">
                       New Recipe
                     </div>
                   </a>
                 </NavigationMenuLink>
-                <TypographyP className="block text-sm line-clamp-2 text-muted-foreground">
+                <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
                   Got a slick new recipe? Add it!
                 </TypographyP>
               </li>
@@ -106,36 +108,40 @@ export function MainNav({ user, className }: MainNavProps) {
           ) : (
             <>
               <NavigationMenuTrigger>
-                <Avatar>
-                  <AvatarImage src={user?.user_metadata.avatar_url} />
+                <Avatar {...props}>
+                  <AvatarImage
+                    src={user.user_metadata.avatar_url}
+                    className="object-cover"
+                  />
                   <AvatarFallback>
+                    <span className="sr-only">{user.email}</span>
                     <UserCircle2 />
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden truncate md:block">
-                  {user?.user_metadata.first_name}
+                  {user.user_metadata.first_name}
                 </span>
               </NavigationMenuTrigger>
 
               <NavigationMenuContent>
-                <ul className="grid gap-3 p-4 md:grid-cols-1 w-72">
+                <ul className="grid w-72 gap-3 p-4 md:grid-cols-1">
                   <li className="row-span-1">
                     <NavigationMenuLink
                       className={navigationMenuTriggerStyle()}
                       asChild
                     >
                       <a
-                        className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        href={`/profile/${user?.id}`}
+                        className="space-4 block select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href={`/profile/${user.id}`}
                       >
-                        <UserCircle2 className="w-8 h-8" />
+                        <UserCircle2 className="h-8 w-8" />
                         <div className="mx-2 text-sm font-medium leading-none">
                           Profile
                         </div>
                       </a>
                     </NavigationMenuLink>
-                    <TypographyP className="block text-sm truncate line-clamp-2 text-muted-foreground">
-                      {user?.email}
+                    <TypographyP className="line-clamp-2 block truncate text-sm text-muted-foreground">
+                      {user.email}
                     </TypographyP>
                   </li>
                   <li className="row-span-1">
@@ -144,21 +150,21 @@ export function MainNav({ user, className }: MainNavProps) {
                       asChild
                     >
                       <a
-                        className="block leading-none no-underline transition-colors rounded-md outline-none select-none space-4 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        href={`/profile/${user?.id}/edit`}
+                        className="space-4 block select-none rounded-md leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        href={`/profile/${user.id}/edit`}
                       >
-                        <Edit className="w-8 h-8" />
+                        <Edit className="h-8 w-8" />
                         <div className="mx-2 text-sm font-medium leading-none">
                           Edit Profile
                         </div>
                       </a>
                     </NavigationMenuLink>
-                    <TypographyP className="block text-sm line-clamp-2 text-muted-foreground">
+                    <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
                       Update your information
                     </TypographyP>
                   </li>
 
-                  <Separator className="w-full h-2 my-1 rounded-lg bg-foreground" />
+                  <Separator className="my-1 h-2 w-full rounded-lg bg-foreground" />
 
                   <li className="row-span-1 ml-auto">
                     <LogoutButton />
@@ -173,5 +179,5 @@ export function MainNav({ user, className }: MainNavProps) {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  );
+  )
 }

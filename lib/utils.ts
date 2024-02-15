@@ -1,10 +1,9 @@
-import { ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-import { Ingredient } from "@/types/supabase";
+import { Ingredient } from "@/supabase/types"
+import { ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 export const shimmer = (w: number, h: number) => `
@@ -19,45 +18,45 @@ export const shimmer = (w: number, h: number) => `
   <rect width="${w}" height="${h}" fill="#333" />
   <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
   <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
-</svg>`;
+</svg>`
 
 export const toBase64 = (str: string) =>
   typeof window === "undefined"
     ? Buffer.from(str).toString("base64")
-    : window.btoa(str);
+    : window.btoa(str)
 
-let count = 0;
+let count = 0
 
 export function genId() {
-  count = (count + 1) % Number.MAX_VALUE;
+  count = (count + 1) % Number.MAX_VALUE
 
-  return count.toString();
+  return count.toString()
 }
 
 export function improperFractionToMixedFraction(
   improperFraction: string
 ): string {
   // Split the improper fraction into the numerator and denominator.
-  var numerator, denominator;
-  var parts = improperFraction.split("/");
-  numerator = parts[0];
-  denominator = parts[1];
+  var numerator, denominator
+  var parts = improperFraction.split("/")
+  numerator = parts[0]
+  denominator = parts[1]
 
   // Get the quotient of the numerator and denominator.
-  var quotient = Math.floor(Number(numerator) / Number(denominator));
+  var quotient = Math.floor(Number(numerator) / Number(denominator))
 
   // Get the remainder of the numerator and denominator.
-  var remainder = Number(numerator) % Number(denominator);
+  var remainder = Number(numerator) % Number(denominator)
 
   // If the remainder is 0, then the fraction is already a mixed fraction.
   if (remainder === 0) {
-    return improperFraction;
+    return improperFraction
   } else if (quotient === 0) {
     // If the quotient is 0, then the fraction is simply 1/denominator.
-    return "1/" + denominator;
+    return "1/" + denominator
   } else {
     // Otherwise, the fraction is improper. Return the mixed fraction.
-    return quotient + " " + "1/" + denominator;
+    return quotient + " " + "1/" + denominator
   }
 }
 
@@ -66,7 +65,7 @@ export function toSlug(input: string): string {
     .toLowerCase() // Convert to lowercase
     .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric characters with dashes
     .replace(/^-+|-+$/g, "") // Remove leading/trailing dashes
-    .trim(); // Remove extra whitespace
+    .trim() // Remove extra whitespace
 }
 
 // Borrowed (and modified) from @hero-page/hero-recipe-utils
@@ -76,21 +75,21 @@ export function scaleIngredients(
   servings: number
 ): Ingredient[] {
   if (!servings || servings <= 0) {
-    return ingredients;
+    return ingredients
   }
 
   return ingredients.map((ingredient) => {
     if (!ingredient.hasOwnProperty("amount") || ingredient.amount < 0) {
       throw new Error(
         `Invalid quantity for ingredient: ${ingredient.ingredient}`
-      );
+      )
     }
 
     return {
       ...ingredient,
       amount: ingredient.amount * servings,
-    };
-  });
+    }
+  })
 }
 
 // Also borrowed (and modified) from @hero-page/hero-recipe-utils
@@ -122,36 +121,36 @@ export function cookTimeEstimator(ingredients: Ingredient[]) {
     oil: 5,
     spices: 1,
     herbs: 1,
-  };
+  }
 
-  let cookTime = 0;
+  let cookTime = 0
 
   for (const ingredient of ingredients) {
-    const ingredientName = ingredient.ingredient.toLowerCase();
+    const ingredientName = ingredient.ingredient.toLowerCase()
 
-    const matchedIngredient = Object.keys(
-      defaultCookTimes
-    ).find((defaultIngredient) => ingredientName.includes(defaultIngredient));
+    const matchedIngredient = Object.keys(defaultCookTimes).find(
+      (defaultIngredient) => ingredientName.includes(defaultIngredient)
+    )
 
     if (matchedIngredient && ingredient.amount > 0) {
-      cookTime += defaultCookTimes[matchedIngredient] * ingredient.amount;
+      cookTime += defaultCookTimes[matchedIngredient] * ingredient.amount
     }
   }
 
-  cookTime === 0 && `-`;
+  cookTime === 0 && `-`
 
-  const roundedCookTime = Math.ceil(cookTime);
-  const minutes = roundedCookTime % 60;
-  const hours = Math.floor(roundedCookTime / 60);
+  const roundedCookTime = Math.ceil(cookTime)
+  const minutes = roundedCookTime % 60
+  const hours = Math.floor(roundedCookTime / 60)
 
-  const cookTimeStr = `${hours} hour(s) ${minutes} minute(s)`;
-  return hours === 0 ? `${minutes} minutes` : cookTimeStr;
+  const cookTimeStr = `${hours} hour(s) ${minutes} minute(s)`
+  return hours === 0 ? `${minutes} minutes` : cookTimeStr
 }
 
 export function trimAvatarUrl(fullUrl: string) {
-  const match = fullUrl.match(/public\/(.+)/);
+  const match = fullUrl.match(/public\/(.+)/)
   if (match) {
-    return match[1];
+    return match[1]
   }
-  return "";
+  return ""
 }

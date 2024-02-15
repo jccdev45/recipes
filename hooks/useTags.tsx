@@ -1,53 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
+import { createClient } from "@/supabase/client"
+import { Database, Tag } from "@/supabase/types"
 
-import { genId } from "@/lib/utils";
-import { Database, Tag } from "@/types/supabase";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { genId } from "@/lib/utils"
 
 export default function useUniqueTags() {
-  const supabase = createClientComponentClient<Database>();
-  const [uniqueTags, setUniqueTags] = useState<Tag[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const supabase = createClientComponentClient<Database>();
+  const supabase = createClient()
+  const [uniqueTags, setUniqueTags] = useState<Tag[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const getTags = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase.from("recipes").select("tags");
+      setIsLoading(true)
+      const { data, error } = await supabase.from("recipes").select("tags")
 
-      const tags: Tag[] = [];
+      const tags: Tag[] = []
 
       if (data) {
         data.forEach((recipe) => {
           recipe.tags.forEach((tag) => {
             const tagExists = tags.some(
               (existingTag) => existingTag.tag === tag.tag
-            );
+            )
 
             if (!tagExists) {
               tags.push({
                 id: genId(),
                 tag: tag.tag,
-              });
+              })
             }
-          });
-        });
+          })
+        })
       }
 
       if (error) {
-        setError(error.message);
+        setError(error.message)
       }
 
-      setIsLoading(false);
-      setUniqueTags(tags);
-    };
+      setIsLoading(false)
+      setUniqueTags(tags)
+    }
 
-    getTags();
-  }, []);
+    getTags()
+  }, [])
 
   return {
     error,
     isLoading,
     uniqueTags,
-  };
+  }
 }
