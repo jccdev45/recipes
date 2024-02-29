@@ -4,9 +4,13 @@ import { maxAmount, minAmount } from "../constants"
 
 const sharedFields = {
   auth: {
-    email: z.string().email({ message: "Must be a valid email" }),
+    email: z
+      .string({ invalid_type_error: "Invalid email" })
+      .email({ message: "Must be a valid email" }),
     password: z
-      .string()
+      .string({
+        invalid_type_error: "Invalid password",
+      })
       .min(8, { message: "Password must be at least 8 characters" })
       .max(32, { message: "Password must be less than 32 characters" })
       .regex(/[a-z]/, {
@@ -15,7 +19,10 @@ const sharedFields = {
       .regex(/[A-Z]/, {
         message: "Password must contain at least one uppercase letter",
       })
-      .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least one special character",
+      }),
   },
   user: {
     first_name: z

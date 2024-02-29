@@ -39,6 +39,7 @@
     "next": "latest",
     "next-themes": "^0.2.1",
     "number2fraction": "^1.1.1",
+    "obscenity": "^0.2.0",
     "query-string": "^8.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",

@@ -15,7 +15,7 @@ export function StepBoxImStuck({ className, id, step }: StepPropsImStuck) {
     <li
       // key={id}
       className={cn(
-        `flex cursor-pointer items-center rounded-md transition-colors duration-200 p-2`,
+        `flex cursor-pointer items-center rounded-md p-2 transition-colors duration-200`,
         className,
         isChecked ? `bg-green-300 line-through` : `hover:bg-gray-300/80 `
       )}
@@ -24,7 +24,7 @@ export function StepBoxImStuck({ className, id, step }: StepPropsImStuck) {
       <Checkbox checked={isChecked} className="m-0" />
       <Label
         // htmlFor={id}
-        className="m-0 text-base cursor-pointer"
+        className="m-0 cursor-pointer text-base"
         onClick={() => setIsChecked((isChecked) => !isChecked)}
       >
         {step}

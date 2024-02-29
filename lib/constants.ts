@@ -1,25 +1,62 @@
 export const apiUrl =
   process.env.NODE_ENV === "development"
     ? `http://localhost:3000/api`
-    : `https://family-recipes-v2.vercel.app/api`;
+    : `https://family-recipes-v2.vercel.app/api`
 
-export const userFormItems = [
+export const loginFormItems = [
   {
-    id: 1,
+    type: "email",
+    fieldName: "email",
+    placeholder: "what@mark.com",
+    label: "Email",
+    required: true,
+  },
+  {
+    type: "password",
+    fieldName: "password",
+    placeholder: "********",
+    label: "Password",
+    required: true,
+  },
+] as const
+
+export const registerFormItems = [
+  {
+    type: "text",
     fieldName: "first_name",
     placeholder: "Mark",
     label: "First Name",
+    required: true,
   },
-  { id: 2, fieldName: "last_name", placeholder: "Jobber", label: "Last Name" },
-  { id: 3, fieldName: "email", placeholder: "what@mark.com", label: "Email" },
-  { id: 4, fieldName: "password", placeholder: "********", label: "Password" },
   {
-    id: 5,
+    type: "text",
+    fieldName: "last_name",
+    placeholder: "Jobber",
+    label: "Last Name",
+    required: false,
+  },
+  {
+    type: "email",
+    fieldName: "email",
+    placeholder: "what@mark.com",
+    label: "Email",
+    required: true,
+  },
+  {
+    type: "password",
+    fieldName: "password",
+    placeholder: "********",
+    label: "Password",
+    required: true,
+  },
+  {
+    type: "password",
     fieldName: "confirm_password",
     placeholder: "********",
     label: "Confirm Password",
+    required: true,
   },
-];
+] as const
 
-export const minAmount = 0.1;
-export const maxAmount = 1000;
+export const minAmount = 0.1
+export const maxAmount = 1000

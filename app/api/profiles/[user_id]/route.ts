@@ -1,19 +1,13 @@
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { getOne } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
-// import { createClient } from "@/supabase/server"
-
-import { Database, Recipe } from "@/supabase/types"
-
-// export const dynamic = "force-dynamic";
+import { Recipe } from "@/supabase/types"
 
 export async function GET(
   request: Request,
   { params }: { params: { user_id: string } }
 ) {
-  // const supabase = createRouteHandlerClient<Database>({ cookies });
-  const supabase = createClient(cookies())
+  const supabase = createClient()
   const queryParams = {
     filters: {
       column: "id",

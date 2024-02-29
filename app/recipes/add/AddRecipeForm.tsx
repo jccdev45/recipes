@@ -185,16 +185,16 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
-          `rounded-lg md:p-6 bg-background dark:bg-stone-900 gap-y-6`,
+          `gap-y-6 rounded-lg bg-background dark:bg-stone-900 md:p-6`,
           className
         )}
       >
-        <div className="grid grid-cols-1 col-span-1 lg:grid-cols-2">
+        <div className="col-span-1 grid grid-cols-1 lg:grid-cols-2">
           <FormField
             control={control}
             name="recipe_name"
             render={({ field }) => (
-              <FormItem className="w-full col-span-2 lg:col-span-1">
+              <FormItem className="col-span-2 w-full lg:col-span-1">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
@@ -211,7 +211,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             control={form.control}
             name="quote"
             render={({ field }) => (
-              <FormItem className="w-full col-span-2 lg:col-span-1">
+              <FormItem className="col-span-2 w-full lg:col-span-1">
                 <FormLabel>Quote</FormLabel>
                 <FormControl>
                   <Input
@@ -226,14 +226,14 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="h-1 col-span-1 my-2 rounded-lg" />
+        <Separator className="col-span-1 my-2 h-1 rounded-lg" />
 
         <div className="col-span-1 space-y-6">
           <div className="">
             {ingFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid items-end w-full grid-cols-4 gap-2 lg:grid-cols-8">
+                  <div className="grid w-full grid-cols-4 items-end gap-2 lg:grid-cols-8">
                     {/* NOTE: AMOUNT */}
                     <Controller
                       control={control}
@@ -252,7 +252,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                               min={minAmount}
                               max={maxAmount}
                               placeholder="0.0"
-                              className="col-span-1 p-2 border border-border"
+                              className="col-span-1 border border-border p-2"
                               {...field}
                               {...register(
                                 `ingredients.${index}.amount` as const,
@@ -314,7 +314,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                             <Input
                               {...field}
                               placeholder="sugar"
-                              className="col-span-1 p-2 border border-border"
+                              className="col-span-1 border border-border p-2"
                             />
                           </FormControl>
                           <FormMessage />
@@ -356,14 +356,14 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          <Separator className="h-1 my-2 rounded-lg" />
+          <Separator className="my-2 h-1 rounded-lg" />
 
           {/* NOTE: STEPS FIELD ARRAY */}
           <div className="">
             {stepFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid items-end w-full grid-cols-1 lg:grid-cols-8 lg:gap-x-2">
+                  <div className="grid w-full grid-cols-1 items-end lg:grid-cols-8 lg:gap-x-2">
                     <Controller
                       control={control}
                       name={`steps.${index}.step`}
@@ -377,7 +377,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                           <FormControl>
                             <Input
                               placeholder="Boil water, eat it"
-                              className="p-2 border border-border"
+                              className="border border-border p-2"
                               {...field}
                             />
                           </FormControl>
@@ -390,7 +390,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       type="button"
                       variant="destructive"
                       className={cn(
-                        `col-span-1 w-1/4 ml-auto lg:w-full`,
+                        `col-span-1 ml-auto w-1/4 lg:w-full`,
                         stepFieldArray.fields.length === 1 &&
                           `cursor-not-allowed`
                       )}
@@ -418,14 +418,14 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             </Button>
           </div>
 
-          <Separator className="h-1 my-2 rounded-lg" />
+          <Separator className="my-2 h-1 rounded-lg" />
 
           {/* NOTE: TAGS FIELD ARRAY */}
           <div className="">
             {tagFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid items-end w-full grid-cols-1 lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
+                  <div className="grid w-full grid-cols-1 items-end lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
                     <Controller
                       control={control}
                       name={`tags.${index}.tag`}
@@ -438,7 +438,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                           </FormLabel>
                           <TagCombobox
                             uniqueTags={uniqueTags}
-                            className="w-full mx-auto"
+                            className="mx-auto w-full"
                             field={field}
                             form={form}
                             update={update}
@@ -453,7 +453,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                       type="button"
                       variant="destructive"
                       className={cn(
-                        `col-span-1 w-1/4 ml-auto lg:w-full`,
+                        `col-span-1 ml-auto w-1/4 lg:w-full`,
                         tagFieldArray.fields.length === 1 &&
                           `cursor-not-allowed`
                       )}
@@ -490,7 +490,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
               <FileInput
                 onFileChange={handleImageUpload}
                 className={cn(
-                  `px-2 py-4 border rounded-md border-border`,
+                  `rounded-md border border-border px-2 py-4`,
                   recipeError && `border-destructive`
                 )}
                 type="recipe"
@@ -519,7 +519,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           type="submit"
           disabled={!isSubmittable}
           className={cn(
-            `w-1/4 md:w-1/5 ml-auto`,
+            `ml-auto w-1/4 md:w-1/5`,
             !isSubmittable && `cursor-not-allowed`
           )}
         >

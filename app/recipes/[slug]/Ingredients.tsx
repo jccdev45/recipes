@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Ingredient } from "@/supabase/types"
 import { ArrowDown, ArrowUp } from "lucide-react"
 import { number2fraction } from "number2fraction"

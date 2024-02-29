@@ -1,5 +1,4 @@
 import { Metadata, ResolvingMetadata } from "next"
-import { cookies } from "next/headers"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
@@ -10,7 +9,6 @@ import { Edit, UserCircle2 } from "lucide-react"
 
 import { apiUrl } from "@/lib/constants"
 import { shimmer, toBase64 } from "@/lib/utils"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
 import {
   TypographyH2,
@@ -45,7 +43,7 @@ export default async function ProfilePage({
 }: {
   params: { user_id: string }
 }) {
-  const supabase = createClient(cookies())
+  const supabase = createClient()
   const { data } = await supabase.auth.getUser()
 
   if (!data.user) {

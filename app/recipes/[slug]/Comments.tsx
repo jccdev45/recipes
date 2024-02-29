@@ -8,7 +8,7 @@ import { getAll } from "@/supabase/helpers"
 import { Comment as CommentType } from "@/supabase/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@supabase/supabase-js"
-import { Heart, UserCircle2 } from "lucide-react"
+import { UserCircle2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 
 import { cn } from "@/lib/utils"
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/form"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
-import { TypographyH4, TypographyP } from "@/components/ui/typography"
+import { TypographyP } from "@/components/ui/typography"
 
 type CommentsSectionProps = {
   className: string

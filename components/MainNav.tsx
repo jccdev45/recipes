@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { AvatarProps } from "@radix-ui/react-avatar"
-import { User } from "@supabase/supabase-js"
+import type { User } from "@supabase/supabase-js"
 import {
   ChefHat,
   Edit,

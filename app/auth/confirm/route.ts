@@ -1,30 +1,45 @@
 import { cookies } from "next/headers"
-import { NextResponse, type NextRequest } from "next/server"
-import { createClient } from "@/supabase/server"
-import { type EmailOtpType } from "@supabase/supabase-js"
+import { NextRequest, NextResponse } from "next/server"
+import type { Database } from "@/supabase/types"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import type { EmailOtpType } from "@supabase/supabase-js"
+
+import { getURL } from "@/app/(auth)/actions"
 
 export async function GET(request: NextRequest) {
-  const cookieStore = cookies()
-
   const { searchParams } = new URL(request.url)
   const token_hash = searchParams.get("token_hash")
   const type = searchParams.get("type") as EmailOtpType | null
   const next = searchParams.get("next") ?? "/"
-
   const redirectTo = request.nextUrl.clone()
   redirectTo.pathname = next
-  redirectTo.searchParams.delete("token_hash")
-  redirectTo.searchParams.delete("type")
 
   if (token_hash && type) {
-    const supabase = createClient(cookieStore)
+    const cookieStore = cookies()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...options })
+          },
+          remove(name: string, options: CookieOptions) {
+            cookieStore.delete({ name, ...options })
+          },
+        },
+      }
+    )
 
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
+      options: { redirectTo: getURL() },
     })
     if (!error) {
-      redirectTo.searchParams.delete("next")
       return NextResponse.redirect(redirectTo)
     }
   }

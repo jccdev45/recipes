@@ -1,4 +1,3 @@
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { getOne } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
@@ -10,7 +9,7 @@ export async function GET(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
-  const supabase = createClient(cookies())
+  const supabase = createClient()
 
   const queryParams = {
     filters: {
