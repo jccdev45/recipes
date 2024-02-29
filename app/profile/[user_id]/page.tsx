@@ -1,19 +1,25 @@
+import { Suspense } from "react"
 import { Metadata, ResolvingMetadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 import { getAll } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
 import { Recipe, User } from "@/supabase/types"
-import { Edit, UserCircle2 } from "lucide-react"
+import { User2, UserCircle, UserCircle2 } from "lucide-react"
 
 import { apiUrl } from "@/lib/constants"
-import { shimmer, toBase64 } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
-  TypographyH2,
+  TypographyH1,
   TypographyH3,
   TypographyH4,
+  TypographyLarge,
+  TypographyLead,
+  TypographyMuted,
+  TypographySmall,
 } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/GradientBanner"
 import { RecipeCard } from "@/app/recipes/RecipeCard"
@@ -34,7 +40,7 @@ export async function generateMetadata(
   return {
     title: `${
       user?.first_name ? user.first_name : user.user_id
-    } | profile | ${previousTitle}`,
+    }'s profile | ${previousTitle}`,
   }
 }
 
@@ -63,83 +69,91 @@ export default async function ProfilePage({
     supabase
   )
 
-  const { first_name, last_name, avatar_url, created_at, last_updated } =
-    ((await user.json()) as User) || {}
+  const { first_name, last_name, avatar_url }: User = await user.json()
 
   return (
-    <section className="h-full">
+    <div className="mx-auto space-y-4">
       <GradientBanner />
 
-      {!user && notFound()}
-
-      {user && (
-        <div className="mx-auto flex w-5/6 flex-col justify-between md:px-8">
-          {/* TODO: add change avatar dialog */}
-          <div className="w-full -translate-y-1/4">
-            <div className="h-24 w-24">
-              {/* <AspectRatio ratio={1 / 1}> */}
-              {avatar_url ? (
-                <Image
-                  src={avatar_url}
-                  width={200}
-                  height={200}
+      <div className="mx-auto grid grid-cols-1 gap-8 bg-gray-100 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
+        <section className="space-y-6">
+          <header className="space-y-4">
+            <TypographyH1>My Profile</TypographyH1>
+            <TypographyLead>
+              Manage your profile information here
+            </TypographyLead>
+          </header>
+          <div className="space-y-8">
+            <div className="flex items-center space-x-4">
+              <Avatar className="aspect-square size-20 border">
+                <AvatarImage
                   alt={`${first_name} ${last_name}`}
-                  className="aspect-square size-24 rounded-full border-2 border-foreground object-cover"
-                  placeholder="blur"
-                  blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                    shimmer(96, 96)
-                  )}`}
+                  src={avatar_url ? avatar_url : `https://placehold.co/100`}
                 />
-              ) : (
-                <UserCircle2 />
-              )}
-              {/* </AspectRatio> */}
+                <AvatarFallback>AC</AvatarFallback>
+              </Avatar>
+              <div className="text-sm">
+                <TypographyH4 className="font-semibold">
+                  {first_name} {last_name}
+                </TypographyH4>
+                <TypographyLead className="text-base">
+                  {data.user.email}
+                </TypographyLead>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 ">
+              <TypographyMuted>Joined</TypographyMuted>
+              <TypographySmall className="col-span-2">
+                {new Date(data.user.created_at).toLocaleDateString("en-US")}
+              </TypographySmall>
+              <TypographyMuted>Last login</TypographyMuted>
+              <TypographySmall className="col-span-2">
+                {new Date(data.user.last_sign_in_at!).toLocaleDateString(
+                  "en-US"
+                )}
+              </TypographySmall>
             </div>
 
-            {/* TODO: ADJUST TYPOGRAPHY & LAYOUT */}
-            <TypographyH2>
-              {first_name} {last_name}
-            </TypographyH2>
-            {data.user?.id === user_id && (
-              <TypographyH4>Email: {data.user?.email}</TypographyH4>
-            )}
-
-            {created_at && (
-              <TypographyH4>
-                Joined: {new Date(created_at).toLocaleDateString("en-US")}
-              </TypographyH4>
-            )}
-
-            <Button asChild>
-              <Link href={`/profile/${user_id}/edit`} className="my-4 flex">
-                <Edit /> Edit Profile
+            <Button asChild variant="outline" className="gap-4">
+              <Link href={`/profile/${user_id}/edit`}>
+                <UserCircle /> Edit Profile
               </Link>
             </Button>
           </div>
-          <TypographyH3>
-            Recipes:
-            {/* {first_name ? `Recipes by: ${first_name}` : ``} */}
-          </TypographyH3>
-          <aside className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {recipes?.length ? (
-              recipes.map((recipe) => {
-                return (
-                  <RecipeCard
-                    key={recipe.id}
-                    className="col-span-1 mx-auto w-full"
-                    recipe={recipe}
-                  />
-                )
-              })
-            ) : (
-              <>
-                This is where {first_name}'s recipes would be...
-                <em>IF THEY ADDED ANY</em>
-              </>
-            )}
-          </aside>
-        </div>
-      )}
-    </section>
+        </section>
+        <section className="space-y-6 lg:space-y-10">
+          <Card>
+            <CardHeader className="p-4">
+              <TypographyH3 className="text-lg font-bold">
+                Recipes by me:
+              </TypographyH3>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
+                <Suspense fallback={<RecipesFallback />}>
+                  {recipes?.length ? (
+                    recipes?.map((recipe) => (
+                      <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))
+                  ) : (
+                    <TypographyLarge>No recipes yet</TypographyLarge>
+                  )}
+                </Suspense>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+function RecipesFallback() {
+  return (
+    <>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+    </>
   )
 }

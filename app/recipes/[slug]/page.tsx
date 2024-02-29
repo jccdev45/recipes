@@ -1,4 +1,4 @@
-import { Metadata, ResolvingMetadata } from "next"
+import type { Metadata, ResolvingMetadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -8,7 +8,6 @@ import { Recipe } from "@/supabase/types"
 
 import { apiUrl } from "@/lib/constants"
 import { shimmer, toBase64 } from "@/lib/utils"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -22,12 +21,12 @@ import { CommentsSection } from "@/app/recipes/[slug]/Comments"
 import { Ingredients } from "./Ingredients"
 import { Steps } from "./Steps"
 
-type Props = {
+type RecipePageProps = {
   params: { slug: string }
 }
 
 export async function generateMetadata(
-  { params: { slug } }: Props,
+  { params: { slug } }: RecipePageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   // fetch data
@@ -36,11 +35,13 @@ export async function generateMetadata(
   const previousTitle = (await parent).title?.absolute || ""
 
   return {
-    title: `${recipe?.recipe_name} | ${previousTitle}${recipe?.recipe_name}`,
+    title: `${recipe?.recipe_name} | ${previousTitle}`,
   }
 }
 
-export default async function RecipePage({ params: { slug } }: Props) {
+export default async function RecipePage({
+  params: { slug },
+}: RecipePageProps) {
   const res = await fetch(`${apiUrl}/recipes/${slug}`)
   const recipe: Recipe = await res.json()
 
@@ -64,104 +65,72 @@ export default async function RecipePage({ params: { slug } }: Props) {
   } = recipe
 
   return (
-    <section className="size-full">
+    <div className="space-y-4 px-4">
       <GradientBanner />
 
-      <div className="-translate-y-16 p-4 md:-translate-y-24">
-        <div className="flex flex-col items-center lg:flex-row lg:justify-center">
-          <div className="mx-auto h-full w-5/6 rounded-lg lg:w-2/5">
-            <AspectRatio ratio={5 / 4}>
-              <Image
-                src={img || "http://unsplash.it/g/300/300?gravity=center"}
-                alt={recipe_name || "Generic fallback"}
-                fill
-                className="m-0 h-auto w-auto rounded-lg object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                placeholder="blur"
-                blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                  shimmer(444, 355)
-                )}`}
-              />
-            </AspectRatio>
-          </div>
-          <div className="h-full w-full flex-col items-center justify-center text-center lg:w-1/2">
+      <div className="flex flex-col gap-8">
+        <header className="grid grid-cols-1 md:grid-cols-2">
+          <div className="my-auto grid h-fit place-items-center">
             <TypographyH1>{recipe_name}</TypographyH1>
-            <TypographyBlockquote className="flex flex-col items-center md:flex-row md:justify-center md:gap-x-2">
-              "{quote}"
-              <figure className="flex items-center justify-center gap-x-4">
-                {user_id ? (
-                  <Link
-                    href={`/profile/${user_id}`}
-                    className="flex items-center text-lg underline"
-                  >
-                    <figcaption>- {author}</figcaption>
-                  </Link>
-                ) : (
-                  author
-                )}
-                {/* <UserCircle2 /> */}
-              </figure>
-            </TypographyBlockquote>
-            <TypographyList className="flex items-center justify-center gap-x-1">
+            <TypographyBlockquote>{quote}</TypographyBlockquote>
+
+            {user_id ? (
+              <Link
+                href={`/profile/${user_id}`}
+                className="inline-flex items-center text-lg underline"
+              >
+                - {author}
+              </Link>
+            ) : (
+              author
+            )}
+            <TypographyList className="space-x-2">
               {tags.map(({ id, tag }) => (
                 <Badge key={id}>{tag}</Badge>
               ))}
             </TypographyList>
           </div>
+
+          <Image
+            src={img || "http://unsplash.it/g/300/300?gravity=center"}
+            alt={recipe_name || "Generic fallback"}
+            width={450}
+            height={325}
+            className="mx-auto shadow shadow-foreground"
+            placeholder="blur"
+            blurDataURL={`data:image/svg+xml;base64,${toBase64(
+              shimmer(450, 325)
+            )}`}
+          />
+        </header>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
+          <section>
+            {ingredients && (
+              <Ingredients
+                ingredients={ingredients}
+                className="col-span-full flex flex-col lg:col-span-1"
+              />
+            )}
+          </section>
+          <section>
+            {steps && (
+              <Steps
+                steps={steps}
+                className="col-span-full flex flex-col lg:col-span-1"
+              />
+            )}
+          </section>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          {ingredients && (
-            <Ingredients
-              ingredients={ingredients}
-              className="col-span-full flex flex-col lg:col-span-1"
-            />
-          )}
-          {steps && (
-            <Steps
-              steps={steps}
-              className="col-span-full flex flex-col lg:col-span-1"
-            />
-          )}
-        </div>
-        <Separator className="my-2 h-1 rounded-lg bg-slate-400" />
+
+        <Separator />
+
         <CommentsSection
           currentUser={user!}
           recipe_id={id}
           className="flex w-full max-w-full flex-col"
         />
       </div>
-    </section>
+    </div>
   )
 }
-
-// function RecipeFallback() {
-//   return (
-//     <div className="w-full h-full">
-//       <div className="flex flex-col items-center justify-between lg:flex-row gap-y-4 lg:justify-center">
-//         <div className="w-5/6 h-full mx-auto rounded-lg lg:w-1/3">
-//           <Skeleton className="w-[316px] h-[253px] mx-auto" />
-//         </div>
-//         <div className="flex-col items-center w-full mx-auto gap-y-4 lg:w-1/2">
-//           <Skeleton className="h-6 mx-auto w-52" />
-//           <Skeleton className="h-12 mx-auto w-52" />
-//           <div className="flex items-center justify-center gap-x-2">
-//             {Array.from({ length: 3 }).map((_, index) => (
-//               <Skeleton key={index} className="w-16 h-6" />
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="grid grid-cols-1 mt-8 h-96 lg:grid-cols-2">
-//         {Array.from({ length: 2 }).map((_, index) => (
-//           <div
-//             key={index}
-//             className="w-full h-full col-span-full lg:col-span-1"
-//           >
-//             <Skeleton className="w-5/6 h-full mx-auto" />
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   )
-// }

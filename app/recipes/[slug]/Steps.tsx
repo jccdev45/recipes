@@ -1,9 +1,12 @@
+"use client"
+
+import { ReactNode, useState } from "react"
 import { Step } from "@/supabase/types"
 
 import { cn } from "@/lib/utils"
-import { TypographyH3, TypographyList } from "@/components/ui/typography"
-
-import { StepBoxImStuck } from "./StepBoxImStuck"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { TypographyH2, TypographyList } from "@/components/ui/typography"
 
 type StepsProps = {
   className: string
@@ -13,13 +16,40 @@ type StepsProps = {
 export function Steps({ steps, className }: StepsProps) {
   return (
     <div className={cn(``, className)}>
-      <TypographyH3>Steps</TypographyH3>
+      <TypographyH2>Steps</TypographyH2>
       {/* TODO: ADD DRAGGABLE */}
       <TypographyList className="flex flex-col">
         {steps.map(({ id, step }) => (
-          <StepBoxImStuck key={id} step={step} className="space-x-2" />
+          <StepBoxImStuck key={id} id={id}>
+            {step}
+          </StepBoxImStuck>
         ))}
       </TypographyList>
     </div>
+  )
+}
+
+type StepPropsImStuck = { id?: string; children: ReactNode }
+
+function StepBoxImStuck({ id, children }: StepPropsImStuck) {
+  const [isChecked, setIsChecked] = useState(false)
+
+  return (
+    <li
+      className={cn(
+        `flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors duration-200`,
+        isChecked ? `bg-secondary line-through` : `hover:bg-muted`
+      )}
+      onClick={() => setIsChecked((isChecked) => !isChecked)}
+    >
+      <Checkbox name={id} id={id} checked={isChecked} className="m-0" />
+      <Label
+        htmlFor={id}
+        className="m-0 cursor-pointer text-base"
+        onClick={() => setIsChecked((isChecked) => !isChecked)}
+      >
+        {children}
+      </Label>
+    </li>
   )
 }
