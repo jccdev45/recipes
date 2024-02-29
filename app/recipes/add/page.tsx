@@ -1,31 +1,30 @@
-import Cooking2 from "/public/images/Cooking2.svg";
-import Image from "next/image";
-import { redirect } from "next/navigation";
+import Image from "next/image"
+import { redirect } from "next/navigation"
+import { createClient } from "@/supabase/server"
 
-import { GradientBanner } from "@/components/GradientBanner";
-import { createClient } from "@/supabase/server";
+import { GradientBanner } from "@/components/GradientBanner"
 
-import { AddRecipeForm } from "./AddRecipeForm";
-import { cookies } from "next/headers";
+import { AddRecipeForm } from "./AddRecipeForm"
+import Cooking2 from "/public/images/Cooking2.svg"
 
 export default async function AddRecipePage() {
-  const supabase = createClient(cookies());
+  const supabase = createClient()
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   return (
     <section>
       <GradientBanner />
 
-      <div className="grid grid-cols-1 px-4 -translate-y-20 gap-y-4 lg:gap-0 lg:grid-cols-5 lg:-translate-y-20">
+      <div className="grid -translate-y-20 grid-cols-1 gap-y-4 px-4 lg:-translate-y-20 lg:grid-cols-5 lg:gap-0">
         <AddRecipeForm
-          className="grid order-last w-full max-w-4xl grid-cols-1 col-span-1 p-4 mx-auto lg:ml-auto md:col-span-3 lg:w-5/6"
+          className="order-last col-span-1 mx-auto grid w-full max-w-4xl grid-cols-1 p-4 md:col-span-3 lg:ml-auto lg:w-5/6"
           user={user}
         />
 
@@ -35,10 +34,10 @@ export default async function AddRecipePage() {
             alt="Cartoonish depiction of two people whisking a bowl (not sure why it takes two but okay)"
             width={300}
             height={300}
-            className="w-5/6 mx-auto translate-x-0 lg:translate-x-8 md:w-2/3"
+            className="mx-auto w-5/6 translate-x-0 md:w-2/3 lg:translate-x-8"
           />
         </div>
       </div>
     </section>
-  );
+  )
 }

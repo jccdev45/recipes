@@ -1,30 +1,24 @@
 import { Suspense } from "react"
-import { cookies } from "next/headers"
 import Image from "next/image"
 import Link from "next/link"
 import { getAll } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
 import { Recipe } from "@/supabase/types"
 
-import { shimmer, toBase64 } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   TypographyH1,
   TypographyH2,
-  TypographyH4,
   TypographyLarge,
-  TypographyP,
-  TypographySmall,
 } from "@/components/ui/typography"
 import { RecipeCard } from "@/app/recipes/RecipeCard"
 
 import CookingSvg from "/public/images/CookingSvg.svg"
 
 export default async function Index() {
-  const supabase = createClient(cookies())
-  // const user = await getAuthUser(supabase)
+  const supabase = createClient()
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -39,23 +33,8 @@ export default async function Index() {
   const data = (await getAll({ db: "recipes", params }, supabase)) as Recipe[]
 
   return (
-    <section className="w-full">
-      {/* <div className="relative h-40 aspect-auto md:h-48 lg:h-64">
-        <Image
-          src="https://eebioglnufbnareanhqf.supabase.co/storage/v1/object/public/photos/banner-full.jpeg"
-          alt="Medina Family Banner"
-          fill
-          priority
-          // sizes="(max-width: 768px) 100vw"
-          className="object-cover object-top lg:object-contain"
-          placeholder="blur"
-          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-            shimmer(1000, 250)
-          )}`}
-        />
-      </div> */}
-
-      <div className="flex flex-col items-center gap-y-4 px-4 py-10 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
+    <div className="mx-auto w-full max-w-6xl">
+      <section className="flex flex-col items-center gap-y-4 px-4 py-10 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
         <div className="my-6 flex w-full flex-col items-start justify-center gap-2 px-8 md:my-0 md:w-1/3">
           <TypographyH1 className="max-w-max rounded-md dark:bg-black/80">
             Welcome!
@@ -85,34 +64,66 @@ export default async function Index() {
             className="contain"
           />
         </div>
-      </div>
+      </section>
 
-      {/* <Separator className="w-5/6 h-2 mx-auto my-8 rounded-lg bg-foreground" /> */}
+      <section className="w-full py-6 md:py-12 lg:py-16">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <div className="w-2/3 space-y-2">
+            <TypographyH2 className="text-center">
+              Family Recipes,{" "}
+              <span className="bg-gradient-to-r from-[#EF0000] via-white to-[#004EF1] bg-clip-text text-transparent">
+                Puerto Rican
+              </span>{" "}
+              style
+            </TypographyH2>
+            <p className="md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Discover the authentic flavors of Puerto Rican cuisine. Our
+              collection of family recipes captures the essence of the island's
+              culinary traditions. From pernil to arroz con gandules, each
+              recipe tells a story of heritage and home-cooked goodness.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <Button asChild>
+              <Link className="" href="/recipes">
+                View Recipes
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link className="" href="/recipes/add">
+                Add Recipe
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-      <div className="p-2">
-        <TypographyH2 className="my-4 text-center">Get a taste:</TypographyH2>
+      <section className="p-2">
+        <TypographyH2 className="my-4 text-center">
+          Featured recipes:
+        </TypographyH2>
         <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1">
           <Suspense fallback={<RecipesFallback />}>
             {data?.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                className="col-span-1 mx-auto w-11/12"
+                className="col-span-1 mx-auto w-5/6"
               />
             ))}
           </Suspense>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }
 
 function RecipesFallback() {
   return (
     <>
-      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-11/12"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
     </>
   )
 }

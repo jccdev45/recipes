@@ -1,4 +1,3 @@
-import { cookies } from "next/headers"
 import Image from "next/image"
 import { redirect } from "next/navigation"
 import { getAuthUser } from "@/supabase/helpers"
@@ -10,7 +9,7 @@ import { RegisterForm } from "@/app/(auth)/login/RegisterForm"
 import AccountInfoSvg from "/public/images/AccountInfo.svg"
 
 export default async function EditProfilePage() {
-  const supabase = createClient(cookies())
+  const supabase = createClient()
   const user = (await getAuthUser(supabase)) || null
 
   if (!user) {

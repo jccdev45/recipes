@@ -1,11 +1,19 @@
 import Image from "next/image"
+import Link from "next/link"
 
+import { registerFormItems } from "@/lib/constants"
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { TypographyH2 } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/GradientBanner"
-import { LoginForm } from "@/app/(auth)/login/login-form"
+import { signup } from "@/app/(auth)/actions"
+import { AuthButton } from "@/app/(auth)/auth-button"
+import { SignupForm } from "@/app/(auth)/signup/signup-form"
 
 import AuthSvg from "/public/images/Login.svg"
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   return (
     <div className="h-full">
       <GradientBanner />
@@ -19,7 +27,7 @@ export default async function LoginPage() {
           height={500}
         />
 
-        <LoginForm />
+        <SignupForm />
       </section>
     </div>
   )

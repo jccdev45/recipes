@@ -2,29 +2,29 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Loading() {
   return (
-    <div className="w-full h-full">
-      <div className="flex flex-col items-center justify-between lg:flex-row gap-y-4 lg:justify-center">
-        <div className="w-5/6 h-full mx-auto rounded-lg lg:w-1/3">
-          <Skeleton className="w-[316px] h-[253px] mx-auto" />
+    <div className="h-full w-full">
+      <div className="flex flex-col items-center justify-between gap-y-4 lg:flex-row lg:justify-center">
+        <div className="mx-auto h-full w-5/6 rounded-lg lg:w-1/3">
+          <Skeleton className="mx-auto h-[253px] w-[316px]" />
         </div>
-        <div className="flex-col items-center w-full mx-auto gap-y-4 lg:w-1/2">
-          <Skeleton className="h-6 mx-auto w-52" />
-          <Skeleton className="h-12 mx-auto w-52" />
+        <div className="mx-auto w-full flex-col items-center gap-y-4 lg:w-1/2">
+          <Skeleton className="mx-auto h-6 w-52" />
+          <Skeleton className="mx-auto h-12 w-52" />
           <div className="flex items-center justify-center gap-x-2">
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className="w-16 h-6" />
+              <Skeleton key={index} className="h-6 w-16" />
             ))}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 mt-8 h-96 lg:grid-cols-2">
+      <div className="mt-8 grid h-96 grid-cols-1 lg:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (
           <div
             key={index}
-            className="w-full h-full col-span-full lg:col-span-1"
+            className="col-span-full h-full w-full lg:col-span-1"
           >
-            <Skeleton className="w-5/6 h-full mx-auto" />
+            <Skeleton className="mx-auto h-full w-5/6" />
           </div>
         ))}
       </div>

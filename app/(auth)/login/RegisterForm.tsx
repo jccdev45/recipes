@@ -9,7 +9,7 @@ import { User } from "@supabase/supabase-js"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { userFormItems } from "@/lib/constants"
+import { registerFormItems } from "@/lib/constants"
 import { cn, trimAvatarUrl } from "@/lib/utils"
 import { RegisterFormValues, RegisterSchema } from "@/lib/zod/schema"
 import {
@@ -231,39 +231,34 @@ export function RegisterForm({
           {type === "register" ? `Sign Up` : `Edit Profile`}
         </TypographyH3>
         <div className="grid auto-cols-auto gap-2">
-          {userFormItems.map(({ id, fieldName, placeholder, label }) => (
-            <FormField
-              key={id}
-              control={form.control}
-              // TODO: FIX THIS TYPE WEIRDNESS
-              name={
-                fieldName as
-                  | "first_name"
-                  | "last_name"
-                  | "email"
-                  | "confirm_password"
-                  | "password"
-              }
-              render={({ field }) => (
-                <FormItem
-                  className={cn(
-                    "col-span-2 lg:col-span-1",
-                    fieldName === "email" && `lg:col-span-2`
-                  )}
-                >
-                  <FormLabel>{label}</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="mb-6 rounded-md border bg-inherit px-4 py-2 shadow-inner"
-                      placeholder={placeholder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+          {registerFormItems.map(
+            ({ fieldName, placeholder, label, type, required }) => (
+              <FormField
+                key={fieldName}
+                control={form.control}
+                name={fieldName}
+                render={({ field }) => (
+                  <FormItem
+                    className={cn(
+                      "col-span-2 lg:col-span-1",
+                      fieldName === "email" && `lg:col-span-2`
+                    )}
+                  >
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type={type}
+                        className="mb-6 rounded-md border bg-inherit px-4 py-2 shadow-inner"
+                        placeholder={placeholder}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )
+          )}
         </div>
 
         {imgURL.length > 0 ? (

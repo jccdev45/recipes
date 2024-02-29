@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Heart, Linkedin, UtensilsCrossed } from "lucide-react"
+import { Heart, UtensilsCrossed } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { TypographyP } from "@/components/ui/typography"
@@ -10,8 +10,8 @@ export function Footer({ className }: { className?: string }) {
       <div className="mx-auto flex flex-col flex-wrap px-5 md:flex-row md:flex-nowrap md:items-center lg:items-start">
         <div className="mx-auto mt-10 w-64 flex-shrink-0 text-center md:mx-0 md:mt-0 md:text-left">
           <div className="title-font flex items-center justify-center font-medium md:justify-start">
-            <UtensilsCrossed className="h-20 w-20" />
-            <span className="ml-3 text-xl">Medina Family Recipes</span>
+            <UtensilsCrossed className="size-12" />
+            <span className="ml-3 text-xl">Family Recipes</span>
           </div>
         </div>
         <div className="order-first -mb-10 flex flex-grow flex-wrap text-center md:pr-20 md:text-left">
@@ -40,22 +40,6 @@ export function Footer({ className }: { className?: string }) {
             <Heart className="ml-1 bg-gradient-to-br from-red-500 to-red-800 bg-clip-text fill-red-800 no-underline" />
           </Link>
         </TypographyP>
-        <span className="inline-flex justify-center gap-x-2">
-          <Link
-            className="large"
-            href="https://www.github.com/jccdev45"
-            target="_blank"
-          >
-            <Github />
-          </Link>
-          <Link
-            className="large"
-            href="https://www.linkedin.com/in/jordan-cruz-correa"
-            target="_blank"
-          >
-            <Linkedin />
-          </Link>
-        </span>
       </div>
     </footer>
   )

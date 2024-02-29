@@ -1,5 +1,4 @@
 import { Metadata, ResolvingMetadata } from "next"
-import { cookies } from "next/headers"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -37,7 +36,7 @@ export async function generateMetadata(
   const previousTitle = (await parent).title?.absolute || ""
 
   return {
-    title: `${previousTitle} | ${recipe?.recipe_name}`,
+    title: `${recipe?.recipe_name} | ${previousTitle}${recipe?.recipe_name}`,
   }
 }
 
@@ -45,7 +44,7 @@ export default async function RecipePage({ params: { slug } }: Props) {
   const res = await fetch(`${apiUrl}/recipes/${slug}`)
   const recipe: Recipe = await res.json()
 
-  const supabase = createClient(cookies())
+  const supabase = createClient()
   const user = await getAuthUser(supabase)
 
   {
@@ -65,7 +64,7 @@ export default async function RecipePage({ params: { slug } }: Props) {
   } = recipe
 
   return (
-    <section className="h-full w-full">
+    <section className="size-full">
       <GradientBanner />
 
       <div className="-translate-y-16 p-4 md:-translate-y-24">
