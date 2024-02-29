@@ -229,7 +229,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         <Separator className="col-span-1 my-2 h-1 rounded-lg" />
 
         <div className="col-span-1 space-y-6">
-          <div className="">
+          <div>
             {ingFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
@@ -359,7 +359,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           <Separator className="my-2 h-1 rounded-lg" />
 
           {/* NOTE: STEPS FIELD ARRAY */}
-          <div className="">
+          <div>
             {stepFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>
@@ -421,7 +421,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           <Separator className="my-2 h-1 rounded-lg" />
 
           {/* NOTE: TAGS FIELD ARRAY */}
-          <div className="">
+          <div>
             {tagFieldArray.fields.map((feeld, index) => {
               return (
                 <div className="flex items-center gap-y-4" key={feeld?.id}>

@@ -26,20 +26,23 @@ export default async function RecipesPage({
   }
 
   return (
-    <section className="h-full">
-      <GradientBanner />
+    <>
+      <GradientBanner
+        text={search ? `Showing results for ${search}` : "Recipes"}
+      />
 
-      <div className="mx-auto flex h-full w-5/6 max-w-6xl -translate-y-32 flex-col gap-y-8 py-16 md:py-0">
-        <div className="grid grid-cols-1 gap-2 gap-y-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
+      {/* TODO: Combine */}
+      <section className="mx-auto flex h-full w-5/6 max-w-6xl -translate-y-8 flex-col gap-y-8 py-16 md:py-0">
+        <div className="grid grid-cols-1 gap-2 gap-y-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {recipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              className="col-span-1 hover:scale-[1.01]"
+              className="col-span-1 duration-100 hover:translate-x-baseX hover:translate-y-baseY hover:shadow-none"
             />
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

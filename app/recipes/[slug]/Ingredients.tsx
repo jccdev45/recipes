@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  TypographyH3,
+  TypographyH2,
   TypographyList,
   TypographyP,
 } from "@/components/ui/typography"
@@ -32,7 +32,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
 
   return (
     <div className={cn(``, className)}>
-      <TypographyH3>Ingredients</TypographyH3>
+      <TypographyH2>Ingredients</TypographyH2>
       <TypographyP>
         Enter a serving amount or use the arrows to adjust by 1/2 (servings are
         *very* approximated as not all recipes were recorded with serving size,
@@ -87,7 +87,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                     ? `${unitMeasurement}s`
                     : unitMeasurement}
               </span>
-              <span className="">{ingredient}</span>
+              <span>{ingredient}</span>
             </Label>
           </li>
         ))}

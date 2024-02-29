@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
+import { TypographyH2 } from "@/components/ui/typography"
 
-export function GradientBanner() {
+export function GradientBanner({ text }: { text?: string }) {
   const complementaryColors = {
     // {
     //   color1: "from-red-300 dark:from-red-900",
@@ -38,21 +39,21 @@ export function GradientBanner() {
     // },
     // {
     // }
-  };
+  }
 
   const light = {
-    // color1: "from-pink-300 dark:from-pink-900",
-    // color2: "via-rose-300 dark:via-rose-900",
-    // color3: "to-red-300 dark:to-red-900",
-
     color1: "from-sky-200 dark:from-sky-950",
     color2: "via-blue-200 dark:via-blue-950",
     color3: "to-indigo-200 dark:to-indigo-950",
 
+    color4: "from-pink-500 dark:from-pink-700",
+    color5: "via-rose-500 dark:via-rose-700",
+    color6: "to-red-500 dark:to-red-700",
+
     // color1: "from-violet-300 dark:from-violet-900",
     // color2: "via-purple-300 dark:via-purple-900",
     // color3: "to-fuchsia-300 dark:to-fuchsia-900",
-  };
+  }
 
   const dark = {
     color1: "from-zinc-400 dark:from-zinc-800",
@@ -62,24 +63,30 @@ export function GradientBanner() {
     // color1: "from-slate-400 dark:from-slate-800",
     // color2: "via-gray-400 dark:via-gray-800",
     // color3: "to-zinc-400 dark:to-zinc-800",
-  };
+  }
 
-  const colorLight1 = light.color1;
-  const colorLight2 = light.color2;
-  const colorLight3 = light.color3;
-  const colorLight = `${colorLight1} ${colorLight2} ${colorLight3}`;
+  const colorLight1 = light.color1
+  const colorLight2 = light.color2
+  const colorLight3 = light.color3
+  const colorLight = `${colorLight1} ${colorLight2} ${colorLight3}`
+  // const colorLight = `from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] dark:via-white dark:to-[#004EF1]`
 
-  const colorDark1 = dark.color1;
-  const colorDark2 = dark.color2;
-  const colorDark3 = dark.color3;
-  const colorDark = `${colorDark1} ${colorDark2} ${colorDark3}`;
+  const colorDark1 = dark.color1
+  const colorDark2 = dark.color2
+  const colorDark3 = dark.color3
+  const colorDark = `${colorDark1} ${colorDark2} ${colorDark3}`
+
+  const colorText = `${light.color4} ${light.color5} ${light.color6}`
 
   return (
     <div
       className={cn(
-        `w-full rounded-sm h-32 max-h-[8rem] md:h-52 md:max-h-[13rem] bg-gradient-to-l`,
-        `${colorLight}`
+        `grid h-32 max-h-[8rem] w-full place-items-center rounded-sm bg-gradient-to-r md:h-52 md:max-h-[13rem]`,
+        // colorLight
+        `from-primary to-primary/90`
       )}
-    ></div>
-  );
+    >
+      {text && <TypographyH2>{text}</TypographyH2>}
+    </div>
+  )
 }

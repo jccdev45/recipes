@@ -12,7 +12,7 @@ import { TypographyLarge, TypographySmall } from "@/components/ui/typography"
 
 type RecipeCardProps = {
   recipe: Recipe
-  className: string
+  className?: string
 }
 
 export function RecipeCard({ recipe, className }: RecipeCardProps) {
@@ -70,7 +70,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             {user_id ? (
               <Link
                 href={`/profile/${user_id}`}
-                className="mr-auto block transition-all duration-300 ease-in-out hover:underline"
+                className="mr-auto block w-fit transition-all duration-300 ease-in-out hover:underline"
               >
                 {author}
               </Link>
