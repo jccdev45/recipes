@@ -17,10 +17,10 @@ export default async function EditProfilePage() {
   }
 
   return (
-    <section className="">
+    <>
       <GradientBanner />
 
-      <div className="grid -translate-y-[12%] grid-cols-1 gap-y-4 md:-translate-y-1/4 md:grid-cols-3 md:gap-0">
+      <section className="grid -translate-y-[12%] grid-cols-1 gap-y-4 md:-translate-y-1/4 md:grid-cols-3 md:gap-0">
         <div className="relative -z-10 col-span-1 mx-auto hidden h-3/4 w-2/3 rounded-lg md:block md:w-5/6">
           <Image
             src={AccountInfoSvg}
@@ -36,7 +36,7 @@ export default async function EditProfilePage() {
           user={user}
           className="col-span-1 mx-auto flex w-5/6 flex-1 flex-col gap-2 p-4 md:col-span-2 md:w-3/4"
         />
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

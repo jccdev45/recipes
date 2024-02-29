@@ -131,7 +131,6 @@ export function CommentsSection({
                 <FormLabel>Leave a comment</FormLabel>
                 <FormControl>
                   <Textarea
-                    className=""
                     disabled={!currentUser}
                     placeholder={
                       currentUser
@@ -147,7 +146,6 @@ export function CommentsSection({
           />
 
           <Button
-            type="submit"
             className="my-2 ml-auto"
             disabled={!currentUser || !isSubmittable}
           >
@@ -267,7 +265,7 @@ function Comment({ comment, currentUser }: CommentProps) {
           )}
           onClick={handleLike}
         />
-        <span className="">{liked}</span>
+        <span>{liked}</span>
       </div> */}
 
       {currentUser?.id === user_id && (

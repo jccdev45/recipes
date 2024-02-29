@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useFormState } from "react-dom"
-import { toast } from "sonner"
+
+// import { toast } from "sonner"
 
 import { registerFormItems } from "@/lib/constants"
 import { cn } from "@/lib/utils"
@@ -57,7 +58,6 @@ export function SignupForm() {
                 type={type}
                 placeholder={placeholder}
                 required={required}
-                className=""
               />
             </div>
           )
