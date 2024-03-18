@@ -26,7 +26,7 @@ export default async function Index() {
   const params = {
     order: {
       column: "id",
-      options: { ascending: false },
+      options: { ascending: true },
     },
     limit: 3,
   }
@@ -110,7 +110,7 @@ export default async function Index() {
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                className="col-span-1 mx-auto w-5/6"
+                className="col-span-1 mx-auto w-3/4 md:w-5/6"
               />
             ))}
           </Suspense>

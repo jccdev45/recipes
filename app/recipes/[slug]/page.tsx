@@ -66,10 +66,8 @@ export default async function RecipePage({
 
   return (
     <div className="space-y-4 px-4">
-      <GradientBanner />
-
       <div className="flex flex-col gap-8">
-        <header className="grid grid-cols-1 md:grid-cols-2">
+        <header className="grid grid-cols-1 bg-primary/30 py-4 md:grid-cols-2">
           <div className="my-auto grid h-fit place-items-center">
             <TypographyH1>{recipe_name}</TypographyH1>
             <TypographyBlockquote>{quote}</TypographyBlockquote>

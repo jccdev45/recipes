@@ -39,7 +39,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
           )}`}
         />
       </AspectRatio>
-      <div className="absolute left-0 top-0 flex w-full max-w-fit p-2">
+      <div className="absolute left-0 top-0 flex w-full max-w-fit flex-wrap gap-0.5 p-2">
         {tags.map(({ tag, id }) => (
           <Badge key={id} className="mx-1">
             {tag}
@@ -47,7 +47,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
         ))}
       </div>
 
-      <div className="absolute inset-x-0 bottom-1 mx-auto w-11/12 rounded-md bg-slate-800/70 p-3 text-white drop-shadow-md backdrop-blur dark:text-foreground">
+      <div className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded-md bg-primary/70 px-3 py-1.5 text-center text-white drop-shadow-md backdrop-blur dark:text-foreground lg:px-12">
         <div className="flex items-center justify-between">
           <TypographyLarge>
             <Link
