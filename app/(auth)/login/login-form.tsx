@@ -1,7 +1,6 @@
 "use client"
 
 import { Fragment } from "react"
-import Link from "next/link"
 import { useFormState } from "react-dom"
 import { toast } from "sonner"
 
@@ -18,27 +17,21 @@ const initialState = {
 }
 
 export function LoginForm() {
-  const [state, formAction] = useFormState(login, initialState)
+  // const [state, formAction] = useFormState(login, initialState)
 
-  // const renderErrors =
-  //   state && state.errors
-  //     ? Object.keys(state.errors).map((key) => {
-  //         // TODO: Fix this 😩
-  //         // @ts-ignore
-  //         if (state.errors[key] && state.errors[key]?.length) {
-  //           // @ts-ignore
-  //           return state.errors[key].map((error) =>
-  //             // <p key={`${key}-${error}`}>{error}</p>
-  //             toast.error(error)
-  //           )
-  //         }
-  //       })
-  //     : null
+  // Display errors as toast notifications
+  // if (state?.errors) {
+  //   Object.entries(state.errors).forEach(([key, errors]) => {
+  //     if (Array.isArray(errors)) {
+  //       errors.forEach((error) => toast.error(error))
+  //     }
+  //   })
+  // }
 
   return (
     <form
       className="w-full border bg-background p-8 shadow md:px-24"
-      action={formAction}
+      autoComplete="off"
     >
       <fieldset className="flex flex-col items-start gap-4">
         <TypographyH2 className="mx-auto w-2/3 text-center">Login</TypographyH2>
@@ -57,32 +50,23 @@ export function LoginForm() {
             />
           </Fragment>
         ))}
-        <div aria-live="polite">
-          {!state?.errors ? (
-            <p>{state?.message}</p>
+        {/* <div aria-live="polite">
+          {state?.errors ? (
+            Object.entries(state.errors).map(([field, errors]) =>
+              Array.isArray(errors)
+                ? errors.map((error) => (
+                    <p key={`${field}-${error}`} className="text-red-500">
+                      {error}
+                    </p>
+                  ))
+                : null
+            )
           ) : (
-            Object.entries(state?.errors)
+            <p>{state?.message}</p>
           )}
-        </div>
-        <AuthButton
-          label="Login"
-          // formAction={formAction}
-          // onClick={() => {
-          //   if (state?.message || state?.errors) {
-          //     toast.error("There was a problem with the request", {
-          //       description: state.message,
-          //     })
-          //   }
-          // }}
-        />
+        </div> */}
+        <AuthButton label="Login" action={login} />
       </fieldset>
-
-      <Link
-        href="/signup"
-        className="text-foreground/90 underline transition-colors duration-100 ease-in-out hover:text-foreground"
-      >
-        Need an account?
-      </Link>
     </form>
   )
 }

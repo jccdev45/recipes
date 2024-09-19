@@ -57,7 +57,7 @@ export default function useUnits() {
   }, [])
 
   return {
-    loading,
+    unitLoading: loading,
     units,
   }
 }

@@ -48,7 +48,7 @@ export default function useUniqueTags() {
 
   return {
     error,
-    isLoading,
+    tagLoading: isLoading,
     uniqueTags,
   }
 }

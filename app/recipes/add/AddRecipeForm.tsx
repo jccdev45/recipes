@@ -5,7 +5,16 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@supabase/supabase-js"
-import { Plus } from "lucide-react"
+import { CommandEmpty, CommandGroup, CommandInput, CommandItem } from "cmdk"
+import {
+  Beef,
+  Check,
+  ChevronsUpDown,
+  Command,
+  ListOrdered,
+  Plus,
+  Tags,
+} from "lucide-react"
 import {
   Controller,
   SubmitHandler,
@@ -20,6 +29,7 @@ import { cn, genId, toSlug } from "@/lib/utils"
 import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema"
 import useUniqueTags from "@/hooks/useTags"
 import useUnits from "@/hooks/useUnits"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -31,12 +41,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { TagCombobox } from "@/app/recipes/add/TagCombobox"
 
@@ -65,8 +73,8 @@ type AddRecipeFormProps = {
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const supabase = createClient()
   const router = useRouter()
-  const { uniqueTags, isLoading, error } = useUniqueTags()
-  const { units, loading } = useUnits()
+  const { uniqueTags, tagLoading, error } = useUniqueTags()
+  const { units, unitLoading } = useUnits()
 
   const [imgURL, setImgURL] = useState("")
   const [recipeError, setRecipeError] = useState("")
@@ -109,8 +117,20 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     control,
   })
 
-  const update = (index: number, obj: { id: string; tag: string }) => {
-    tagFieldArray.update(index, obj)
+  const updateUnits = (
+    index: number,
+    ingredient?: {
+      id: string
+      amount: number
+      unitMeasurement: string
+      ingredient: string
+    }
+  ) => {
+    ingFieldArray.update(index, ingredient!)
+  }
+
+  const updateTags = (index: number, tag?: { id: string; tag: string }) => {
+    tagFieldArray.update(index, tag!)
   }
 
   const handleImageUpload = async (file: File | null) => {
@@ -183,19 +203,17 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   return (
     <Form {...form}>
       <form
+        noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn(
-          `gap-y-6 rounded-lg bg-background dark:bg-stone-900 md:p-6`,
-          className
-        )}
+        className={cn(`rounded-lg bg-muted md:p-6`, className)}
       >
-        <div className="col-span-1 grid grid-cols-1 lg:grid-cols-2">
+        <div className="col-span-1 grid grid-cols-1 gap-2 lg:grid-cols-2">
           <FormField
             control={control}
             name="recipe_name"
             render={({ field }) => (
               <FormItem className="col-span-2 w-full lg:col-span-1">
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Recipe Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Chicken Parm"
@@ -226,294 +244,345 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="col-span-1 my-2 h-1 rounded-lg" />
+        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
 
-        <div className="col-span-1 space-y-6">
-          <div>
-            {ingFieldArray.fields.map((feeld, index) => {
-              return (
-                <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid w-full grid-cols-4 items-end gap-2 lg:grid-cols-8">
-                    {/* NOTE: AMOUNT */}
-                    <Controller
-                      control={control}
-                      name={`ingredients.${index}.amount`}
-                      render={({ field }) => (
-                        <FormItem className="col-span-1 lg:col-span-1">
-                          <FormLabel
-                            className={index === 0 ? `block` : `hidden`}
-                          >
-                            Amount
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step={0.1}
-                              min={minAmount}
-                              max={maxAmount}
-                              placeholder="0.0"
-                              className="col-span-1 border border-border p-2"
-                              {...field}
-                              {...register(
-                                `ingredients.${index}.amount` as const,
-                                {
-                                  valueAsNumber: true,
-                                }
-                              )}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* NOTE: UNIT */}
-                    <Controller
-                      control={control}
-                      name={`ingredients.${index}.unitMeasurement`}
-                      // {({ field: { onChange, onBlur, value, ref }, formState, fieldState })
-                      render={({ field }) => (
-                        <FormItem className="col-span-3 lg:col-span-2">
-                          <FormLabel
-                            className={index === 0 ? `block` : `hidden`}
-                          >
-                            Unit Measurement
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a measurement" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {units.map((unit) => (
-                                <SelectItem key={unit} value={unit}>
-                                  {unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* NOTE: ING */}
-                    <Controller
-                      control={control}
-                      name={`ingredients.${index}.ingredient`}
-                      render={({ field }) => (
-                        <FormItem className="col-span-3 lg:col-span-4">
-                          <FormLabel
-                            className={index === 0 ? `block` : `hidden`}
-                          >
-                            Ingredient
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="sugar"
-                              className="col-span-1 border border-border p-2"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+        <Alert>
+          <Beef />
+          <AlertTitle className="text-lg font-bold">Ingredient</AlertTitle>
+          <AlertDescription>
+            Adjust your numerical amount, select your unit type and add the name
+            of the ingredient.
+          </AlertDescription>
+        </Alert>
 
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className={cn(
-                        `col-span-1`,
-                        ingFieldArray.fields.length === 1 &&
-                          `cursor-not-allowed`
-                      )}
-                      onClick={() => ingFieldArray.remove(index)}
-                      disabled={ingFieldArray.fields.length === 1}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-            <Button
-              type="button"
-              className="mx-auto my-4"
-              onClick={() =>
-                ingFieldArray.append({
-                  id: genId(),
-                  ingredient: "",
-                  amount: 0,
-                  unitMeasurement: "",
-                })
-              }
-            >
-              <Plus />
-              Add Ingredient
-            </Button>
-          </div>
-
-          <Separator className="my-2 h-1 rounded-lg" />
-
-          {/* NOTE: STEPS FIELD ARRAY */}
-          <div>
-            {stepFieldArray.fields.map((feeld, index) => {
-              return (
-                <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid w-full grid-cols-1 items-end lg:grid-cols-8 lg:gap-x-2">
-                    <Controller
-                      control={control}
-                      name={`steps.${index}.step`}
-                      render={({ field }) => (
-                        <FormItem className="col-span-3 lg:col-span-7">
-                          <FormLabel
-                            className={index === 0 ? `block` : `hidden`}
-                          >
-                            Recipe Steps
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Boil water, eat it"
-                              className="border border-border p-2"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className={cn(
-                        `col-span-1 ml-auto w-1/4 lg:w-full`,
-                        stepFieldArray.fields.length === 1 &&
-                          `cursor-not-allowed`
-                      )}
-                      onClick={() => stepFieldArray.remove(index)}
-                      disabled={stepFieldArray.fields.length === 1}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-            <Button
-              type="button"
-              className="mx-auto my-4"
-              onClick={() =>
-                stepFieldArray.append({
-                  id: genId(),
-                  step: "",
-                })
-              }
-            >
-              <Plus />
-              Add Step
-            </Button>
-          </div>
-
-          <Separator className="my-2 h-1 rounded-lg" />
-
-          {/* NOTE: TAGS FIELD ARRAY */}
-          <div>
-            {tagFieldArray.fields.map((feeld, index) => {
-              return (
-                <div className="flex items-center gap-y-4" key={feeld?.id}>
-                  <div className="grid w-full grid-cols-1 items-end lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
-                    <Controller
-                      control={control}
-                      name={`tags.${index}.tag`}
-                      render={({ field }) => (
-                        <FormItem className="col-span-6">
-                          <FormLabel
-                            className={index === 0 ? `block` : `hidden`}
-                          >
-                            Tags
-                          </FormLabel>
-                          <TagCombobox
-                            uniqueTags={uniqueTags}
-                            className="mx-auto w-full"
-                            field={field}
-                            form={form}
-                            update={update}
-                            index={index}
+        <div>
+          {ingFieldArray.fields.map((feeld, index) => {
+            return (
+              <div className="flex items-center gap-y-4" key={feeld?.id}>
+                <div className="grid w-full grid-cols-4 items-end gap-2 lg:grid-cols-8">
+                  {/* NOTE: AMOUNT */}
+                  <Controller
+                    control={control}
+                    name={`ingredients.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-1 lg:col-span-1">
+                        <FormLabel className={index === 0 ? `block` : `hidden`}>
+                          Amount
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step={0.1}
+                            min={minAmount}
+                            max={maxAmount}
+                            placeholder="0.0"
+                            className="col-span-1 border border-border p-2"
+                            {...field}
+                            {...register(
+                              `ingredients.${index}.amount` as const,
+                              {
+                                valueAsNumber: true,
+                              }
+                            )}
                           />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* NOTE: UNIT */}
+                  <Controller
+                    control={control}
+                    name={`ingredients.${index}.unitMeasurement`}
+                    // {({ field: { onChange, onBlur, value, ref }, formState, fieldState })
+                    render={({ field }) => (
+                      <FormItem className="col-span-3 w-full lg:col-span-2">
+                        <FormLabel className={index === 0 ? `block` : `hidden`}>
+                          Unit Measurement
+                        </FormLabel>
 
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className={cn(
-                        `col-span-1 ml-auto w-1/4 lg:w-full`,
-                        tagFieldArray.fields.length === 1 &&
-                          `cursor-not-allowed`
-                      )}
-                      onClick={() => tagFieldArray.remove(index)}
-                      disabled={tagFieldArray.fields.length === 1}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-            <Button
-              type="button"
-              className={cn(
-                `col-span-1 my-4`,
-                tagFieldArray.fields.length >= 5 && `hover:cursor-not-allowed`
-              )}
-              onClick={() =>
-                tagFieldArray.append({
-                  id: genId(),
-                  tag: "",
-                })
-              }
-              disabled={tagFieldArray.fields.length >= 5}
-            >
-              <Plus />
-              Add Tag
-            </Button>
-          </div>
+                        <TagCombobox
+                          className="mx-auto w-full"
+                          field={field}
+                          index={index}
+                          items={units}
+                          update={updateUnits}
+                        />
 
-          {nameForImage && (
-            <>
-              <FileInput
-                onFileChange={handleImageUpload}
-                className={cn(
-                  `rounded-md border border-border px-2 py-4`,
-                  recipeError && `border-destructive`
-                )}
-                type="recipe"
-              />
-              {uploadError && <p className="text-destructive">{uploadError}</p>}
-              {recipeError && (
-                <p className="text-destructive">
-                  {recipeError}
+                        {/* <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? units.find((item) => item === field.value)
+                                  : "Select item"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0">
+                            <Command>
+                              <CommandInput placeholder="Search unit..." />
+                              <CommandEmpty>No unit found.</CommandEmpty>
+                              <CommandGroup>
+                                {units.map((item) => (
+                                  <CommandItem
+                                    value={item}
+                                    key={item}
+                                    onSelect={field.onChange}
+                                    defaultValue={field.value}
+                                    // onSelect={() => {
+                                    //   form.setValue("", item)
+                                    // }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        item === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {item}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* NOTE: ING */}
+                  <Controller
+                    control={control}
+                    name={`ingredients.${index}.ingredient`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-3 lg:col-span-4">
+                        <FormLabel className={index === 0 ? `block` : `hidden`}>
+                          Ingredient
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="sugar"
+                            className="col-span-1 w-full border border-border p-2"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <Button
-                    className="mx-4"
-                    variant="default"
-                    onClick={() => {
-                      setRecipeError("")
-                      setIsConfirmed(true)
-                    }}
+                    type="button"
+                    variant="destructive"
+                    className={cn(
+                      `col-span-1`,
+                      ingFieldArray.fields.length === 1 && `cursor-not-allowed`
+                    )}
+                    onClick={() => ingFieldArray.remove(index)}
+                    disabled={ingFieldArray.fields.length === 1}
                   >
-                    Continue
+                    Delete
                   </Button>
-                </p>
-              )}
-            </>
-          )}
+                </div>
+              </div>
+            )
+          })}
+          <Button
+            type="button"
+            className="mx-auto my-4"
+            onClick={() =>
+              ingFieldArray.append({
+                id: genId(),
+                ingredient: "",
+                amount: 0,
+                unitMeasurement: "",
+              })
+            }
+          >
+            <Plus />
+            Add Ingredient
+          </Button>
         </div>
+
+        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
+
+        <Alert>
+          <ListOrdered />
+          <AlertTitle className="text-lg font-bold">Steps</AlertTitle>
+          <AlertDescription>
+            Add your recipe's instructions here. Try to break your steps up into
+            clear, concise parts - line by line.
+          </AlertDescription>
+        </Alert>
+
+        {/* NOTE: STEPS FIELD ARRAY */}
+        <div>
+          {stepFieldArray.fields.map((feeld, index) => {
+            return (
+              <div className="flex items-center gap-y-4" key={feeld?.id}>
+                <div className="grid w-full grid-cols-1 items-end lg:grid-cols-8 lg:gap-x-2">
+                  <Controller
+                    control={control}
+                    name={`steps.${index}.step`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-3 lg:col-span-7">
+                        {/* <FormLabel className={index === 0 ? `block` : `hidden`}>
+                          Recipe Steps
+                        </FormLabel> */}
+                        <FormControl>
+                          <Input
+                            placeholder="Boil water, eat it"
+                            className="border border-border p-2"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className={cn(
+                      `col-span-1 ml-auto w-1/4 lg:w-full`,
+                      stepFieldArray.fields.length === 1 && `cursor-not-allowed`
+                    )}
+                    onClick={() => stepFieldArray.remove(index)}
+                    disabled={stepFieldArray.fields.length === 1}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )
+          })}
+          <Button
+            type="button"
+            className="mx-auto my-4"
+            onClick={() =>
+              stepFieldArray.append({
+                id: genId(),
+                step: "",
+              })
+            }
+          >
+            <Plus />
+            Add Step
+          </Button>
+        </div>
+
+        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
+
+        <Alert>
+          <Tags />
+          <AlertTitle className="text-lg font-bold">Tags</AlertTitle>
+          <AlertDescription>
+            Select from existing tags or add your own. This will help with
+            searching and organizing recipes. Nobody likes a messy kitchen.
+          </AlertDescription>
+        </Alert>
+
+        {/* NOTE: TAGS FIELD ARRAY */}
+        <div>
+          {tagFieldArray.fields.map((feeld, index) => {
+            return (
+              <div className="flex items-center gap-y-4" key={feeld?.id}>
+                <div className="grid w-full grid-cols-1 items-end lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
+                  <Controller
+                    control={control}
+                    name={`tags.${index}.tag`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-6">
+                        {/* <FormLabel className={index === 0 ? `block` : `hidden`}>
+                          Tags
+                        </FormLabel> */}
+                        <TagCombobox
+                          className="mx-auto w-full"
+                          field={field}
+                          index={index}
+                          items={uniqueTags}
+                          update={updateTags}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className={cn(
+                      `col-span-1 ml-auto w-1/4 lg:w-full`,
+                      tagFieldArray.fields.length === 1 && `cursor-not-allowed`
+                    )}
+                    onClick={() => tagFieldArray.remove(index)}
+                    disabled={tagFieldArray.fields.length === 1}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )
+          })}
+          <Button
+            type="button"
+            className={cn(
+              `col-span-1 my-4`,
+              tagFieldArray.fields.length >= 5 && `hover:cursor-not-allowed`
+            )}
+            onClick={() =>
+              tagFieldArray.append({
+                id: genId(),
+                tag: "",
+              })
+            }
+            disabled={tagFieldArray.fields.length >= 5}
+          >
+            <Plus />
+            Add Tag
+          </Button>
+        </div>
+
+        {nameForImage && (
+          <>
+            <FileInput
+              onFileChange={handleImageUpload}
+              className={cn(
+                `rounded-md border border-border px-2 py-4`,
+                recipeError && `border-destructive`
+              )}
+              type="recipe"
+            />
+            {uploadError && <p className="text-destructive">{uploadError}</p>}
+            {recipeError && (
+              <p className="text-destructive">
+                {recipeError}
+                <Button
+                  className="mx-4"
+                  variant="default"
+                  onClick={() => {
+                    setRecipeError("")
+                    setIsConfirmed(true)
+                  }}
+                >
+                  Continue
+                </Button>
+              </p>
+            )}
+          </>
+        )}
 
         <Button
           type="submit"

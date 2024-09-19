@@ -47,7 +47,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
         ))}
       </div>
 
-      <div className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded-md bg-primary/70 px-3 py-1.5 text-center text-white drop-shadow-md backdrop-blur dark:text-foreground lg:px-12">
+      <div className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded-md bg-primary/70 px-3 py-1 text-center text-white drop-shadow-md backdrop-blur dark:text-foreground lg:px-6">
         <div className="flex items-center justify-between">
           <TypographyLarge>
             <Link

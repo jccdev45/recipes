@@ -1,5 +1,10 @@
 import { Recipe } from "@/supabase/types"
-import { SupabaseClient, User } from "@supabase/supabase-js"
+import { SupabaseClient, type User } from "@supabase/supabase-js"
+import {
+  englishDataset,
+  englishRecommendedTransformers,
+  RegExpMatcher,
+} from "obscenity"
 
 interface QueryParams {
   filters?: { column: string; value: any }
@@ -92,5 +97,16 @@ export async function searchRecipes(
   } catch (error) {
     console.error("Error: ", error)
     return null
+  }
+}
+
+export function checkProfamity(formData: FormData) {
+  const matcher = new RegExpMatcher({
+    ...englishDataset.build(),
+    ...englishRecommendedTransformers,
+  })
+
+  for (const pair of formData.entries()) {
+    return matcher.hasMatch(pair[1].toString())
   }
 }

@@ -1,21 +1,25 @@
 import Image from "next/image"
-import Link from "next/link"
+import { redirect } from "next/navigation"
+import { createClient } from "@/supabase/server"
 
-import { registerFormItems } from "@/lib/constants"
-import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { TypographyH2 } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/GradientBanner"
+import { UserProfileForm } from "@/components/user-profile-form"
 import { signup } from "@/app/(auth)/actions"
-import { AuthButton } from "@/app/(auth)/auth-button"
-import { SignupForm } from "@/app/(auth)/signup/signup-form"
 
 import AuthSvg from "/public/images/Login.svg"
 
 export default async function SignupPage() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect(`/profile/${user.id}`)
+  }
+
   return (
-    <div className="h-full">
+    <>
       <GradientBanner />
 
       <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:px-16 lg:grid-cols-2">
@@ -27,8 +31,8 @@ export default async function SignupPage() {
           height={500}
         />
 
-        <SignupForm />
+        <UserProfileForm title="Sign Up" formType="register" />
       </section>
-    </div>
+    </>
   )
 }

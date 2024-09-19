@@ -3,8 +3,6 @@ import { getOne } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
 import { Recipe } from "@/supabase/types"
 
-export const dynamic = "force-dynamic"
-
 export async function GET(
   request: Request,
   { params }: { params: { slug: string } }

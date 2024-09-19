@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { getAll } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
 import { Recipe, User } from "@/supabase/types"
-import { User2, UserCircle, UserCircle2 } from "lucide-react"
+import { UserCircle } from "lucide-react"
 
 import { apiUrl } from "@/lib/constants"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -38,9 +38,7 @@ export async function generateMetadata(
   const previousTitle = (await parent).title?.absolute || ""
 
   return {
-    title: `${
-      user?.first_name ? user.first_name : user.user_id
-    }'s profile | ${previousTitle}`,
+    title: `${user?.first_name ?? user?.user_id}'s profile | ${previousTitle}`,
   }
 }
 
@@ -69,13 +67,16 @@ export default async function ProfilePage({
     supabase
   )
 
-  const { first_name, last_name, avatar_url }: User = await user.json()
+  const userRes: User = await user.json()
+  const first_name = userRes?.first_name ?? `N/A`
+  const last_name = userRes?.last_name ?? `N/A`
+  const avatar_url = userRes?.avatar_url ?? `https://placehold.co/100`
 
   return (
     <div className="mx-auto space-y-4">
       <GradientBanner />
 
-      <div className="mx-auto grid grid-cols-1 gap-8 bg-gray-100 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
+      <div className="mx-auto grid grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
         <section className="space-y-6">
           <header className="space-y-4">
             <TypographyH1>My Profile</TypographyH1>
@@ -88,7 +89,7 @@ export default async function ProfilePage({
               <Avatar className="aspect-square size-20 border">
                 <AvatarImage
                   alt={`${first_name} ${last_name}`}
-                  src={avatar_url ? avatar_url : `https://placehold.co/100`}
+                  src={avatar_url}
                 />
                 <AvatarFallback>AC</AvatarFallback>
               </Avatar>

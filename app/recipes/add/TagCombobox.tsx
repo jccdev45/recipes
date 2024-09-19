@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { Tag } from "@/supabase/types"
+import { Ingredient, Tag } from "@/supabase/types"
 import { CheckIcon, ChevronsUpDown } from "lucide-react"
+import { ControllerRenderProps } from "react-hook-form"
 
 import { cn, genId } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,24 +19,40 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-type TagProps = {
+// type TagProps = {
+//   className: string
+//   field: any
+//   form: any
+//   index: number
+//   update: (index: number, obj: { id: string; tag: string }) => void
+//   uniqueTags: Tag[]
+// }
+type RecipeFormComboboxProps = {
   className: string
   field: any
-  form: any
   index: number
-  update: (index: number, obj: { id: string; tag: string }) => void
-  uniqueTags: Tag[]
+  update: (
+    index: number,
+    tag?: { id: string; tag: string },
+    ingredient?: {
+      id: string
+      amount: number
+      unitMeasurement: string
+      ingredient: string
+    }
+  ) => void
+  items: Array<Tag['tag'] | Ingredient["unitMeasurement"]>
 }
 
 export function TagCombobox({
   className,
   field,
-  form,
   index,
   update,
-  uniqueTags,
-}: TagProps) {
-  const [tagValue, setTagValue] = useState("")
+  items,
+}: RecipeFormComboboxProps) {
+  // const [tagValue, setTagValue] = useState("")
+  const [value, setValue] = useState("")
 
   return (
     <Popover>
@@ -43,7 +60,7 @@ export function TagCombobox({
         <FormControl>
           <Button variant="outline" className="justify-between" role="combobox">
             {field.value
-              ? uniqueTags.find(({ tag }) => tag === field.value)?.tag
+              ? items.find((item) => item === field.value)?.toString()
               : "Select tag..."}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -54,21 +71,22 @@ export function TagCombobox({
           <CommandInput className="h-9" placeholder="Search tags..." />
           <CommandEmpty>No tag found.</CommandEmpty>
           <CommandGroup>
-            {uniqueTags.map(({ tag, id }) => (
+            {items.map((item) => (
               <CommandItem
-                key={id}
-                value={tag}
+                key={item.toString()}
+                value={item.toString()}
                 onSelect={(currentValue) => {
-                  setTagValue(currentValue === tagValue ? "" : currentValue)
+                  setValue(currentValue === value ? "" : currentValue)
                   update(index, { id: genId(), tag: currentValue })
-                  // setTagOpen(false);
                 }}
               >
-                {tag}
+                {item.toString()}
                 <CheckIcon
                   className={cn(
                     "ml-auto h-4 w-4",
-                    tag === field.value ? "opacity-100" : "opacity-0"
+                    item.toString() === field.value
+                      ? "opacity-100"
+                      : "opacity-0"
                   )}
                 />
               </CommandItem>
