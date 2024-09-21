@@ -1,8 +1,7 @@
-import { Database } from "@/supabase/supabase-types"
-import { SupabaseClient } from "@supabase/supabase-js"
+import { TypedSupabaseClient } from "@/supabase/client"
 
 export function getUserWithRecipes(
-  client: SupabaseClient<Database>,
+  client: TypedSupabaseClient,
   userId: string
 ) {
   return client
