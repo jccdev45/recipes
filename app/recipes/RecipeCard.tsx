@@ -3,12 +3,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import type { Recipe } from "@/supabase/types"
 
 import { cn, shimmer, toBase64 } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
 import { TypographyLarge, TypographySmall } from "@/components/ui/typography"
+
+import type { Recipe } from "@/lib/types"
 
 type RecipeCardProps = {
   recipe: Recipe
