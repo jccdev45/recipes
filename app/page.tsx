@@ -1,10 +1,15 @@
 import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { getAll } from "@/supabase/helpers"
+import { getFeaturedRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
+import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query"
 
-import { Recipe } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -13,28 +18,19 @@ import {
   TypographyLead,
   TypographyP,
 } from "@/components/ui/typography"
-import { RecipeCard } from "@/app/recipes/RecipeCard"
+import { FeaturedRecipes } from "@/components/featured-recipes"
 
 import CookingSvg from "/public/images/CookingSvg.svg"
 
 export default async function Index() {
   const supabase = createClient()
+  const queryClient = new QueryClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const params = {
-    order: {
-      column: "id",
-      options: { ascending: true },
-    },
-    limit: 3,
-  }
-  // TODO: CHANGE ONCE PROPER TYPING IS ADDED TO GETALL
-  const data: Recipe[] | null = await getAll(
-    { db: "recipes", params },
-    supabase
-  )
+
+  await prefetchQuery(queryClient, getFeaturedRecipes(supabase))
 
   return (
     <>
@@ -106,13 +102,9 @@ export default async function Index() {
         </TypographyH2>
         <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1">
           <Suspense fallback={<RecipesFallback />}>
-            {data?.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                className="col-span-1 mx-auto w-3/4 md:w-5/6"
-              />
-            ))}
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              <FeaturedRecipes />
+            </HydrationBoundary>
           </Suspense>
         </div>
       </section>
