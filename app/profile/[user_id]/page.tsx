@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { getUserWithRecipes } from "@/queries/get-user-with-recipes"
+import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import {

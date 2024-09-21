@@ -1,4 +1,4 @@
-import { getRecipes } from "@/queries/get-recipes"
+import { getRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { QueryClient } from "@tanstack/react-query"

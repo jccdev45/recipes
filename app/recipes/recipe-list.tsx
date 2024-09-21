@@ -1,6 +1,6 @@
 "use client"
 
-import { getRecipes } from "@/queries/get-recipes"
+import { getRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 
@@ -18,7 +18,7 @@ export function RecipeList() {
   const recipes = data as unknown as Recipe[]
 
   return (
-    <section className="flex flex-col w-5/6 h-full max-w-6xl py-16 mx-auto -translate-y-8 gap-y-8 md:py-0">
+    <section className="mx-auto flex h-full w-5/6 max-w-6xl -translate-y-8 flex-col gap-y-8 py-16 md:py-0">
       <div className="grid grid-cols-1 gap-2 gap-y-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
         {!recipes ? (
           <div></div>

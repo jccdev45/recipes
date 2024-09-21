@@ -2,7 +2,7 @@
 
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
-import { getUserWithRecipes } from "@/queries/get-user-with-recipes"
+import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { Link, Loader2, UserCircle } from "lucide-react"
@@ -28,7 +28,7 @@ import type { User } from "@supabase/supabase-js"
 function ProfileInfo({ user }: { user: UserWithRecipes }) {
   return (
     <div className="flex items-center space-x-4">
-      <Avatar className="border aspect-square size-20">
+      <Avatar className="aspect-square size-20 border">
         <AvatarImage
           alt={`${user.first_name} ${user.last_name}`}
           src={user.avatar_url ?? "https://placehold.co/80"}
@@ -82,7 +82,7 @@ function RecipesFallback() {
   return (
     <>
       {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="w-5/6 col-span-1 mx-auto" />
+        <Skeleton key={i} className="col-span-1 mx-auto w-5/6" />
       ))}
     </>
   )
@@ -116,7 +116,7 @@ export function UserProfile({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 p-4 mx-auto backdrop-blur-md md:grid-cols-2 lg:p-6">
+    <div className="mx-auto grid grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
       <section className="space-y-6">
         <header className="space-y-4">
           <TypographyH1>Profile</TypographyH1>
