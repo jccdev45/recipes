@@ -1,10 +1,13 @@
-import { Recipe } from "@/supabase/types"
-import { SupabaseClient, type User } from "@supabase/supabase-js"
+import { SupabaseClient } from "@supabase/supabase-js"
 import {
   englishDataset,
   englishRecommendedTransformers,
   RegExpMatcher,
 } from "obscenity"
+
+import { Recipe } from "@/lib/types"
+
+import type { User } from "@supabase/supabase-js"
 
 interface QueryParams {
   filters?: { column: string; value: any }
@@ -48,6 +51,7 @@ export async function getAll(
     let query = supabase.from(db).select(column && column)
     if (params) {
       if (params.filters) {
+        // supabase.from("recipes").select('user_id').eq('user_id', user_id)
         query = query.eq(params.filters.column, params.filters.value)
       }
       if (params.order) {

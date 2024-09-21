@@ -1,6 +1,9 @@
-import { Ingredient } from "@/supabase/types"
-import { ClassValue, clsx } from "clsx"
+import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+
+import { Ingredient } from "@/lib/types"
+
+import type { ClassValue } from "clsx"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

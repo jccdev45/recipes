@@ -3,8 +3,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { getAll } from "@/supabase/helpers"
 import { createClient } from "@/supabase/server"
-import { Recipe } from "@/supabase/types"
 
+import { Recipe } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
