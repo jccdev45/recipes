@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Ingredient } from "@/supabase/types"
 import { ArrowDown, ArrowUp, Info } from "lucide-react"
 import { number2fraction } from "number2fraction"
 
+import { Ingredient } from "@/lib/types"
 import { cn, scaleIngredients } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {

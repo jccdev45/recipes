@@ -1,8 +1,8 @@
 "use client"
 
 import { ReactNode, useState } from "react"
-import { Step } from "@/supabase/types"
 
+import { Step } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
