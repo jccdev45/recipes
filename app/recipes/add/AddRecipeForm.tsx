@@ -5,22 +5,12 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@supabase/supabase-js"
-import { CommandEmpty, CommandGroup, CommandInput, CommandItem } from "cmdk"
-import {
-  Beef,
-  Check,
-  ChevronsUpDown,
-  Command,
-  ListOrdered,
-  Plus,
-  Tags,
-} from "lucide-react"
+import { Beef, ListOrdered } from "lucide-react"
 import {
   Controller,
   SubmitHandler,
   useFieldArray,
   useForm,
-  UseFormProps,
 } from "react-hook-form"
 import * as z from "zod"
 
@@ -40,30 +30,10 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { TagCombobox } from "@/app/recipes/add/TagCombobox"
+import { FormCombobox } from "@/app/recipes/add/form-combobox"
 
 import { FileInput } from "./ImageUpload"
-
-function useZodForm<TSchema extends z.ZodType>(
-  props: Omit<UseFormProps<TSchema["_input"]>, "resolver"> & {
-    schema: TSchema
-  }
-) {
-  const form = useForm<TSchema["_input"]>({
-    ...props,
-    resolver: zodResolver(props.schema, undefined, {
-      raw: true,
-    }),
-  })
-
-  return form
-}
 
 type AddRecipeFormProps = {
   className: string
@@ -73,17 +43,26 @@ type AddRecipeFormProps = {
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const supabase = createClient()
   const router = useRouter()
-  const { uniqueTags, tagLoading, error } = useUniqueTags()
-  const { units, unitLoading } = useUnits()
 
+  // NOTE: React Query hooks
+  const {
+    data: uniqueTags,
+    isLoading: tagLoading,
+    error: tagError,
+  } = useUniqueTags()
+  const { data: units, isLoading: unitLoading, error: unitError } = useUnits()
+
+  // Form state
   const [imgURL, setImgURL] = useState("")
   const [recipeError, setRecipeError] = useState("")
   const [uploadError, setUploadError] = useState("")
+  const [formError, setFormError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
 
-  const form = useZodForm({
-    schema: RecipeFormSchema,
+  // Form setup
+  const form = useForm<z.infer<typeof RecipeFormSchema>>({
+    resolver: zodResolver(RecipeFormSchema),
     defaultValues: {
       recipe_name: "",
       quote: "",
@@ -97,49 +76,52 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   })
 
   const {
-    handleSubmit,
     register,
     control,
-    formState: { isValid, errors, isValidating, isDirty },
+    formState: { isValid, errors, isDirty },
     reset,
+    getValues,
   } = form
 
-  const ingFieldArray = useFieldArray({
-    name: "ingredients",
-    control,
-  })
-  const stepFieldArray = useFieldArray({
-    name: "steps",
-    control,
-  })
-  const tagFieldArray = useFieldArray({
-    name: "tags",
-    control,
-  })
+  // Field arrays
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({ name: "ingredients", control })
+  const {
+    fields: stepFields,
+    append: appendStep,
+    remove: removeStep,
+  } = useFieldArray({ name: "steps", control })
+  const {
+    fields: tagFields,
+    append: appendTag,
+    remove: removeTag,
+  } = useFieldArray({ name: "tags", control })
 
+  // Helper functions
   const updateUnits = (
     index: number,
-    ingredient?: {
-      id: string
-      amount: number
-      unitMeasurement: string
-      ingredient: string
-    }
+    ingredient: AddRecipeFormValues["ingredients"][number]
   ) => {
-    ingFieldArray.update(index, ingredient!)
+    form.setValue(`ingredients.${index}`, ingredient, { shouldValidate: true })
   }
 
-  const updateTags = (index: number, tag?: { id: string; tag: string }) => {
-    tagFieldArray.update(index, tag!)
+  const updateTags = (index: number, tag: { id?: string; tag: string }) => {
+    form.setValue(
+      `tags.${index}`,
+      { id: tag.id || genId(), tag: tag.tag },
+      { shouldValidate: true }
+    )
   }
 
   const handleImageUpload = async (file: File | null) => {
     const fileExt = file?.name.split(".").pop()
-    const filePath = `recipes/${form.getValues(
-      "recipe_name"
-    )}/${Math.random()}.${fileExt}`
+    const filePath = `recipes/${form.getValues("recipe_name")}/${Math.random()}.${fileExt}`
 
     if (file) {
+      setIsUploading(true)
       const { data, error } = await supabase.storage
         .from("photos")
         .upload(filePath, file, {
@@ -148,57 +130,70 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         })
 
       if (error) {
-        setUploadError(error.message)
+        setFormError(error.message)
       } else {
         setImgURL(data.path)
-        setIsUploading(false)
-        setUploadError("")
+        setFormError(null)
       }
+      setIsUploading(false)
     } else {
-      setUploadError("No file selected")
+      setFormError("No file selected")
     }
   }
 
   const isSubmittable = !!isDirty && !!isValid
 
-  const onSubmit: SubmitHandler<AddRecipeFormValues> = async (
-    values: AddRecipeFormValues,
-    e
-  ) => {
+  const onSubmit: SubmitHandler<AddRecipeFormValues> = async (values, e) => {
     e?.preventDefault()
+    setFormError(null) // Clear any previous errors
 
     if (!imgURL && !isConfirmed) {
-      setRecipeError(
+      setFormError(
         "You haven't selected an image, are you sure you want to continue? (you can still upload one later)"
       )
       return
-    } else {
-      const updatedValues = {
-        ...values,
-        author: user?.user_metadata.first_name,
-        user_id: user?.id,
-        slug: toSlug(values.recipe_name),
-        img:
-          imgURL.length > 0
-            ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
-            : "http://loremflickr.com/g/500/500/food",
-      }
+    }
 
+    const updatedValues = {
+      ...values,
+      author: user?.user_metadata.first_name || "Anonymous User",
+      user_id: user?.id,
+      slug: toSlug(values.recipe_name),
+      img: imgURL
+        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
+        : "http://loremflickr.com/g/500/500/food",
+    }
+
+    try {
       const { data, error } = await supabase
         .from("recipes")
         .insert(updatedValues)
         .select()
 
-      if (!error) {
-        reset()
-        router.push(`/recipes/${data?.[0].slug}`)
-        router.refresh()
-      }
+      if (error) throw error
+
+      reset()
+      router.push(`/recipes/${data[0].slug}`)
+      router.refresh()
+    } catch (error) {
+      console.error("Error submitting recipe:", error)
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while submitting the recipe"
+      )
     }
   }
 
   const nameForImage =
-    !errors.recipe_name && form.getValues("recipe_name").length > 0
+    !errors.recipe_name && getValues("recipe_name").length > 0
+
+  // Render logic
+  if (tagLoading || unitLoading) return <div>Loading...</div>
+  if (tagError || unitError)
+    return (
+      <div>An error occurred: {tagError?.message || unitError?.message}</div>
+    )
 
   return (
     <Form {...form}>
@@ -207,36 +202,31 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(`rounded-lg bg-muted md:p-6`, className)}
       >
-        <div className="col-span-1 grid grid-cols-1 gap-2 lg:grid-cols-2">
+        <div className="grid grid-cols-1 col-span-1 gap-2 lg:grid-cols-2">
+          {/* Recipe Name */}
           <FormField
             control={control}
             name="recipe_name"
             render={({ field }) => (
-              <FormItem className="col-span-2 w-full lg:col-span-1">
+              <FormItem>
                 <FormLabel>Recipe Name</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Chicken Parm"
-                    {...field}
-                    className="w-full border border-border"
-                  />
+                  <Input placeholder="Enter recipe name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {/* Quote */}
           <FormField
-            control={form.control}
+            control={control}
             name="quote"
             render={({ field }) => (
-              <FormItem className="col-span-2 w-full lg:col-span-1">
+              <FormItem>
                 <FormLabel>Quote</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="From my plate to yours"
-                    {...field}
-                    className="w-full"
-                  />
+                  <Input placeholder="Enter a quote" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -244,7 +234,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
+        <Separator className="h-1 my-2 rounded-lg bg-muted-foreground" />
 
         <Alert>
           <Beef />
@@ -255,167 +245,73 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           </AlertDescription>
         </Alert>
 
+        {/* Ingredients */}
         <div>
-          {ingFieldArray.fields.map((feeld, index) => {
-            return (
-              <div className="flex items-center gap-y-4" key={feeld?.id}>
-                <div className="grid w-full grid-cols-4 items-end gap-2 lg:grid-cols-8">
-                  {/* NOTE: AMOUNT */}
-                  <Controller
-                    control={control}
-                    name={`ingredients.${index}.amount`}
-                    render={({ field }) => (
-                      <FormItem className="col-span-1 lg:col-span-1">
-                        <FormLabel className={index === 0 ? `block` : `hidden`}>
-                          Amount
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step={0.1}
-                            min={minAmount}
-                            max={maxAmount}
-                            placeholder="0.0"
-                            className="col-span-1 border border-border p-2"
-                            {...field}
-                            {...register(
-                              `ingredients.${index}.amount` as const,
-                              {
-                                valueAsNumber: true,
-                              }
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* NOTE: UNIT */}
-                  <Controller
-                    control={control}
-                    name={`ingredients.${index}.unitMeasurement`}
-                    // {({ field: { onChange, onBlur, value, ref }, formState, fieldState })
-                    render={({ field }) => (
-                      <FormItem className="col-span-3 w-full lg:col-span-2">
-                        <FormLabel className={index === 0 ? `block` : `hidden`}>
-                          Unit Measurement
-                        </FormLabel>
-
-                        <TagCombobox
-                          className="mx-auto w-full"
-                          field={field}
-                          index={index}
-                          items={units}
-                          update={updateUnits}
-                        />
-
-                        {/* <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? units.find((item) => item === field.value)
-                                  : "Select item"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="p-0">
-                            <Command>
-                              <CommandInput placeholder="Search unit..." />
-                              <CommandEmpty>No unit found.</CommandEmpty>
-                              <CommandGroup>
-                                {units.map((item) => (
-                                  <CommandItem
-                                    value={item}
-                                    key={item}
-                                    onSelect={field.onChange}
-                                    defaultValue={field.value}
-                                    // onSelect={() => {
-                                    //   form.setValue("", item)
-                                    // }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        item === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    {item}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        </Popover> */}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* NOTE: ING */}
-                  <Controller
-                    control={control}
-                    name={`ingredients.${index}.ingredient`}
-                    render={({ field }) => (
-                      <FormItem className="col-span-3 lg:col-span-4">
-                        <FormLabel className={index === 0 ? `block` : `hidden`}>
-                          Ingredient
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="sugar"
-                            className="col-span-1 w-full border border-border p-2"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className={cn(
-                      `col-span-1`,
-                      ingFieldArray.fields.length === 1 && `cursor-not-allowed`
-                    )}
-                    onClick={() => ingFieldArray.remove(index)}
-                    disabled={ingFieldArray.fields.length === 1}
+          <FormLabel>Ingredients</FormLabel>
+          {ingredientFields.map((field, index) => (
+            <div key={field.id} className="flex items-center space-x-2">
+              <Input
+                type="number"
+                placeholder="Amount"
+                {...register(`ingredients.${index}.amount` as const, {
+                  valueAsNumber: true,
+                  min: minAmount,
+                  max: maxAmount,
+                })}
+              />
+              <Controller
+                name={`ingredients.${index}.unitMeasurement`}
+                control={control}
+                render={({ field }) => (
+                  <FormCombobox<
+                    AddRecipeFormValues,
+                    `ingredients.${number}.unitMeasurement`
                   >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            )
-          })}
+                    className="w-[180px]"
+                    field={field}
+                    index={index}
+                    update={(index, value) => {
+                      if (typeof value === "string") {
+                        updateUnits(index, {
+                          ...form.getValues(`ingredients.${index}`),
+                          unitMeasurement: value,
+                        })
+                      }
+                    }}
+                    items={units || []}
+                    placeholder="Select unit"
+                  />
+                )}
+              />
+              <Input
+                placeholder="Ingredient"
+                {...register(`ingredients.${index}.ingredient` as const)}
+              />
+              <Button
+                type="button"
+                onClick={() => removeIngredient(index)}
+                disabled={ingredientFields.length === 1}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
           <Button
             type="button"
-            className="mx-auto my-4"
             onClick={() =>
-              ingFieldArray.append({
+              appendIngredient({
                 id: genId(),
-                ingredient: "",
                 amount: 0,
                 unitMeasurement: "",
+                ingredient: "",
               })
             }
           >
-            <Plus />
             Add Ingredient
           </Button>
         </div>
 
-        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
+        <Separator className="h-1 my-2 rounded-lg bg-muted-foreground" />
 
         <Alert>
           <ListOrdered />
@@ -426,174 +322,120 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           </AlertDescription>
         </Alert>
 
-        {/* NOTE: STEPS FIELD ARRAY */}
+        {/* Steps */}
         <div>
-          {stepFieldArray.fields.map((feeld, index) => {
-            return (
-              <div className="flex items-center gap-y-4" key={feeld?.id}>
-                <div className="grid w-full grid-cols-1 items-end lg:grid-cols-8 lg:gap-x-2">
-                  <Controller
-                    control={control}
-                    name={`steps.${index}.step`}
-                    render={({ field }) => (
-                      <FormItem className="col-span-3 lg:col-span-7">
-                        {/* <FormLabel className={index === 0 ? `block` : `hidden`}>
-                          Recipe Steps
-                        </FormLabel> */}
-                        <FormControl>
-                          <Input
-                            placeholder="Boil water, eat it"
-                            className="border border-border p-2"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className={cn(
-                      `col-span-1 ml-auto w-1/4 lg:w-full`,
-                      stepFieldArray.fields.length === 1 && `cursor-not-allowed`
-                    )}
-                    onClick={() => stepFieldArray.remove(index)}
-                    disabled={stepFieldArray.fields.length === 1}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            )
-          })}
+          <FormLabel>Steps</FormLabel>
+          <p className="text-sm text-muted-foreground">
+            Add your recipe's instructions here. Try to break your steps up into
+            clear, concise parts - line by line.
+          </p>
+          {stepFields.map((field, index) => (
+            <div key={field.id} className="flex items-center mt-2 space-x-2">
+              <Input
+                placeholder="Step"
+                {...register(`steps.${index}.step` as const)}
+              />
+              <Button
+                type="button"
+                onClick={() => removeStep(index)}
+                disabled={stepFields.length === 1}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
           <Button
             type="button"
-            className="mx-auto my-4"
-            onClick={() =>
-              stepFieldArray.append({
-                id: genId(),
-                step: "",
-              })
-            }
+            onClick={() => appendStep({ id: genId(), step: "" })}
+            className="mt-2"
           >
-            <Plus />
             Add Step
           </Button>
         </div>
 
-        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
-
-        <Alert>
-          <Tags />
-          <AlertTitle className="text-lg font-bold">Tags</AlertTitle>
-          <AlertDescription>
+        {/* Tags */}
+        <div>
+          <FormLabel>Tags</FormLabel>
+          <p className="text-sm text-muted-foreground">
             Select from existing tags or add your own. This will help with
             searching and organizing recipes. Nobody likes a messy kitchen.
-          </AlertDescription>
-        </Alert>
-
-        {/* NOTE: TAGS FIELD ARRAY */}
-        <div>
-          {tagFieldArray.fields.map((feeld, index) => {
-            return (
-              <div className="flex items-center gap-y-4" key={feeld?.id}>
-                <div className="grid w-full grid-cols-1 items-end lg:w-2/3 lg:grid-cols-7 lg:gap-x-2">
-                  <Controller
-                    control={control}
-                    name={`tags.${index}.tag`}
-                    render={({ field }) => (
-                      <FormItem className="col-span-6">
-                        {/* <FormLabel className={index === 0 ? `block` : `hidden`}>
-                          Tags
-                        </FormLabel> */}
-                        <TagCombobox
-                          className="mx-auto w-full"
-                          field={field}
-                          index={index}
-                          items={uniqueTags}
-                          update={updateTags}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
+          </p>
+          {tagFields.map((field, index) => (
+            <div key={field.id} className="flex items-center mt-2 space-x-2">
+              <Controller
+                name={`tags.${index}.tag`}
+                control={control}
+                render={({ field }) => (
+                  <FormCombobox<AddRecipeFormValues, `tags.${number}.tag`>
+                    className="w-[180px]"
+                    field={field}
+                    index={index}
+                    update={(index, value) => {
+                      if (typeof value === "object" && "tag" in value) {
+                        updateTags(index, value)
+                      }
+                    }}
+                    items={uniqueTags || []}
+                    placeholder="Select tag"
                   />
-
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className={cn(
-                      `col-span-1 ml-auto w-1/4 lg:w-full`,
-                      tagFieldArray.fields.length === 1 && `cursor-not-allowed`
-                    )}
-                    onClick={() => tagFieldArray.remove(index)}
-                    disabled={tagFieldArray.fields.length === 1}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            )
-          })}
+                )}
+              />
+              <Button
+                type="button"
+                onClick={() => removeTag(index)}
+                disabled={tagFields.length === 1}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
           <Button
             type="button"
+            onClick={() => appendTag({ id: genId(), tag: "" })}
             className={cn(
-              `col-span-1 my-4`,
-              tagFieldArray.fields.length >= 5 && `hover:cursor-not-allowed`
+              "mt-2",
+              tagFields.length >= 5 && "hover:cursor-not-allowed"
             )}
-            onClick={() =>
-              tagFieldArray.append({
-                id: genId(),
-                tag: "",
-              })
-            }
-            disabled={tagFieldArray.fields.length >= 5}
+            disabled={tagFields.length >= 5}
           >
-            <Plus />
             Add Tag
           </Button>
         </div>
 
+        {/* Image Upload */}
         {nameForImage && (
-          <>
-            <FileInput
-              onFileChange={handleImageUpload}
-              className={cn(
-                `rounded-md border border-border px-2 py-4`,
-                recipeError && `border-destructive`
-              )}
-              type="recipe"
-            />
-            {uploadError && <p className="text-destructive">{uploadError}</p>}
-            {recipeError && (
-              <p className="text-destructive">
-                {recipeError}
-                <Button
-                  className="mx-4"
-                  variant="default"
-                  onClick={() => {
-                    setRecipeError("")
-                    setIsConfirmed(true)
-                  }}
-                >
-                  Continue
-                </Button>
-              </p>
+          <FileInput
+            onFileChange={handleImageUpload}
+            className={cn(
+              `rounded-md border border-border px-2 py-4`,
+              recipeError && `border-destructive`
             )}
-          </>
+            type="recipe"
+          />
         )}
 
-        <Button
-          type="submit"
-          disabled={!isSubmittable}
-          className={cn(
-            `ml-auto w-1/4 md:w-1/5`,
-            !isSubmittable && `cursor-not-allowed`
-          )}
-        >
+        {/* Submit Button */}
+        <Button type="submit" disabled={!isSubmittable}>
           Submit
         </Button>
+
+        {/* Error Messages */}
+        {formError && (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{formError}</AlertDescription>
+            {!imgURL && (
+              <Button
+                onClick={() => {
+                  setFormError(null)
+                  setIsConfirmed(true)
+                }}
+              >
+                Continue
+              </Button>
+            )}
+          </Alert>
+        )}
       </form>
     </Form>
   )

@@ -1,31 +1,31 @@
-import { useEffect, useState } from "react"
 import { createClient } from "@/supabase/client"
-import { getAll } from "@/supabase/helpers"
-import { Recipe, UnitMeasurement } from "@/supabase/types"
+import { useQuery } from "@tanstack/react-query"
+
+import { Ingredient, UnitMeasurement } from "@/lib/types"
 
 export default function useUnits() {
   const supabase = createClient()
-  const [units, setUnits] = useState<UnitMeasurement[]>([])
-  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const getUnits = async (): Promise<void> => {
-      setLoading(true)
-      const data: Recipe[] | null = await getAll(
-        {
-          db: "recipes",
-          column: "ingredients",
-        },
-        supabase
-      )
+  return useQuery({
+    queryKey: ["units"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("ingredients")
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      const typedData = data as unknown as { ingredients: Ingredient[] }[]
 
       const units: Set<UnitMeasurement> = new Set()
 
-      if (data) {
-        data.forEach((recipe) => {
-          recipe.ingredients.forEach((unit) => {
-            if (unit.unitMeasurement) {
-              units.add(unit.unitMeasurement)
+      if (typedData) {
+        typedData.forEach((recipe) => {
+          recipe.ingredients.forEach((ingredient) => {
+            if (ingredient?.unitMeasurement) {
+              units.add(ingredient?.unitMeasurement)
             }
           })
         })
@@ -45,19 +45,7 @@ export default function useUnits() {
         }
       })
 
-      // if (error) {
-      //   setError(error.message)
-      // }
-
-      setLoading(false)
-      setUnits(unitArray)
-    }
-
-    getUnits()
-  }, [])
-
-  return {
-    unitLoading: loading,
-    units,
-  }
+      return unitArray
+    },
+  })
 }
