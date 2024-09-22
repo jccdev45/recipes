@@ -32,8 +32,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { FormCombobox } from "@/app/recipes/add/form-combobox"
-
-import { FileInput } from "./image-upload"
+import { FileInput } from "@/app/recipes/add/image-upload"
 
 type AddRecipeFormProps = {
   className: string

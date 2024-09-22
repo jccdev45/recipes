@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function Searchbar({ className }: { className?: string }) {
+export function Searchbar({ className }: { className?: string }) {
   const router = useRouter()
   const [value, setValue] = useState("")
 

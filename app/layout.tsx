@@ -7,9 +7,8 @@ import { Toaster } from "sonner"
 import { cn } from "@/lib/utils"
 import { Footer } from "@/components/footer"
 import { MainNav } from "@/components/main-nav"
-
-import { AppProviders } from "./providers"
-import Searchbar from "./recipes/search"
+import { AppProviders } from "@/app/providers"
+import { Searchbar } from "@/app/recipes/search"
 
 const fontIBM = localFont({
   src: [
