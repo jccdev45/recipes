@@ -77,9 +77,15 @@ const fontIBM = localFont({
 })
 
 export const metadata = {
-  title: "Family Recipes",
+  title: {
+    template: "%s | Family Recipes",
+    default: "Family Recipes",
+  },
   description:
     "Collection of signature recipes from the Medina Collective. Expect lots of flavor and lots of love. Enjoy.",
+  keywords: "nextjs, supabase, recipes, cooking",
+  author: "jccdev",
+  creator: "Jordan Cruz-Correa",
 }
 
 export default async function RootLayout({
@@ -89,6 +95,10 @@ export default async function RootLayout({
 }) {
   const supabase = createClient()
   const { data, error } = await supabase.auth.getUser()
+
+  if (error) {
+    console.error(error)
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>

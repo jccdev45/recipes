@@ -8,6 +8,10 @@ import { GradientBanner } from "@/components/GradientBanner"
 import { AddRecipeForm } from "./AddRecipeForm"
 import Cooking2 from "/public/images/Cooking2.svg"
 
+export const metadata = {
+  title: "Add Recipe",
+}
+
 export default async function AddRecipePage() {
   const supabase = createClient()
 
@@ -47,7 +51,7 @@ export default async function AddRecipePage() {
             alt="Cartoonish depiction of two people whisking a bowl (not sure why it takes two but okay)"
             width={300}
             height={300}
-            className="mx-auto w-5/6 translate-x-0 md:w-2/3 lg:translate-x-8"
+            className="w-5/6 mx-auto translate-x-0 md:w-2/3 lg:translate-x-8"
           />
         </div> */}
       </div>

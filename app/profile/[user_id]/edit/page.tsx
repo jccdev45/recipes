@@ -8,6 +8,10 @@ import { AccountForm } from "@/app/profile/[user_id]/edit/account-form"
 
 import AccountInfoSvg from "/public/images/AccountInfo.svg"
 
+export const metadata = {
+  title: "Edit Profile",
+}
+
 export default async function EditProfilePage() {
   const supabase = createClient()
   const {

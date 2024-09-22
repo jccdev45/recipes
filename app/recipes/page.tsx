@@ -6,6 +6,10 @@ import { QueryClient } from "@tanstack/react-query"
 import { GradientBanner } from "@/components/GradientBanner"
 import { RecipeList } from "@/app/recipes/recipe-list"
 
+export const metadata = {
+  title: "Recipes",
+}
+
 export default async function RecipesPage({
   searchParams,
 }: {

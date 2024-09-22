@@ -5,6 +5,10 @@ import { GradientBanner } from "@/components/GradientBanner"
 
 import Email from "/public/images/email.svg"
 
+export const metadata = {
+  title: "Success",
+}
+
 export default async function SuccessPage() {
   return (
     <div className="grow">
@@ -16,7 +20,7 @@ export default async function SuccessPage() {
           alt="person with mobile phone showing email"
           height={500}
           width={500}
-          className=" col-span-1 mx-auto w-5/6 lg:order-first"
+          className="col-span-1 mx-auto w-5/6  lg:order-first"
         />
 
         <div className="grid place-items-center bg-foreground p-16 shadow shadow-white/50">

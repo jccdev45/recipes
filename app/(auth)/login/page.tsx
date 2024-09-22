@@ -9,6 +9,10 @@ import { LoginForm } from "@/app/(auth)/login/login-form"
 
 import AuthSvg from "/public/images/Login.svg"
 
+export const metadata = {
+  title: "Login",
+}
+
 export default async function LoginPage() {
   const supabase = createClient()
   const {

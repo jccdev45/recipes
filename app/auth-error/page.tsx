@@ -8,7 +8,7 @@ import { TypographyH1, TypographyP } from "@/components/ui/typography"
 import ErrorSVG from "/public/images/error.svg"
 
 export const metadata = {
-  title: "❌ Error",
+  title: "Error",
 }
 
 export default function AuthErrorPage({

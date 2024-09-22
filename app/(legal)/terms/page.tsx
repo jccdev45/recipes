@@ -9,6 +9,10 @@ import {
   TypographyP,
 } from "@/components/ui/typography"
 
+export const metadata = {
+  title: "Terms & Conditions",
+}
+
 export default function TermsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-8">

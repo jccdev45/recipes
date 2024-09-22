@@ -9,6 +9,10 @@ import {
   TypographyP,
 } from "@/components/ui/typography"
 
+export const metadata = {
+  title: "Privacy Policy",
+}
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="mx-auto max-w-4xl text-pretty p-8">

@@ -8,6 +8,10 @@ import { signup } from "@/app/(auth)/actions"
 
 import AuthSvg from "/public/images/Login.svg"
 
+export const metadata = {
+  title: "Sign Up",
+}
+
 export default async function SignupPage() {
   const supabase = createClient()
   const {
