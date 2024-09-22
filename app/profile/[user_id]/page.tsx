@@ -8,7 +8,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query"
 
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfile } from "@/app/profile/[user_id]/user-profile"
 
 type Props = {

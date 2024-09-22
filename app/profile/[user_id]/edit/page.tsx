@@ -2,7 +2,7 @@ import Image from "next/image"
 import { redirect } from "next/navigation"
 import { createClient } from "@/supabase/server"
 
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
 import { AccountForm } from "@/app/profile/[user_id]/edit/account-form"
 

@@ -3,7 +3,7 @@ import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { QueryClient } from "@tanstack/react-query"
 
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 import { RecipeList } from "@/app/recipes/recipe-list"
 
 export const metadata = {

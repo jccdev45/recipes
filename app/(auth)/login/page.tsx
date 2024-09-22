@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/supabase/server"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
 import { LoginForm } from "@/app/(auth)/login/login-form"
 

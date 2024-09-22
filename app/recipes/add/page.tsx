@@ -3,9 +3,9 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/supabase/server"
 
 import { TypographyH1 } from "@/components/ui/typography"
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 
-import { AddRecipeForm } from "./AddRecipeForm"
+import { AddRecipeForm } from "./add-recipe-form"
 import Cooking2 from "/public/images/Cooking2.svg"
 
 export const metadata = {

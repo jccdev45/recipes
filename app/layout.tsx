@@ -5,11 +5,11 @@ import { createClient } from "@/supabase/server"
 import { Toaster } from "sonner"
 
 import { cn } from "@/lib/utils"
-import { Footer } from "@/components/Footer"
-import { MainNav } from "@/components/MainNav"
+import { Footer } from "@/components/footer"
+import { MainNav } from "@/components/main-nav"
 
 import { AppProviders } from "./providers"
-import Searchbar from "./recipes/Search"
+import Searchbar from "./recipes/search"
 
 const fontIBM = localFont({
   src: [

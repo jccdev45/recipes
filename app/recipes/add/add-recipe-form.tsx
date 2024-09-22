@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { FormCombobox } from "@/app/recipes/add/form-combobox"
 
-import { FileInput } from "./ImageUpload"
+import { FileInput } from "./image-upload"
 
 type AddRecipeFormProps = {
   className: string
@@ -202,7 +202,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(`rounded-lg bg-muted md:p-6`, className)}
       >
-        <div className="grid grid-cols-1 col-span-1 gap-2 lg:grid-cols-2">
+        <div className="col-span-1 grid grid-cols-1 gap-2 lg:grid-cols-2">
           {/* Recipe Name */}
           <FormField
             control={control}
@@ -234,7 +234,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           />
         </div>
 
-        <Separator className="h-1 my-2 rounded-lg bg-muted-foreground" />
+        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
 
         <Alert>
           <Beef />
@@ -311,7 +311,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           </Button>
         </div>
 
-        <Separator className="h-1 my-2 rounded-lg bg-muted-foreground" />
+        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
 
         <Alert>
           <ListOrdered />
@@ -330,7 +330,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             clear, concise parts - line by line.
           </p>
           {stepFields.map((field, index) => (
-            <div key={field.id} className="flex items-center mt-2 space-x-2">
+            <div key={field.id} className="mt-2 flex items-center space-x-2">
               <Input
                 placeholder="Step"
                 {...register(`steps.${index}.step` as const)}
@@ -361,7 +361,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             searching and organizing recipes. Nobody likes a messy kitchen.
           </p>
           {tagFields.map((field, index) => (
-            <div key={field.id} className="flex items-center mt-2 space-x-2">
+            <div key={field.id} className="mt-2 flex items-center space-x-2">
               <Controller
                 name={`tags.${index}.tag`}
                 control={control}

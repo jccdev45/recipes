@@ -5,7 +5,7 @@ import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 
 import { Recipe } from "@/lib/types"
-import { RecipeCard } from "@/app/recipes/RecipeCard"
+import { RecipeCard } from "@/app/recipes/recipe-card"
 
 export function RecipeList() {
   const supabase = createClient()

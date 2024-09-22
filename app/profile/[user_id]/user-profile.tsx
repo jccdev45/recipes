@@ -20,7 +20,7 @@ import {
   TypographyMuted,
   TypographySmall,
 } from "@/components/ui/typography"
-import { RecipeCard } from "@/app/recipes/RecipeCard"
+import { RecipeCard } from "@/app/recipes/recipe-card"
 
 import type { UserWithRecipes } from "@/lib/types"
 import type { User } from "@supabase/supabase-js"

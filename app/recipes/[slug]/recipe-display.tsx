@@ -15,8 +15,8 @@ import {
   TypographyH1,
   TypographyList,
 } from "@/components/ui/typography"
-import { Ingredients } from "@/app/recipes/[slug]/Ingredients"
-import { Steps } from "@/app/recipes/[slug]/Steps"
+import { Ingredients } from "@/app/recipes/[slug]/ingredients"
+import { Steps } from "@/app/recipes/[slug]/steps"
 
 export function RecipeDisplay({
   slug,

@@ -8,7 +8,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query"
 
-import { CommentsSection } from "@/app/recipes/[slug]/Comments"
+import { CommentsSection } from "@/app/recipes/[slug]/comments"
 import { RecipeDisplay } from "@/app/recipes/[slug]/recipe-display"
 
 import type { Metadata, ResolvingMetadata } from "next"

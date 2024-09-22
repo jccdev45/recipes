@@ -1,7 +1,7 @@
 import Image from "next/image"
 
 import { TypographyH1 } from "@/components/ui/typography"
-import { GradientBanner } from "@/components/GradientBanner"
+import { GradientBanner } from "@/components/gradient-banner"
 
 import Email from "/public/images/email.svg"
 
