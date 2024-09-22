@@ -49,7 +49,7 @@ export async function updateProfile(formData: FormData) {
   if (error) {
     console.error("Error: ", error.message)
 
-    redirect("/error")
+    redirect(`/auth-error?message=${error.message}`)
   }
 
   revalidatePath(`/profile/${data.user.id}`, "page")

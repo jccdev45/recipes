@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { NextRequest } from "next/server"
 import { createClient } from "@/supabase/server"
+
 import type { EmailOtpType } from "@supabase/supabase-js"
 
 export async function GET(request: NextRequest) {
@@ -23,5 +24,5 @@ export async function GET(request: NextRequest) {
   }
 
   // redirect the user to an error page with some instructions
-  redirect("/error")
+  redirect("/auth-error?message=Invalid or expired token")
 }

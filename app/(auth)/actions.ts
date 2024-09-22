@@ -70,7 +70,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect("/error")
+    redirect(`/auth-error?message=${error.message}`)
   }
 
   revalidatePath(`/profile/${user?.id}`, "page")
@@ -120,7 +120,7 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect("/error")
+    redirect(`/auth-error?message=${error.message}`)
     // if (error.message.includes("already registered")) {
     //   return {
     //     message:

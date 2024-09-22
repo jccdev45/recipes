@@ -1,18 +1,27 @@
 import Image from "next/image"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { TypographyH1, TypographyP } from "@/components/ui/typography"
 
 import ErrorSVG from "/public/images/error.svg"
 
-export default function ErrorPage({
-  error,
-  reset,
+export const metadata = {
+  title: "❌ Error",
+}
+
+export default function AuthErrorPage({
+  searchParams,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  searchParams: { message: string }
 }) {
+  const { message } = searchParams
+
+  if (!message) {
+    redirect("/")
+  }
+
   return (
     <section className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4 lg:flex-row lg:gap-8">
       <Image
@@ -24,22 +33,13 @@ export default function ErrorPage({
         priority
       />
       <div className="text-center lg:text-left">
-        <TypographyH1 className="mb-4">Oops! Something went wrong</TypographyH1>
+        <TypographyH1 className="mb-4">Authentication Error</TypographyH1>
         <TypographyP className="mb-6">
-          We apologize for the inconvenience. Our team has been notified and is
-          working on a fix.
+          {decodeURIComponent(message)}
         </TypographyP>
-        <div className="space-x-4">
-          <Button onClick={() => reset()}>Try again</Button>
-          <Button variant="outline" asChild>
-            <Link href="/">Go to homepage</Link>
-          </Button>
-        </div>
-        {process.env.NODE_ENV === "development" && (
-          <TypographyP className="mt-4 text-sm text-muted-foreground">
-            Error: {error.message}
-          </TypographyP>
-        )}
+        <Button variant="outline" asChild>
+          <Link href="/">Return to Home</Link>
+        </Button>
       </div>
     </section>
   )
