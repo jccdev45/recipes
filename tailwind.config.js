@@ -9,33 +9,13 @@ module.exports = {
   ],
   theme: {
     container: {
-      center: true,
+      center: "true",
       padding: "2rem",
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
-      boxShadow: {
-        sm: "1px 2px",
-        DEFAULT: "3px 4px",
-        md: "5px 7px",
-        lg: "15px 20px",
-        xl: "25px 30px",
-        none: "0 0 #0000",
-      },
-      spacing: {
-        smX: "1px",
-        smY: "2px",
-        baseX: "3px",
-        baseY: "4px",
-        mdX: "5px",
-        mdY: "7px",
-        lgX: "15px",
-        lgY: "20px",
-        xlX: "25px",
-        xlY: "30px",
-      },
       typography: {
         DEFAULT: {
           css: {
@@ -85,15 +65,41 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
