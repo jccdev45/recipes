@@ -17,12 +17,10 @@ export function Footer({ className }: { className?: string }) {
         <div className="order-first -mb-10 flex flex-grow flex-wrap text-center md:pr-20 md:text-left">
           <div className="w-full px-4 md:w-1/2 lg:w-1/4">
             <nav className="mb-10 flex flex-col">
-              <Link href="/" className="">
-                Home
-              </Link>
-              <Link href="/recipes" className="">
-                Recipes
-              </Link>
+              <Link href="/">Home</Link>
+              <Link href="/recipes">Recipes</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms">Terms of Service</Link>
             </nav>
           </div>
         </div>

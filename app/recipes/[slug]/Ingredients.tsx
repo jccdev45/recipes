@@ -1,19 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Ingredient } from "@/supabase/types"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { ArrowDown, ArrowUp, Info } from "lucide-react"
 import { number2fraction } from "number2fraction"
 
+import { Ingredient } from "@/lib/types"
 import { cn, scaleIngredients } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  TypographyH3,
-  TypographyList,
-  TypographyP,
-} from "@/components/ui/typography"
+import { TypographyH2, TypographyList } from "@/components/ui/typography"
 
 type IngredientsProps = {
   className: string
@@ -32,12 +33,18 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
 
   return (
     <div className={cn(``, className)}>
-      <TypographyH3>Ingredients</TypographyH3>
-      <TypographyP>
-        Enter a serving amount or use the arrows to adjust by 1/2 (servings are
-        *very* approximated as not all recipes were recorded with serving size,
-        use your best judgment)
-      </TypographyP>
+      <div className="flex items-center gap-4 border-b">
+        <TypographyH2 className="border-0">Ingredients</TypographyH2>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Info />
+          </HoverCardTrigger>
+          <HoverCardContent>
+            Enter a serving amount or use arrows to adjust (servings are *very*
+            approximated as not all recipes were recorded with serving size)
+          </HoverCardContent>
+        </HoverCard>
+      </div>
       <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
         <span className="flex items-center justify-center">
           <Input
@@ -87,7 +94,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
                     ? `${unitMeasurement}s`
                     : unitMeasurement}
               </span>
-              <span className="">{ingredient}</span>
+              <span>{ingredient}</span>
             </Label>
           </li>
         ))}

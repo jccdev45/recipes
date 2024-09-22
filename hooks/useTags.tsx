@@ -1,54 +1,40 @@
-import { useEffect, useState } from "react"
 import { createClient } from "@/supabase/client"
-import { Database, Tag } from "@/supabase/types"
+import { useQuery } from "@tanstack/react-query"
 
+import { Tag } from "@/lib/types"
 import { genId } from "@/lib/utils"
 
 export default function useUniqueTags() {
-  // const supabase = createClientComponentClient<Database>();
   const supabase = createClient()
-  const [uniqueTags, setUniqueTags] = useState<Tag[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
 
-  useEffect(() => {
-    const getTags = async () => {
-      setIsLoading(true)
+  return useQuery({
+    queryKey: ["uniqueTags"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("recipes").select("tags")
 
-      const tags: Tag[] = []
-
-      if (data) {
-        data.forEach((recipe) => {
-          recipe.tags.forEach((tag) => {
-            const tagExists = tags.some(
-              (existingTag) => existingTag.tag === tag.tag
-            )
-
-            if (!tagExists) {
-              tags.push({
-                id: genId(),
-                tag: tag.tag,
-              })
-            }
-          })
-        })
-      }
-
       if (error) {
-        setError(error.message)
+        throw new Error(error.message)
       }
 
-      setIsLoading(false)
-      setUniqueTags(tags)
-    }
+      const tags = data as unknown as { tags: Tag[] }[]
 
-    getTags()
-  }, [])
+      const uniqueTags = tags.reduce((acc: Tag[], recipe) => {
+        recipe.tags.forEach((tag) => {
+          const tagExists = acc.some(
+            (existingTag) => existingTag.tag === tag?.tag
+          )
 
-  return {
-    error,
-    isLoading,
-    uniqueTags,
-  }
+          if (!tagExists && tag?.tag) {
+            acc.push({
+              id: genId(),
+              tag: tag.tag,
+            })
+          }
+        })
+        return acc
+      }, [])
+
+      return uniqueTags
+    },
+  })
 }

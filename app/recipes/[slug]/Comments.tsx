@@ -1,16 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { getCommentsByRecipeId } from "@/queries/comment-queries"
 import { createClient } from "@/supabase/client"
-import { getAll } from "@/supabase/helpers"
-import { Comment as CommentType } from "@/supabase/types"
 import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  useDeleteMutation,
+  useInsertMutation,
+  useQuery,
+} from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
+import { useQueryClient } from "@tanstack/react-query"
 import { UserCircle2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 
+import { CommentInsert, Comment as CommentType } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CommentFormValues, CommentSchema } from "@/lib/zod/schema"
 import {
@@ -35,51 +41,54 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { TypographyP } from "@/components/ui/typography"
 
 type CommentsSectionProps = {
   className: string
-  currentUser: User
+  currentUser: User | null
   recipe_id: number
 }
-const supabase = createClient()
 
 export function CommentsSection({
   className,
   currentUser,
   recipe_id,
 }: CommentsSectionProps) {
-  const [comments, setComments] = useState<CommentType[]>([])
+  const supabase = createClient()
+  const queryClient = useQueryClient()
+  const router = useRouter()
 
-  useEffect(() => {
-    const getComments = async () => {
-      const params = {
-        db: "comments",
-        params: {
-          filters: {
-            column: "recipe_id",
-            value: recipe_id,
-          },
-          order: {
-            column: "created_at",
-            ascending: false,
-          },
-        },
-      }
+  const {
+    data: comments,
+    isLoading,
+    error,
+  } = useQuery(getCommentsByRecipeId(supabase, recipe_id))
+  // const comments = data as unknown as CommentType[]
 
-      const comments: CommentType[] | null = await getAll(params, supabase)
-
-      if (comments) {
-        setComments(comments)
-      }
+  const { mutateAsync: insertCommentMutation } = useInsertMutation(
+    supabase.from("comments"),
+    ["id"],
+    "*",
+    {
+      onSuccess: () => {
+        router.refresh()
+      },
     }
+  )
 
-    getComments()
-  }, [supabase, setComments])
+  const { mutate: deleteCommentMutation } = useDeleteMutation(
+    supabase.from("comments"),
+    ["id"],
+    "*",
+    {
+      onSuccess: () => {
+        router.refresh()
+      },
+    }
+  )
 
-  const form = useForm<CommentFormValues>({
+  const form = useForm({
     resolver: zodResolver(CommentSchema),
     defaultValues: {
       message: "",
@@ -90,89 +99,77 @@ export function CommentsSection({
     handleSubmit,
     formState: { errors, isDirty, isValid, isSubmitting },
   } = form
-  const isSubmittable = !!isValid && !!isDirty
+  const isSubmittable = isValid && isDirty
 
-  // TODO: ADD LOADING STATES FOR COMMENT SUBMIT
   const handleSubmitComment = async (values: CommentFormValues) => {
-    const author = currentUser?.user_metadata.first_name
-      ? currentUser?.user_metadata.first_name
-      : currentUser?.email
+    if (!currentUser) {
+      console.error("No user logged in")
+      return
+    }
 
-    const newValues = {
+    const author = currentUser.user_metadata.first_name || currentUser.email
+    const newComment: CommentInsert = {
       author: author.toString(),
       avatar_url: currentUser.user_metadata.avatar_url,
       message: values.message,
-      liked_by: [""],
+      liked_by: [],
       likes: 0,
       recipe_id: recipe_id,
-      user_id: currentUser && currentUser.id,
+      user_id: currentUser.id,
     }
 
-    const { data, error } = await supabase.from("comments").insert(newValues)
-
-    if (data) {
-      setComments([...comments, data])
-      form.reset()
-    }
+    await insertCommentMutation([newComment])
+    form.reset()
   }
 
+  if (isLoading) return <div>Loading comments...</div>
+  if (error) return <div>Error loading comments: {error.message}</div>
+
   return (
-    <div className={cn(`space-y-8 p-4`, className)}>
-      <Form {...form}>
-        <form
-          className="my-0 flex w-full max-w-2xl flex-col rounded-lg"
-          onSubmit={handleSubmit(handleSubmitComment)}
-        >
-          <FormField
-            control={form.control}
-            name="message"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Leave a comment</FormLabel>
-                <FormControl>
-                  <Textarea
-                    className=""
-                    disabled={!currentUser}
-                    placeholder={
-                      currentUser
-                        ? "Wow great recipe!"
-                        : "You must be signed in to comment"
-                    }
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button
-            type="submit"
-            className="my-2 ml-auto"
-            disabled={!currentUser || !isSubmittable}
-          >
-            Submit
-          </Button>
-        </form>
-      </Form>
-
-      {!comments && (
-        <div className="flex">
-          <Skeleton className="h-10 w-10" />
-
-          <div>
-            <Skeleton className="h-4 w-10" />
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-6 w-6" />
-          </div>
-        </div>
+    <div className={cn("space-y-4", className)}>
+      {currentUser ? (
+        <Form {...form}>
+          <form onSubmit={handleSubmit(handleSubmitComment)}>
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Leave a comment</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      disabled={!currentUser}
+                      placeholder={
+                        currentUser
+                          ? "Wow great recipe!"
+                          : "You must be signed in to comment"
+                      }
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              disabled={!isSubmittable || isSubmitting || !currentUser}
+            >
+              Submit
+            </Button>
+          </form>
+        </Form>
+      ) : (
+        <TypographyP>Please login to leave a comment</TypographyP>
       )}
 
-      {/* {comments?.length === 0 && <TypographyH4>No comments yet</TypographyH4>} */}
-
       {comments?.map((comment) => (
-        <Comment key={comment.id} comment={comment} currentUser={currentUser} />
+        <CommentItem
+          key={comment.id}
+          comment={comment}
+          currentUser={currentUser}
+          onDelete={() => deleteCommentMutation({ id: comment.id })}
+        />
       ))}
     </div>
   )
@@ -181,9 +178,10 @@ export function CommentsSection({
 type CommentProps = {
   comment: CommentType
   currentUser: User | null
+  onDelete: () => void
 }
 
-function Comment({ comment, currentUser }: CommentProps) {
+function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
   const router = useRouter()
   const {
     author,
@@ -197,6 +195,7 @@ function Comment({ comment, currentUser }: CommentProps) {
     user_id,
   } = comment
   const [liked, setLiked] = useState(likes)
+  const supabase = createClient()
 
   // TODO: EXTRACT + COMPLETE FUNCTIONALITY
   const handleLike = async () => {
@@ -217,24 +216,24 @@ function Comment({ comment, currentUser }: CommentProps) {
   }
 
   // TODO: EXTRACT
-  const handleDelete = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("comments")
-        .delete()
-        .eq("id", id!)
-        .select()
+  // const handleDelete = async () => {
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("comments")
+  //       .delete()
+  //       .eq("id", id!)
+  //       .select()
 
-      if (data) {
-        router.refresh()
-      }
-      if (error) {
-      }
-    } catch (error) {
-      console.error("Error: ", error)
-      return null
-    }
-  }
+  //     if (data) {
+  //       router.refresh()
+  //     }
+  //     if (error) {
+  //     }
+  //   } catch (error) {
+  //     console.error("Error: ", error)
+  //     return null
+  //   }
+  // }
 
   return (
     <div className="relative flex w-full rounded-md border border-foreground/40 bg-background p-2 shadow-md dark:bg-slate-900 md:w-1/2">
@@ -267,7 +266,7 @@ function Comment({ comment, currentUser }: CommentProps) {
           )}
           onClick={handleLike}
         />
-        <span className="">{liked}</span>
+        <span>{liked}</span>
       </div> */}
 
       {currentUser?.id === user_id && (
@@ -289,7 +288,7 @@ function Comment({ comment, currentUser }: CommentProps) {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDelete}
+                onClick={onDelete}
                 className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
               >
                 Confirm

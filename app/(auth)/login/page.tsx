@@ -1,16 +1,33 @@
 import Image from "next/image"
+import { redirect } from "next/navigation"
+import { createClient } from "@/supabase/server"
 
-import { GradientBanner } from "@/components/GradientBanner"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { GradientBanner } from "@/components/gradient-banner"
+import { UserProfileForm } from "@/components/user-profile-form"
 import { LoginForm } from "@/app/(auth)/login/login-form"
 
 import AuthSvg from "/public/images/Login.svg"
 
+export const metadata = {
+  title: "Login",
+}
+
 export default async function LoginPage() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect(`/profile/${user.id}`)
+  }
+
   return (
     <div className="h-full">
       <GradientBanner />
 
-      <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:px-16 lg:grid-cols-2">
+      <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:py-8 lg:grid-cols-2">
         <Image
           src={AuthSvg}
           alt="Cartoon depiction of person standing on laptop with lock icon, representing logging in"
@@ -19,7 +36,18 @@ export default async function LoginPage() {
           height={500}
         />
 
-        <LoginForm />
+        <Tabs defaultValue="login">
+          <TabsList>
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login">
+            <LoginForm />
+          </TabsContent>
+          <TabsContent value="signup">
+            <UserProfileForm title="Sign Up" formType="register" />
+          </TabsContent>
+        </Tabs>
       </section>
     </div>
   )
