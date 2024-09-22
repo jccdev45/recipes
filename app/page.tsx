@@ -34,11 +34,9 @@ export default async function Index() {
 
   return (
     <>
-      <section className="flex flex-col items-center gap-y-4 px-4 py-10 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
-        <div className="my-6 flex w-full flex-col items-start justify-center gap-2 px-8 md:my-0 md:w-1/3">
-          <TypographyH1 className="max-w-max rounded-md dark:bg-black/80">
-            Welcome!
-          </TypographyH1>
+      <section className="flex flex-col items-center px-4 py-10 gap-y-4 md:flex-row md:justify-evenly md:py-14 lg:gap-0">
+        <div className="flex flex-col items-start justify-center w-full gap-2 px-8 my-6 md:my-0 md:w-1/3">
+          <TypographyH1 className="rounded-md max-w-max">Welcome!</TypographyH1>
           <div className="w-full md:w-fit">
             {!user && (
               <Button asChild>
@@ -115,9 +113,9 @@ export default async function Index() {
 function RecipesFallback() {
   return (
     <>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="w-5/6 col-span-1 mx-auto"></Skeleton>
+      <Skeleton className="w-5/6 col-span-1 mx-auto"></Skeleton>
+      <Skeleton className="w-5/6 col-span-1 mx-auto"></Skeleton>
     </>
   )
 }
