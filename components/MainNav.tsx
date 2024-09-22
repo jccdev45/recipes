@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { AvatarProps } from "@radix-ui/react-avatar"
-import type { User } from "@supabase/supabase-js"
 import {
   ChefHat,
   Edit,
@@ -28,7 +27,8 @@ import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { TypographyP } from "@/components/ui/typography"
 
-import LogoutButton from "./LogoutButton"
+import LogoutButton from "../app/(auth)/logout-button"
+import type { User } from "@supabase/supabase-js"
 
 interface MainNavProps extends AvatarProps {
   className: string
