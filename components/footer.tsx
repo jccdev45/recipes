@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Heart, UtensilsCrossed } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 export function Footer({ className }: { className?: string }) {
   return (
@@ -26,7 +26,7 @@ export function Footer({ className }: { className?: string }) {
         </div>
       </div>
       <div className="container mx-auto flex w-full flex-col items-center justify-center px-5 py-4 md:max-w-sm">
-        <TypographyP className="text-center">
+        <Typography variant="p" className="text-center">
           Made (with love) by{" "}
           <Link
             href="https://jccdev.vercel.app"
@@ -37,7 +37,7 @@ export function Footer({ className }: { className?: string }) {
             @jccdev
             <Heart className="ml-1 bg-gradient-to-br from-red-500 to-red-800 bg-clip-text fill-red-800 no-underline" />
           </Link>
-        </TypographyP>
+        </Typography>
       </div>
     </footer>
   )

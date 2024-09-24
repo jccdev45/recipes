@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 import { cn, shimmer, toBase64 } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
-import { TypographyLarge, TypographySmall } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 import type { Recipe } from "@/lib/types"
 
@@ -50,7 +50,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
 
       <div className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded-md bg-primary/70 px-3 py-1 text-center text-white drop-shadow-md backdrop-blur dark:text-foreground lg:px-6">
         <div className="flex items-center justify-between">
-          <TypographyLarge>
+          <Typography variant="large">
             <Link
               href={`/recipes/${slug}`}
               className={cn(
@@ -60,13 +60,13 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             >
               {recipe_name}
             </Link>
-          </TypographyLarge>
+          </Typography>
 
           {/* <Heart /> */}
         </div>
 
         {path === "/recipes" && (
-          <TypographySmall>
+          <Typography variant="small">
             <em>"{quote}" - </em>
             {user_id ? (
               <Link
@@ -78,7 +78,7 @@ export function RecipeCard({ recipe, className }: RecipeCardProps) {
             ) : (
               author
             )}
-          </TypographySmall>
+          </Typography>
         )}
       </div>
     </article>

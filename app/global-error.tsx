@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { TypographyH1, TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 import ErrorSVG from "/public/images/error.svg"
 
@@ -28,13 +28,13 @@ export default function Error({
             priority
           />
           <div className="text-center lg:text-left">
-            <TypographyH1 className="mb-4">
+            <Typography variant="h1" className="mb-4">
               Oops! Something went wrong
-            </TypographyH1>
-            <TypographyP className="mb-6">
+            </Typography>
+            <Typography variant="p" className="mb-6">
               We apologize for the inconvenience. Our team has been notified and
               is working on a fix.
-            </TypographyP>
+            </Typography>
             <div className="space-x-4">
               <Button onClick={() => reset()}>Try again</Button>
               <Button variant="outline" asChild>
@@ -42,9 +42,12 @@ export default function Error({
               </Button>
             </div>
             {process.env.NODE_ENV === "development" && (
-              <TypographyP className="mt-4 text-sm text-muted-foreground">
+              <Typography
+                variant="p"
+                className="mt-4 text-sm text-muted-foreground"
+              >
                 Error: {error.message}
-              </TypographyP>
+              </Typography>
             )}
           </div>
         </section>

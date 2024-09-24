@@ -10,7 +10,7 @@ import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TypographyH4, TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 export function Searchbar({ className }: { className?: string }) {
   const supabase = createClient()
@@ -28,20 +28,20 @@ export function Searchbar({ className }: { className?: string }) {
 
   const renderSearchResults = useMemo(() => {
     if (isLoading) {
-      return <TypographyP>Loading...</TypographyP>
+      return <Typography variant="p">Loading...</Typography>
     }
 
     if (error) {
-      return <TypographyP>{error.message}</TypographyP>
+      return <Typography variant="p">{error.message}</Typography>
     }
 
     if (!searchResults || searchResults.length === 0) {
-      return <TypographyP>No results found</TypographyP>
+      return <Typography variant="p">No results found</Typography>
     }
 
     return (
       <>
-        <TypographyH4>Showing results for: {searchTerm}</TypographyH4>
+        <Typography variant="h4">Showing results for: {searchTerm}</Typography>
         <ul>
           {searchResults.map((recipe) => (
             <li key={recipe.id}>

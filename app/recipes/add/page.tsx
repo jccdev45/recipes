@@ -2,7 +2,7 @@ import Image from "next/image"
 import { redirect } from "next/navigation"
 import { createClient } from "@/supabase/server"
 
-import { TypographyH1 } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/gradient-banner"
 import { AddRecipeForm } from "@/app/recipes/add/add-recipe-form"
 
@@ -29,9 +29,9 @@ export default async function AddRecipePage() {
 
       <div className="grid -translate-y-20 grid-cols-1 px-4 lg:-translate-y-20 lg:gap-0">
         <div className="grid grid-cols-2 bg-muted p-2 md:py-4">
-          <TypographyH1 className="m-auto text-2xl md:text-3xl">
+          <Typography variant="h1" className="m-auto text-2xl md:text-3xl">
             Add Recipe
-          </TypographyH1>
+          </Typography>
           <Image
             src={Cooking2}
             alt="Cartoonish depiction of two people whisking a bowl (not sure why it takes two but okay). The person on the right is holding the bowl and the one on the left is whisking it. You could argue they're showing the other how to do it but like, I wouldn't show someone while they were holding the bowl because that sounds like a quick way for the bowl to be dropped. Hopefully one day the truth comes to light."

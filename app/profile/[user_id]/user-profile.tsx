@@ -11,15 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  TypographyH1,
-  TypographyH3,
-  TypographyH4,
-  TypographyLarge,
-  TypographyLead,
-  TypographyMuted,
-  TypographySmall,
-} from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 import { RecipeCard } from "@/app/recipes/recipe-card"
 
 import type { UserWithRecipes } from "@/lib/types"
@@ -39,9 +31,9 @@ function ProfileInfo({ user }: { user: UserWithRecipes }) {
         </AvatarFallback>
       </Avatar>
       <div className="text-sm">
-        <TypographyH4 className="font-semibold">
+        <Typography variant="h4" className="font-semibold">
           {user.first_name} {user.last_name}
-        </TypographyH4>
+        </Typography>
       </div>
     </div>
   )
@@ -50,23 +42,25 @@ function ProfileInfo({ user }: { user: UserWithRecipes }) {
 function AuthUserInfo({ user }: { user: User }) {
   return (
     <div className="grid grid-cols-3 gap-2">
-      <TypographyMuted>Email</TypographyMuted>
-      <TypographySmall className="col-span-2">{user.email}</TypographySmall>
-      <TypographyMuted>Joined</TypographyMuted>
-      <TypographySmall className="col-span-2">
+      <Typography variant="muted">Email</Typography>
+      <Typography variant="small" className="col-span-2">
+        {user.email}
+      </Typography>
+      <Typography variant="muted">Joined</Typography>
+      <Typography variant="small" className="col-span-2">
         {new Date(user.created_at).toLocaleDateString("en-US")}
-      </TypographySmall>
-      <TypographyMuted>Last login</TypographyMuted>
-      <TypographySmall className="col-span-2">
+      </Typography>
+      <Typography variant="muted">Last login</Typography>
+      <Typography variant="small" className="col-span-2">
         {new Date(user.last_sign_in_at!).toLocaleDateString("en-US")}
-      </TypographySmall>
+      </Typography>
     </div>
   )
 }
 
 function RecipesList({ recipes }: { recipes: UserWithRecipes["recipes"] }) {
   if (!recipes.length) {
-    return <TypographyLarge>No recipes yet</TypographyLarge>
+    return <Typography variant="large">No recipes yet</Typography>
   }
 
   return (
@@ -119,8 +113,8 @@ export function UserProfile({
     <div className="mx-auto grid grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
       <section className="space-y-6">
         <header className="space-y-4">
-          <TypographyH1>Profile</TypographyH1>
-          <TypographyLead>User profile information</TypographyLead>
+          <Typography variant="h1">Profile</Typography>
+          <Typography variant="lead">User profile information</Typography>
         </header>
         <div className="space-y-8">
           <ProfileInfo user={profileUser} />
@@ -137,9 +131,9 @@ export function UserProfile({
       <section className="space-y-6 lg:space-y-10">
         <Card>
           <CardHeader className="p-4">
-            <TypographyH3 className="text-lg font-bold">
+            <Typography variant="h3" className="text-lg font-bold">
               Recipes by {profileUser.first_name || "user"}:
-            </TypographyH3>
+            </Typography>
           </CardHeader>
           <CardContent className="p-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">

@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { TypographyH1, TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 import FourOhFour from "/public/images/404.svg"
 
@@ -16,10 +16,12 @@ export default function NotFound() {
         height={400}
         priority
       />
-      <TypographyH1 className="mb-4 mt-8">Oops! Page Not Found</TypographyH1>
-      <TypographyP className="mb-6">
+      <Typography variant="h1" className="mb-4 mt-8">
+        Oops! Page Not Found
+      </Typography>
+      <Typography variant="p" className="mb-6">
         The page you're looking for doesn't exist or has been moved.
-      </TypographyP>
+      </Typography>
       <Button asChild>
         <Link href="/">Return to Home</Link>
       </Button>

@@ -42,7 +42,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 type CommentsSectionProps = {
   className: string
@@ -160,7 +160,7 @@ export function CommentsSection({
           </form>
         </Form>
       ) : (
-        <TypographyP>Please login to leave a comment</TypographyP>
+        <Typography variant="p">Please login to leave a comment</Typography>
       )}
 
       {comments?.map((comment) => (
@@ -254,7 +254,7 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
         <span className="max-w-max text-sm">
           {new Date(created_at).toLocaleDateString("en-US")}
         </span>
-        <TypographyP>{message}</TypographyP>
+        <Typography variant="p">{message}</Typography>
       </div>
 
       {/* <div className="flex items-center justify-center h-10 ml-auto gap-x-2">

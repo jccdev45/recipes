@@ -10,11 +10,7 @@ import { Badge, Link } from "lucide-react"
 import { Recipe } from "@/lib/types"
 import { shimmer, toBase64 } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
-import {
-  TypographyBlockquote,
-  TypographyH1,
-  TypographyList,
-} from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
@@ -48,8 +44,8 @@ export function RecipeDisplay({
     <>
       <header className="grid grid-cols-1 bg-primary/30 py-4 md:grid-cols-2">
         <div className="my-auto grid h-fit place-items-center">
-          <TypographyH1>{recipe_name}</TypographyH1>
-          <TypographyBlockquote>{quote}</TypographyBlockquote>
+          <Typography variant="h1">{recipe_name}</Typography>
+          <Typography variant="blockquote">{quote}</Typography>
 
           {user_id ? (
             <Link
@@ -61,11 +57,11 @@ export function RecipeDisplay({
           ) : (
             author
           )}
-          <TypographyList className="space-x-2">
+          <Typography variant="list" className="space-x-2">
             {tags.map(({ id, tag }) => (
               <Badge key={id}>{tag}</Badge>
             ))}
-          </TypographyList>
+          </Typography>
         </div>
 
         <Image

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 import LogoutButton from "../app/(auth)/logout-button"
 import type { User } from "@supabase/supabase-js"
@@ -68,9 +68,12 @@ export function MainNav({ user, className, ...props }: MainNavProps) {
                     </div>
                   </a>
                 </NavigationMenuLink>
-                <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
+                <Typography
+                  variant="p"
+                  className="line-clamp-2 block text-sm text-muted-foreground"
+                >
                   The complete collection
-                </TypographyP>
+                </Typography>
               </li>
               <li className="row-span-1">
                 <NavigationMenuLink
@@ -87,9 +90,12 @@ export function MainNav({ user, className, ...props }: MainNavProps) {
                     </div>
                   </a>
                 </NavigationMenuLink>
-                <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
+                <Typography
+                  variant="p"
+                  className="line-clamp-2 block text-sm text-muted-foreground"
+                >
                   Got a slick new recipe? Add it!
-                </TypographyP>
+                </Typography>
               </li>
             </ul>
           </NavigationMenuContent>
@@ -140,9 +146,12 @@ export function MainNav({ user, className, ...props }: MainNavProps) {
                         </div>
                       </a>
                     </NavigationMenuLink>
-                    <TypographyP className="line-clamp-2 block truncate text-sm text-muted-foreground">
+                    <Typography
+                      variant="p"
+                      className="line-clamp-2 block truncate text-sm text-muted-foreground"
+                    >
                       {user.email}
-                    </TypographyP>
+                    </Typography>
                   </li>
                   <li className="row-span-1">
                     <NavigationMenuLink
@@ -159,9 +168,12 @@ export function MainNav({ user, className, ...props }: MainNavProps) {
                         </div>
                       </a>
                     </NavigationMenuLink>
-                    <TypographyP className="line-clamp-2 block text-sm text-muted-foreground">
+                    <Typography
+                      variant="p"
+                      className="line-clamp-2 block text-sm text-muted-foreground"
+                    >
                       Update your information
-                    </TypographyP>
+                    </Typography>
                   </li>
 
                   <Separator className="my-1 h-2 w-full rounded-lg bg-foreground" />

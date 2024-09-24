@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/supabase/server"
 
-import { TypographyH1, TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 export default async function EditRecipePage() {
   const supabase = createClient()
@@ -16,8 +16,8 @@ export default async function EditRecipePage() {
 
   return (
     <section>
-      <TypographyH1>Profile</TypographyH1>
-      <TypographyP>{user?.email}</TypographyP>
+      <Typography variant="h1">Profile</Typography>
+      <Typography variant="p">{user?.email}</Typography>
     </section>
   )
 }

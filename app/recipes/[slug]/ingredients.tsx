@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TypographyH2, TypographyList } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 type IngredientsProps = {
   className: string
@@ -34,7 +34,9 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
   return (
     <div className={cn(``, className)}>
       <div className="flex items-center gap-4 border-b">
-        <TypographyH2 className="border-0">Ingredients</TypographyH2>
+        <Typography variant="h2" className="border-0">
+          Ingredients
+        </Typography>
         <HoverCard>
           <HoverCardTrigger>
             <Info />
@@ -71,7 +73,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
         </span>
       </span>
 
-      <TypographyList>
+      <Typography variant="list">
         {adjusted.map(({ id, ingredient, amount, unitMeasurement }) => (
           <li key={id} className="my-1 flex items-center justify-start gap-x-1">
             {unitMeasurement === "unit" || serving === 0 ? (
@@ -98,7 +100,7 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
             </Label>
           </li>
         ))}
-      </TypographyList>
+      </Typography>
     </div>
   )
 }

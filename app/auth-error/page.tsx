@@ -3,7 +3,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
-import { TypographyH1, TypographyP } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 import ErrorSVG from "/public/images/error.svg"
 
@@ -33,10 +33,12 @@ export default function AuthErrorPage({
         priority
       />
       <div className="text-center lg:text-left">
-        <TypographyH1 className="mb-4">Authentication Error</TypographyH1>
-        <TypographyP className="mb-6">
+        <Typography variant="h1" className="mb-4">
+          Authentication Error
+        </Typography>
+        <Typography variant="p" className="mb-6">
           {decodeURIComponent(message)}
-        </TypographyP>
+        </Typography>
         <Button variant="outline" asChild>
           <Link href="/">Return to Home</Link>
         </Button>

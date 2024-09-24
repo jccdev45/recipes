@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TypographyH2 } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 import { signup } from "@/app/(auth)/actions"
 import { AuthButton } from "@/app/(auth)/auth-button"
 import { updateProfile } from "@/app/profile/actions"
@@ -135,9 +135,12 @@ export function UserProfileForm({
   return (
     <form className="m-base border bg-background p-8 shadow" autoComplete="off">
       <fieldset className="grid auto-cols-auto gap-4">
-        <TypographyH2 className="col-span-2 mx-auto w-full text-center">
+        <Typography
+          variant="h2"
+          className="col-span-2 mx-auto w-full text-center"
+        >
           {title}
-        </TypographyH2>
+        </Typography>
 
         {renderFormFields()}
 

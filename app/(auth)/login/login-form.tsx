@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { loginFormItems } from "@/lib/constants"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TypographyH2 } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 import { login } from "@/app/(auth)/actions"
 import { AuthButton } from "@/app/(auth)/auth-button"
 
@@ -34,7 +34,9 @@ export function LoginForm() {
       autoComplete="off"
     >
       <fieldset className="flex flex-col items-start gap-4">
-        <TypographyH2 className="mx-auto w-2/3 text-center">Login</TypographyH2>
+        <Typography variant="h2" className="mx-auto w-2/3 text-center">
+          Login
+        </Typography>
         {loginFormItems.map(({ type, fieldName, placeholder, label }) => (
           <Fragment key={fieldName}>
             <Label className="text-lg" htmlFor={fieldName}>

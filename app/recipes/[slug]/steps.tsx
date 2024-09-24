@@ -6,7 +6,7 @@ import { Step } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { TypographyH2, TypographyList } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 type StepsProps = {
   className: string
@@ -16,15 +16,15 @@ type StepsProps = {
 export function Steps({ steps, className }: StepsProps) {
   return (
     <div className={cn(``, className)}>
-      <TypographyH2>Steps</TypographyH2>
+      <Typography variant="h2">Steps</Typography>
       {/* TODO: ADD DRAGGABLE */}
-      <TypographyList className="flex flex-col">
+      <Typography variant="list" className="flex flex-col">
         {steps.map(({ id, step }) => (
           <StepBoxImStuck key={id} id={id}>
             {step}
           </StepBoxImStuck>
         ))}
-      </TypographyList>
+      </Typography>
     </div>
   )
 }

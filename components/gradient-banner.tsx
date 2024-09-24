@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { TypographyH2 } from "@/components/ui/typography"
+import { Typography } from "@/components/ui/typography"
 
 export function GradientBanner({ text }: { text?: string }) {
   const complementaryColors = {
@@ -86,7 +86,7 @@ export function GradientBanner({ text }: { text?: string }) {
         `from-primary to-primary/90`
       )}
     >
-      {text && <TypographyH2>{text}</TypographyH2>}
+      {text && <Typography variant="h2">{text}</Typography>}
     </div>
   )
 }
