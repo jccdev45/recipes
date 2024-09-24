@@ -15,3 +15,10 @@ export const getFeaturedRecipes = (client: TypedSupabaseClient) => {
     .order("id", { ascending: true })
     .limit(3)
 }
+
+export const searchRecipes = (
+  client: TypedSupabaseClient,
+  searchTerm: string
+) => {
+  return client.from("recipes").select().textSearch("search_vector", searchTerm)
+}
