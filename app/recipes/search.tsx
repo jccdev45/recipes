@@ -59,7 +59,7 @@ export function Searchbar({ className }: { className?: string }) {
   }, [isLoading, error, searchResults, searchTerm])
 
   return (
-    <div className={cn("relative", className)} role="search">
+    <div className={cn("relative w-full", className)} role="search">
       <Label htmlFor="search" className="sr-only">
         Search recipes
       </Label>

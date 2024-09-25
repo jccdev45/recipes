@@ -37,11 +37,11 @@ import { Searchbar } from "@/app/recipes/search"
 
 export function ClientNav({ user }: { user: User | null }) {
   return (
-    <div className="relative flex items-center space-x-4">
-      <div className="hidden md:block">
+    <div className="flex items-end justify-end space-x-4 self-end">
+      <div className="hidden md:w-64 lg:block lg:w-80">
         <Searchbar />
       </div>
-      <div className="hidden items-center space-x-4 md:flex">
+      <div className="hidden items-center space-x-4 lg:flex">
         <UserDropdown user={user} />
         <ThemeToggle />
       </div>
@@ -54,7 +54,7 @@ function MobileMenu({ user }: { user: User | null }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button className="md:hidden" variant="ghost" size="icon">
+        <Button className="lg:hidden" variant="ghost" size="icon">
           <Menu />
         </Button>
       </SheetTrigger>

@@ -28,19 +28,20 @@ export async function Nav() {
 
   return (
     <header className="w-full shadow-md">
-      <div className="container mx-auto flex items-center justify-between py-4 sm:px-4">
-        <Link href="/" className="flex items-center gap-2">
+      <div className="container mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 sm:px-4 lg:grid-cols-3">
+        <Link
+          href="/"
+          className="flex items-center justify-start gap-2 self-start"
+        >
           <UtensilsCrossed className="size-8" />
-          <h1 className="hidden text-2xl font-bold text-secondary sm:block">
-            Family Recipes
-          </h1>
+          <h1 className="text-2xl font-bold text-secondary">Family Recipes</h1>
         </Link>
-        <nav className="hidden space-x-6 md:flex">
+        <nav className="hidden items-center justify-center space-x-6 self-center lg:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className="text-primary-foreground transition-colors duration-200 ease-in-out hover:text-primary"
+              className="text-foreground transition-colors duration-200 ease-in-out hover:text-primary"
             >
               {label}
             </Link>
