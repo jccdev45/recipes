@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { User } from "@supabase/supabase-js"
 import { LogIn, LogOut, Menu, UserCircle2, UserIcon, X } from "lucide-react"
 
@@ -15,10 +16,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { logout } from "@/app/(auth)/actions"
 import { Searchbar } from "@/app/recipes/search"
 
 export function ClientNav({ user }: { user: User | null }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
 
   const renderUserDropdown = () => {
     return (
@@ -47,9 +55,11 @@ export function ClientNav({ user }: { user: User | null }) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 size-4" />
-                <span>Sign out</span>
+              <DropdownMenuItem asChild>
+                <Button variant="destructive" onClick={handleLogout}>
+                  <LogOut className="mr-2 size-4" />
+                  <span>Sign out</span>
+                </Button>
               </DropdownMenuItem>
             </>
           ) : (
