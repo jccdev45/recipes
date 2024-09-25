@@ -1,11 +1,12 @@
 "use client"
 
 import { Suspense } from "react"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import { Link, Loader2, UserCircle } from "lucide-react"
+import { Loader2, UserCircle } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -120,9 +121,12 @@ export function UserProfile({
           <ProfileInfo user={profileUser} />
           {isOwnProfile && currentUser && <AuthUserInfo user={currentUser} />}
           {isOwnProfile && (
-            <Button asChild variant="outline" className="gap-4">
-              <Link href={`/profile/${user_id}/edit`}>
-                <UserCircle /> Edit Profile
+            <Button asChild size="lg">
+              <Link
+                href={`/profile/${user_id}/edit`}
+                className="flex items-center gap-4"
+              >
+                <UserCircle /> <span>Edit Profile</span>
               </Link>
             </Button>
           )}
