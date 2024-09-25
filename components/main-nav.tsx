@@ -1,12 +1,14 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { AvatarProps } from "@radix-ui/react-avatar"
 import {
   ChefHat,
   Edit,
   Home,
   LogIn,
+  LogOut,
   PlusCircle,
   UserCircle2,
   UtensilsCrossed,
@@ -26,8 +28,8 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Typography } from "@/components/ui/typography"
+import { logout } from "@/app/(auth)/actions"
 
-import LogoutButton from "../app/(auth)/logout-button"
 import type { User } from "@supabase/supabase-js"
 
 interface MainNavProps extends AvatarProps {
@@ -36,6 +38,13 @@ interface MainNavProps extends AvatarProps {
 }
 
 export function MainNav({ user, className, ...props }: MainNavProps) {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
+
   return (
     <NavigationMenu className={className}>
       <NavigationMenuList>
@@ -179,7 +188,10 @@ export function MainNav({ user, className, ...props }: MainNavProps) {
                   <Separator className="my-1 h-2 w-full rounded-lg bg-foreground" />
 
                   <li className="row-span-1 ml-auto">
-                    <LogoutButton />
+                    <Button variant="destructive" onClick={handleLogout}>
+                      <LogOut className="mr-2 size-4" />
+                      <span>Sign out</span>
+                    </Button>
                   </li>
                 </ul>
               </NavigationMenuContent>
