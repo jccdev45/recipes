@@ -18,11 +18,7 @@ export function FeaturedRecipes() {
   return (
     <>
       {recipes.map((recipe: Recipe) => (
-        <RecipeCard
-          key={recipe.id}
-          recipe={recipe}
-          className="col-span-1 mx-auto w-3/4 md:w-5/6"
-        />
+        <RecipeCard key={recipe.id} recipe={recipe} />
       ))}
     </>
   )
