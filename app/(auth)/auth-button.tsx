@@ -1,30 +1,31 @@
-"use client"
-
-import { Loader2 } from "lucide-react"
-import { useFormStatus } from "react-dom"
+import { forwardRef } from "react"
 
 import { Button } from "@/components/ui/button"
-import { login } from "@/app/(auth)/actions"
+import { login, signup, updateProfile } from "@/app/(auth)/actions"
+
+type AuthAction = typeof login | typeof signup | typeof updateProfile
 
 interface AuthButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string
-  action: typeof login
+  action: AuthAction
   className?: string
 }
 
-export function AuthButton({ className, label, action }: AuthButtonProps) {
-  const { pending } = useFormStatus()
+export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
+  ({ className, label, action, ...props }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        className={className}
+        formAction={action}
+        type="submit"
+        {...props}
+      >
+        {label}
+      </Button>
+    )
+  }
+)
 
-  return (
-    <Button
-      aria-disabled={pending}
-      disabled={pending}
-      className={className}
-      formAction={action}
-    >
-      {pending && <Loader2 className="mr-2 size-4 animate-spin" />}
-      {label}
-    </Button>
-  )
-}
+AuthButton.displayName = "AuthButton"
