@@ -1,7 +1,11 @@
 import { getRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import { QueryClient } from "@tanstack/react-query"
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query"
 
 import { GradientBanner } from "@/components/gradient-banner"
 import { RecipeList } from "@/app/recipes/recipe-list"
@@ -26,17 +30,18 @@ export default async function RecipesPage({
 
   await prefetchQuery(queryClient, getRecipes(supabase))
 
-  // if (!recipes) {
-  //   return <TypographyH1 className="mx-auto">No recipes found</TypographyH1>
-  // }
-
   return (
     <>
       <GradientBanner
         text={search ? `Showing results for ${search}` : "Recipes"}
+        size="lg"
+        variant="accent"
+        pattern
       />
 
-      <RecipeList />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <RecipeList />
+      </HydrationBoundary>
     </>
   )
 }
