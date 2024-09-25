@@ -79,7 +79,7 @@ export function ClientNav({ user }: { user: User | null }) {
     if (!isMenuOpen) return null
 
     return (
-      <div className="absolute left-0 right-0 top-full bg-white py-4 shadow-md md:hidden">
+      <div className="absolute left-0 right-0 top-full z-10 bg-white py-4 shadow-md md:hidden">
         <nav className="flex flex-col space-y-4 px-4">
           {NAV_LINKS.map((link) => (
             <Link
