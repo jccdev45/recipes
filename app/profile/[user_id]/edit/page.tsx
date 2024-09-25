@@ -4,6 +4,7 @@ import { createClient } from "@/supabase/server"
 
 import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
+import { getUser } from "@/app/(auth)/actions"
 import { AccountForm } from "@/app/profile/[user_id]/edit/account-form"
 
 import AccountInfoSvg from "/public/images/AccountInfo.svg"
@@ -13,10 +14,12 @@ export const metadata = {
 }
 
 export default async function EditProfilePage() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
+
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   if (!user) {
     redirect("/login")

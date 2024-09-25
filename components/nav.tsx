@@ -1,8 +1,8 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { searchRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import { User } from "@supabase/supabase-js"
 import {
   dehydrate,
   HydrationBoundary,
@@ -12,17 +12,16 @@ import { UtensilsCrossed } from "lucide-react"
 
 import { NAV_LINKS } from "@/lib/constants"
 import { ClientNav } from "@/components/client-nav"
+import { getUser } from "@/app/(auth)/actions"
 
 export async function Nav() {
   const supabase = createClient()
   const queryClient = new QueryClient()
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
 
   if (error) {
     console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
   }
 
   await prefetchQuery(queryClient, searchRecipes(supabase, ""))

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { getRecipeBySlug } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
@@ -8,6 +8,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query"
 
+import { getUser } from "@/app/(auth)/actions"
 import { CommentsSection } from "@/app/recipes/[slug]/comments"
 import { RecipeDisplay } from "@/app/recipes/[slug]/recipe-display"
 
@@ -35,13 +36,17 @@ export default async function RecipePage({
 }: RecipePageProps) {
   const queryClient = new QueryClient()
   const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
+
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   await prefetchQuery(queryClient, getRecipeBySlug(supabase, slug))
 
   const { data: recipe } = await getRecipeBySlug(supabase, slug)
+
   if (!recipe) notFound()
 
   return (

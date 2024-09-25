@@ -140,9 +140,10 @@ export async function getUser() {
   const supabase = createClient()
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
 
-  return user
+  return { user, error }
 }
 
 export async function updateProfile(formData: FormData) {

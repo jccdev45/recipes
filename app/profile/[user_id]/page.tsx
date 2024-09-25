@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { redirect } from "next/navigation"
 import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
@@ -9,6 +10,7 @@ import {
 } from "@tanstack/react-query"
 
 import { GradientBanner } from "@/components/gradient-banner"
+import { getUser } from "@/app/(auth)/actions"
 import { UserProfile } from "@/app/profile/[user_id]/user-profile"
 
 type Props = {
@@ -33,9 +35,12 @@ export async function generateMetadata({
 export default async function ProfilePage({ params: { user_id } }: Props) {
   const queryClient = new QueryClient()
   const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
+
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   await prefetchQuery(queryClient, getUserWithRecipes(supabase, user_id))
 

@@ -1,14 +1,15 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/supabase/server"
 
 import { Typography } from "@/components/ui/typography"
+import { getUser } from "@/app/(auth)/actions"
 
 export default async function EditRecipePage() {
-  const supabase = createClient()
-  // const supabase = createServerComponentClient({ cookies });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
+
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   if (!user) {
     redirect("/login")

@@ -1,10 +1,9 @@
 import Image from "next/image"
 import { redirect } from "next/navigation"
-import { createClient } from "@/supabase/server"
 
 import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
-import { signup } from "@/app/(auth)/actions"
+import { getUser } from "@/app/(auth)/actions"
 
 import AuthSvg from "/public/images/Login.svg"
 
@@ -13,10 +12,12 @@ export const metadata = {
 }
 
 export default async function SignupPage() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, error } = await getUser()
+
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   if (user) {
     redirect(`/profile/${user.id}`)

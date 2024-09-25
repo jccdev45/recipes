@@ -1,9 +1,9 @@
 import Image from "next/image"
 import { redirect } from "next/navigation"
-import { createClient } from "@/supabase/server"
 
 import { Typography } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/gradient-banner"
+import { getUser } from "@/app/(auth)/actions"
 import { AddRecipeForm } from "@/app/recipes/add/add-recipe-form"
 
 import Cooking2 from "/public/images/Cooking2.svg"
@@ -13,11 +13,12 @@ export const metadata = {
 }
 
 export default async function AddRecipePage() {
-  const supabase = createClient()
+  const { user, error } = await getUser()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  if (error) {
+    console.error(error)
+    redirect(`/auth-error?message=${error.message}`)
+  }
 
   if (!user) {
     redirect("/login")
