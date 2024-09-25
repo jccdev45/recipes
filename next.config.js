@@ -3,27 +3,32 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: "https",
         hostname: "eebioglnufbnareanhqf.supabase.co",
-        port: ''
+        port: "",
       },
       {
-        protocol: 'https',
+        protocol: "https",
         hostname: "placehold.it",
-        port: ''
+        port: "",
       },
       {
-        protocol: 'https',
+        protocol: "https",
         hostname: "unsplash.it",
-        port: ''
+        port: "",
       },
       {
-        protocol: 'https',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+      },
+      {
+        protocol: "https",
         hostname: "loremflickr.com",
-        port: ''
+        port: "",
       },
     ],
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
