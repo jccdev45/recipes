@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { User } from "@supabase/supabase-js"
 import {
   LogIn,
@@ -41,11 +40,8 @@ export function ClientNav({
   user: User | null
   logout: () => Promise<void>
 }) {
-  const router = useRouter()
-
   const handleLogout = async () => {
     await logout()
-    router.push("/")
   }
 
   return (

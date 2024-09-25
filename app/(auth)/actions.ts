@@ -11,17 +11,17 @@ import {
 
 import { LoginSchema, RegisterSchema } from "@/lib/zod/schema"
 
-// export const getURL = () => {
-//   let url =
-//     process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
-//     process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
-//     "http://localhost:3000/"
-//   // Make sure to include `https://` when not localhost.
-//   url = url.includes("http") ? url : `https://${url}`
-//   // Make sure to include a trailing `/`.
-//   url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
-//   return url
-// }
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    "http://localhost:3000/"
+  // Make sure to include `https://` when not localhost.
+  url = url.startsWith("http") ? url : `https://${url}`
+  // Make sure to include a trailing `/`.
+  url = url.endsWith("/") ? url : `${url}/`
+  return url
+}
 
 // Initialize the obscenity matcher
 const matcher = new RegExpMatcher({
@@ -63,15 +63,18 @@ export async function login(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
+  })
 
   if (error) {
     console.error("Error: ", error.message)
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  revalidatePath("/recipes", "page")
-  redirect(`/recipes`)
+  revalidatePath("/", "layout")
+  redirect(`/`)
 }
 
 // Signup function
@@ -112,6 +115,7 @@ export async function signup(formData: FormData) {
         first_name: values.first_name,
         last_name: values.last_name,
       },
+      emailRedirectTo: getURL(),
     },
   })
 
@@ -120,8 +124,8 @@ export async function signup(formData: FormData) {
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  revalidatePath(`/profile/${user?.id}`, "page")
-  redirect(`/profile/${user?.id}`)
+  revalidatePath("/", "layout")
+  redirect("/")
 }
 
 export async function logout() {
@@ -133,7 +137,8 @@ export async function logout() {
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  // redirect(`/`)
+  revalidatePath("/", "layout")
+  redirect(`/`)
 }
 
 export async function getUser() {
@@ -191,6 +196,6 @@ export async function updateProfile(formData: FormData) {
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  revalidatePath(`/profile/${data.user.id}`, "page")
-  redirect(`/profile/${data.user.id}`)
+  revalidatePath("/", "layout")
+  redirect("/")
 }
