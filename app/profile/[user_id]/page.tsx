@@ -35,11 +35,10 @@ export async function generateMetadata({
 export default async function ProfilePage({ params: { user_id } }: Props) {
   const queryClient = new QueryClient()
   const supabase = createClient()
-  const { user, error } = await getUser()
+  const { user } = await getUser()
 
-  if (error) {
-    console.error(error)
-    redirect(`/auth-error?message=${error.message}`)
+  if (!user) {
+    redirect("/login")
   }
 
   await prefetchQuery(queryClient, getUserWithRecipes(supabase, user_id))

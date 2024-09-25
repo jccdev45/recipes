@@ -32,25 +32,43 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { logout } from "@/app/(auth)/actions"
 import { Searchbar } from "@/app/recipes/search"
 
-export function ClientNav({ user }: { user: User | null }) {
+export function ClientNav({
+  user,
+  logout,
+}: {
+  user: User | null
+  logout: () => Promise<void>
+}) {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
+
   return (
     <div className="flex items-end justify-end space-x-4 self-end">
       <div className="hidden md:w-64 lg:block lg:w-80">
         <Searchbar />
       </div>
       <div className="hidden items-center space-x-4 lg:flex">
-        <UserDropdown user={user} />
+        <UserDropdown user={user} logout={handleLogout} />
         <ThemeToggle />
       </div>
-      <MobileMenu user={user} />
+      <MobileMenu user={user} logout={handleLogout} />
     </div>
   )
 }
 
-function MobileMenu({ user }: { user: User | null }) {
+function MobileMenu({
+  user,
+  logout,
+}: {
+  user: User | null
+  logout: () => Promise<void>
+}) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -80,7 +98,7 @@ function MobileMenu({ user }: { user: User | null }) {
         <SheetFooter>
           <div className="flex items-center justify-between">
             <ThemeToggle />
-            <UserDropdown user={user} />
+            <UserDropdown user={user} logout={logout} />
           </div>
         </SheetFooter>
       </SheetContent>
@@ -88,14 +106,13 @@ function MobileMenu({ user }: { user: User | null }) {
   )
 }
 
-function UserDropdown({ user }: { user: User | null }) {
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    await logout()
-    router.push("/")
-  }
-
+function UserDropdown({
+  user,
+  logout,
+}: {
+  user: User | null
+  logout: () => Promise<void>
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -129,7 +146,7 @@ function UserDropdown({ user }: { user: User | null }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Button variant="destructive" onClick={handleLogout}>
+              <Button variant="destructive" onClick={logout}>
                 <LogOut className="mr-2 size-full" />
                 <span>Sign out</span>
               </Button>

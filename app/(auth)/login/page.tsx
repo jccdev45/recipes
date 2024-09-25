@@ -14,12 +14,7 @@ export const metadata = {
 }
 
 export default async function LoginPage() {
-  const { user, error } = await getUser()
-
-  if (error) {
-    console.error(error)
-    redirect(`/auth-error?message=${error.message}`)
-  }
+  const { user } = await getUser()
 
   if (user) {
     redirect(`/profile/${user.id}`)

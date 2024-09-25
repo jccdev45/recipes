@@ -36,12 +36,7 @@ export default async function RecipePage({
 }: RecipePageProps) {
   const queryClient = new QueryClient()
   const supabase = createClient()
-  const { user, error } = await getUser()
-
-  if (error) {
-    console.error(error)
-    redirect(`/auth-error?message=${error.message}`)
-  }
+  const { user } = await getUser()
 
   await prefetchQuery(queryClient, getRecipeBySlug(supabase, slug))
 

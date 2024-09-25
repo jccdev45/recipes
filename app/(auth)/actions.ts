@@ -133,7 +133,7 @@ export async function logout() {
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  redirect(`/`)
+  // redirect(`/`)
 }
 
 export async function getUser() {

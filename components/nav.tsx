@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { redirect } from "next/navigation"
 import { searchRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
@@ -12,17 +11,12 @@ import { UtensilsCrossed } from "lucide-react"
 
 import { NAV_LINKS } from "@/lib/constants"
 import { ClientNav } from "@/components/client-nav"
-import { getUser } from "@/app/(auth)/actions"
+import { getUser, logout } from "@/app/(auth)/actions"
 
 export async function Nav() {
   const supabase = createClient()
   const queryClient = new QueryClient()
-  const { user, error } = await getUser()
-
-  if (error) {
-    console.error(error)
-    redirect(`/auth-error?message=${error.message}`)
-  }
+  const { user } = await getUser()
 
   await prefetchQuery(queryClient, searchRecipes(supabase, ""))
 
@@ -47,7 +41,7 @@ export async function Nav() {
         ))}
       </nav>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <ClientNav user={user} />
+        <ClientNav user={user} logout={logout} />
       </HydrationBoundary>
     </header>
   )
