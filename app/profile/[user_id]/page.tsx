@@ -46,7 +46,7 @@ export default async function ProfilePage({ params: { user_id } }: Props) {
 
   return (
     <div className="mx-auto space-y-4">
-      <GradientBanner />
+      <GradientBanner pattern text="Profile" variant="secondary" />
 
       <HydrationBoundary state={dehydrate(queryClient)}>
         <UserProfile user_id={user_id} currentUser={user} />

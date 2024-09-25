@@ -27,7 +27,7 @@ export default async function EditProfilePage() {
 
   return (
     <>
-      <GradientBanner />
+      <GradientBanner pattern text="Edit Profile" />
 
       <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:px-16 lg:grid-cols-2">
         <Image

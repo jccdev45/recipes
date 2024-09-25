@@ -113,10 +113,6 @@ export function UserProfile({
   return (
     <div className="mx-auto grid grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
       <section className="space-y-6">
-        <header className="space-y-4">
-          <Typography variant="h1">Profile</Typography>
-          <Typography variant="lead">User profile information</Typography>
-        </header>
         <div className="space-y-8">
           <ProfileInfo user={profileUser} />
           {isOwnProfile && currentUser && <AuthUserInfo user={currentUser} />}
