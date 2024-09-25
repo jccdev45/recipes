@@ -1,10 +1,10 @@
 import Image from "next/image"
 import { redirect } from "next/navigation"
-import { createClient } from "@/supabase/server"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
+import { getUser } from "@/app/(auth)/actions"
 import { LoginForm } from "@/app/(auth)/login/login-form"
 
 import AuthSvg from "/public/images/Login.svg"
@@ -14,10 +14,7 @@ export const metadata = {
 }
 
 export default async function LoginPage() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser()
 
   if (user) {
     redirect(`/profile/${user.id}`)
