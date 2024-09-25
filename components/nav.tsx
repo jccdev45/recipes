@@ -27,30 +27,28 @@ export async function Nav() {
   await prefetchQuery(queryClient, searchRecipes(supabase, ""))
 
   return (
-    <header className="w-full shadow-md">
-      <div className="container mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 sm:px-4 lg:grid-cols-3">
-        <Link
-          href="/"
-          className="flex items-center justify-start gap-2 self-start"
-        >
-          <UtensilsCrossed className="size-8" />
-          <h1 className="text-2xl font-bold text-secondary">Family Recipes</h1>
-        </Link>
-        <nav className="hidden items-center justify-center space-x-6 self-center lg:flex">
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-foreground transition-colors duration-200 ease-in-out hover:text-primary"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <HydrationBoundary state={dehydrate(queryClient)}>
-          <ClientNav user={user} />
-        </HydrationBoundary>
-      </div>
+    <header className="container mx-auto grid w-full grid-cols-[auto_1fr_auto] items-center gap-4 py-4 shadow-md sm:px-4 lg:grid-cols-3">
+      <Link
+        href="/"
+        className="flex items-center justify-start gap-2 self-start"
+      >
+        <UtensilsCrossed className="size-8" />
+        <h1 className="text-2xl font-bold text-secondary">Family Recipes</h1>
+      </Link>
+      <nav className="hidden items-center justify-center space-x-6 self-center lg:flex">
+        {NAV_LINKS.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="text-foreground transition-colors duration-200 ease-in-out hover:text-primary"
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ClientNav user={user} />
+      </HydrationBoundary>
     </header>
   )
 }

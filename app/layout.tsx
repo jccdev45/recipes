@@ -41,11 +41,11 @@ export default async function RootLayout({
         )}
       >
         <AppProviders>
-          <div className="mx-auto flex min-h-screen max-w-screen-xl flex-col items-center justify-between xl:max-w-screen-2xl">
+          <div className="mx-auto flex min-h-screen max-w-screen-lg flex-col items-center justify-between gap-y-4 xl:max-w-screen-xl">
             <Nav />
             <main className="w-full max-w-6xl flex-1 grow">{children}</main>
-            <Toaster />
             <Footer className="w-full py-8" />
+            <Toaster />
           </div>
         </AppProviders>
       </body>
