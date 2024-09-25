@@ -2,8 +2,6 @@
 
 import Link from "next/link"
 import { User } from "@supabase/supabase-js"
-import { useFormState } from "react-dom"
-import { toast } from "sonner"
 
 import { registerFormItems } from "@/lib/constants"
 import { cn } from "@/lib/utils"
@@ -22,14 +20,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Typography } from "@/components/ui/typography"
-import { signup } from "@/app/(auth)/actions"
+import { signup, updateProfile } from "@/app/(auth)/actions"
 import { AuthButton } from "@/app/(auth)/auth-button"
-import { updateProfile } from "@/app/profile/actions"
-
-const initialState = {
-  message: "",
-  errors: {},
-}
 
 interface UserProfileFormProps {
   title: string
@@ -42,20 +34,8 @@ export function UserProfileForm({
   formType,
   userData,
 }: UserProfileFormProps) {
-  const action = formType === "edit" ? updateProfile : signup
-  // const [state, formAction] = useFormState(action, initialState)
-
   const formItems =
     formType === "edit" ? registerFormItems.slice(1, -1) : registerFormItems
-
-  // Display errors as toast notifications
-  // if (state?.errors) {
-  //   Object.entries(state.errors).forEach(([key, errors]) => {
-  //     if (Array.isArray(errors)) {
-  //       errors.forEach((error) => toast.error(error))
-  //     }
-  //   })
-  // }
 
   const renderFormFields = () =>
     formItems.map(
@@ -98,9 +78,9 @@ export function UserProfileForm({
   const renderFormActions = () =>
     formType === "register" ? (
       <AuthButton
-        action={action}
         label={title}
         className="col-span-2 mx-auto w-1/2"
+        action={signup}
       />
     ) : (
       <div className="flex items-center gap-x-4">
@@ -128,7 +108,7 @@ export function UserProfileForm({
             </AlertDialogHeader>
           </AlertDialogContent>
         </AlertDialog>
-        <AuthButton action={action} label="Confirm" />
+        <AuthButton label="Confirm" action={updateProfile} />
       </div>
     )
 
@@ -143,25 +123,6 @@ export function UserProfileForm({
         </Typography>
 
         {renderFormFields()}
-
-        {/* <div aria-live="polite" className="col-span-2">
-          {state?.errors ? (
-            Object.entries(state.errors).map(([field, errors]) =>
-              Array.isArray(errors)
-                ? errors.map((error) => (
-                    <p
-                      key={`${field}-${error}`}
-                      className="text-red-500 border-b"
-                    >
-                      {error}
-                    </p>
-                  ))
-                : null
-            )
-          ) : (
-            <p>{state?.message}</p>
-          )}
-        </div> */}
 
         {renderFormActions()}
       </fieldset>
