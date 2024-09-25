@@ -63,18 +63,15 @@ export async function login(formData: FormData) {
     }
   }
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
     console.error("Error: ", error.message)
     redirect(`/auth-error?message=${error.message}`)
   }
 
-  revalidatePath(`/profile/${user?.id}`, "page")
-  redirect(`/profile/${user?.id}`)
+  revalidatePath("/recipes", "page")
+  redirect(`/recipes`)
 }
 
 // Signup function
@@ -121,17 +118,29 @@ export async function signup(formData: FormData) {
   if (error) {
     console.error("Error: ", error.message)
     redirect(`/auth-error?message=${error.message}`)
-    // if (error.message.includes("already registered")) {
-    //   return {
-    //     message:
-    //       "This email is already registered. Please use a different email.",
-    //   }
-    // }
-    // return {
-    //   message: "An unexpected error occurred. Please try again later.",
-    // }
   }
 
   revalidatePath(`/profile/${user?.id}`, "page")
   redirect(`/profile/${user?.id}`)
+}
+
+export async function logout() {
+  const supabase = createClient()
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    console.error("Error: ", error.message)
+    redirect(`/auth-error?message=${error.message}`)
+  }
+
+  redirect(`/`)
+}
+
+export async function getUser() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  return user
 }
