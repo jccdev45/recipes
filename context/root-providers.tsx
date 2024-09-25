@@ -1,10 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { ThemeProvider } from "@/context/theme-provider"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { Toaster } from "sonner"
-
-import { ThemeProvider } from "@/components/theme-provider"
 
 export const AppProviders = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(
@@ -20,7 +18,6 @@ export const AppProviders = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
       </ThemeProvider>

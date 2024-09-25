@@ -1,12 +1,12 @@
 import "./globals.css"
 
 import { Lexend_Deca, Manrope } from "next/font/google"
+import { AppProviders } from "@/context/root-providers"
 import { Toaster } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { Footer } from "@/components/footer"
 import { Nav } from "@/components/nav"
-import { AppProviders } from "@/app/providers"
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" })
 const lexend = Lexend_Deca({
