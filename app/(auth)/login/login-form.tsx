@@ -1,8 +1,6 @@
 "use client"
 
 import { Fragment } from "react"
-import { useFormState } from "react-dom"
-import { toast } from "sonner"
 
 import { loginFormItems } from "@/lib/constants"
 import { Input } from "@/components/ui/input"
@@ -11,23 +9,7 @@ import { Typography } from "@/components/ui/typography"
 import { login } from "@/app/(auth)/actions"
 import { AuthButton } from "@/app/(auth)/auth-button"
 
-const initialState = {
-  message: "",
-  errors: {},
-}
-
 export function LoginForm() {
-  // const [state, formAction] = useFormState(login, initialState)
-
-  // Display errors as toast notifications
-  // if (state?.errors) {
-  //   Object.entries(state.errors).forEach(([key, errors]) => {
-  //     if (Array.isArray(errors)) {
-  //       errors.forEach((error) => toast.error(error))
-  //     }
-  //   })
-  // }
-
   return (
     <form
       className="w-full border bg-background p-8 shadow md:px-24"
@@ -43,30 +25,15 @@ export function LoginForm() {
               {label}
             </Label>
             <Input
+              className="text-lg"
               id={fieldName}
               name={fieldName}
-              type={type}
               placeholder={placeholder}
               required
-              className="text-lg"
+              type={type}
             />
           </Fragment>
         ))}
-        {/* <div aria-live="polite">
-          {state?.errors ? (
-            Object.entries(state.errors).map(([field, errors]) =>
-              Array.isArray(errors)
-                ? errors.map((error) => (
-                    <p key={`${field}-${error}`} className="text-red-500">
-                      {error}
-                    </p>
-                  ))
-                : null
-            )
-          ) : (
-            <p>{state?.message}</p>
-          )}
-        </div> */}
         <AuthButton label="Login" action={login} />
       </fieldset>
     </form>
