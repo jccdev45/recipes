@@ -1,102 +1,109 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { getRecipeBySlug } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
-import { Badge, Link } from "lucide-react"
 
 import { Recipe } from "@/lib/types"
 import { shimmer, toBase64 } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Typography } from "@/components/ui/typography"
+import { LoadingSpinner } from "@/components/loading-spinner"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
-export function RecipeDisplay({
-  slug,
-  user,
-}: {
+interface RecipeHeaderProps {
+  recipe: Recipe
+  user: User | null
+}
+
+interface RecipeContentProps {
+  recipe: Recipe
+}
+
+interface RecipeDisplayProps {
   slug: string
   user: User | null
-}) {
+}
+
+const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
+  const isAuthor = user && recipe.user_id === user.id
+
+  return (
+    <header className="grid grid-cols-1 gap-8 rounded-md bg-primary/30 py-8 md:grid-cols-2">
+      <div className="my-auto grid h-fit place-items-center gap-4 text-center">
+        <Typography variant="h1">{recipe.recipe_name}</Typography>
+        <Typography variant="blockquote">{recipe.quote}</Typography>
+        {isAuthor ? (
+          <Link
+            href="/profile"
+            className="mb-4 inline-flex items-center text-lg underline"
+          >
+            - {recipe.author} (You)
+          </Link>
+        ) : (
+          <Typography>- {recipe.author}</Typography>
+        )}
+        <div className="flex flex-wrap justify-center gap-2">
+          {recipe.tags.map(({ id, tag }) => (
+            <Badge key={id}>{tag}</Badge>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-center">
+        <Image
+          src={recipe.img || "http://unsplash.it/g/450/325?gravity=center"}
+          alt={recipe.recipe_name || "Generic fallback"}
+          width={450}
+          height={325}
+          className="rounded-md shadow shadow-foreground"
+          placeholder="blur"
+          blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 325))}`}
+        />
+      </div>
+    </header>
+  )
+}
+
+const RecipeContent = ({ recipe }: RecipeContentProps) => (
+  <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+    <Ingredients ingredients={recipe.ingredients} className="flex flex-col" />
+    <Steps steps={recipe.steps} className="flex flex-col" />
+  </div>
+)
+
+export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
   const supabase = createClient()
   const { data, isLoading, error } = useQuery(getRecipeBySlug(supabase, slug))
   const recipe = data as unknown as Recipe
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>An error occurred: {error.message}</div>
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <LoadingSpinner size={48} />
+      </div>
+    )
+  }
 
-  const {
-    author,
-    id,
-    img,
-    ingredients,
-    quote,
-    recipe_name,
-    steps,
-    tags,
-    user_id,
-  } = recipe
+  if (error) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Typography variant="h2" className="text-error">
+          An error occurred: {error.message}
+        </Typography>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <header className="grid grid-cols-1 bg-primary/30 py-4 md:grid-cols-2">
-        <div className="my-auto grid h-fit place-items-center">
-          <Typography variant="h1">{recipe_name}</Typography>
-          <Typography variant="blockquote">{quote}</Typography>
-
-          {user_id ? (
-            <Link
-              href={`/profile/${user_id}`}
-              className="inline-flex items-center text-lg underline"
-            >
-              - {author}
-            </Link>
-          ) : (
-            author
-          )}
-          <Typography variant="list" className="space-x-2">
-            {tags.map(({ id, tag }) => (
-              <Badge key={id}>{tag}</Badge>
-            ))}
-          </Typography>
-        </div>
-
-        <Image
-          src={img || "http://unsplash.it/g/300/300?gravity=center"}
-          alt={recipe_name || "Generic fallback"}
-          width={450}
-          height={325}
-          className="mx-auto shadow shadow-foreground"
-          placeholder="blur"
-          blurDataURL={`data:image/svg+xml;base64,${toBase64(
-            shimmer(450, 325)
-          )}`}
-        />
-      </header>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
-        <section>
-          {ingredients && (
-            <Ingredients
-              ingredients={ingredients}
-              className="col-span-full flex flex-col lg:col-span-1"
-            />
-          )}
-        </section>
-        <section>
-          {steps && (
-            <Steps
-              steps={steps}
-              className="col-span-full flex flex-col lg:col-span-1"
-            />
-          )}
-        </section>
-      </div>
-
+    <div className="container mx-auto px-4">
+      <RecipeHeader recipe={recipe} user={user} />
+      <RecipeContent recipe={recipe} />
       <Separator />
-    </>
+    </div>
   )
 }
