@@ -19,6 +19,7 @@ const typographyVariants = cva("", {
       blockquote: "pl-6 mt-6 italic border-l-2",
       small: "text-sm font-medium leading-none",
       list: "my-6 md:ml-6 list-disc [&>li]:mt-2",
+      error: "text-destructive font-medium",
     },
   },
   defaultVariants: {
@@ -45,6 +46,7 @@ const variantElementMap: Record<
   blockquote: "blockquote",
   small: "small",
   list: "ul",
+  error: "p",
 }
 
 function Typography({ className, variant, ...props }: TypographyProps) {
