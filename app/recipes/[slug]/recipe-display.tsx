@@ -11,8 +11,8 @@ import { Recipe } from "@/lib/types"
 import { shimmer, toBase64 } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
-import { LoadingSpinner } from "@/components/loading-spinner"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
@@ -83,16 +83,16 @@ export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size={48} />
+      <div className="flex h-screen items-start justify-center">
+        <Spinner size="xl" icon="pinwheel" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Typography variant="h2" className="text-error">
+      <div className="flex flex-1 items-start justify-center rounded bg-destructive/20 py-20">
+        <Typography variant="error" className="text-2xl">
           An error occurred: {error.message}
         </Typography>
       </div>
