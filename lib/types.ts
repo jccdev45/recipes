@@ -64,3 +64,9 @@ export interface UserWithRecipes
   extends Omit<GeneratedUserWithRecipes, "recipes"> {
   recipes: Recipe[]
 }
+
+export interface FilterState {
+  authors: string[]
+  tags: Tag[]
+  ingredients: Ingredient[]
+}
