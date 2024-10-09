@@ -17,8 +17,7 @@ import * as z from "zod"
 import { maxAmount, minAmount } from "@/lib/constants"
 import { cn, genId, toSlug } from "@/lib/utils"
 import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema"
-import useUniqueTags from "@/hooks/useTags"
-import useUnits from "@/hooks/useUnits"
+import { useRecipes } from "@/hooks/useRecipes"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,6 +30,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Spinner } from "@/components/ui/spinner"
+import { Typography } from "@/components/ui/typography"
 import { FormCombobox } from "@/app/recipes/add/form-combobox"
 import { FileInput } from "@/app/recipes/add/image-upload"
 
@@ -44,17 +45,10 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const router = useRouter()
 
   // NOTE: React Query hooks
-  const {
-    data: uniqueTags,
-    isLoading: tagLoading,
-    error: tagError,
-  } = useUniqueTags()
-  const { data: units, isLoading: unitLoading, error: unitError } = useUnits()
+  const { tags, units, error: recipeError, isLoading } = useRecipes()
 
   // Form state
   const [imgURL, setImgURL] = useState("")
-  const [recipeError, setRecipeError] = useState("")
-  const [uploadError, setUploadError] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
@@ -188,10 +182,12 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     !errors.recipe_name && getValues("recipe_name").length > 0
 
   // Render logic
-  if (tagLoading || unitLoading) return <div>Loading...</div>
-  if (tagError || unitError)
+  if (isLoading) return <Spinner size="xl" />
+  if (recipeError)
     return (
-      <div>An error occurred: {tagError?.message || unitError?.message}</div>
+      <Typography variant="error">
+        An error occurred: {recipeError.message}
+      </Typography>
     )
 
   return (
@@ -374,7 +370,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
                         updateTags(index, value)
                       }
                     }}
-                    items={uniqueTags || []}
+                    items={tags || []}
                     placeholder="Select tag"
                   />
                 )}
