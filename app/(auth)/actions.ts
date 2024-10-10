@@ -9,7 +9,11 @@ import {
   RegExpMatcher,
 } from "obscenity"
 
-import { LoginSchema, RegisterSchema } from "@/lib/zod/schema"
+import {
+  EditProfileSchema,
+  LoginSchema,
+  RegisterSchema,
+} from "@/lib/zod/schema"
 
 const getURL = () => {
   let url =
@@ -166,11 +170,9 @@ export async function updateProfile(formData: FormData) {
     confirm_password: formData.get("confirm_password") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    // avatar_url: ''
   }
 
-  const validatedFields = RegisterSchema.safeParse(values)
-
+  const validatedFields = EditProfileSchema.safeParse(values)
   if (!validatedFields.success) {
     return {
       message: "There was an error",
@@ -178,21 +180,26 @@ export async function updateProfile(formData: FormData) {
     }
   }
 
-  console.log(values)
+  const updateData: {
+    email?: string
+    password?: string
+    data?: {
+      first_name?: string
+      last_name?: string
+    }
+  } = {}
 
-  const { data, error } = await supabase.auth.updateUser({
-    email: values.email,
-    password: values.password,
-    data: {
-      first_name: values.first_name,
-      last_name: values.last_name,
-      // avatar_url: ''
-    },
-  })
+  if (values.email) updateData.email = values.email
+  if (values.password) updateData.password = values.password
+  if (values.first_name)
+    updateData.data = { ...updateData.data, first_name: values.first_name }
+  if (values.last_name)
+    updateData.data = { ...updateData.data, last_name: values.last_name }
+
+  const { data, error } = await supabase.auth.updateUser(updateData)
 
   if (error) {
     console.error("Error: ", error.message)
-
     redirect(`/auth-error?message=${error.message}`)
   }
 

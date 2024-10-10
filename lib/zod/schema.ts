@@ -103,6 +103,26 @@ export const RegisterSchema = z
     path: ["confirm_password"],
   })
 
+export const EditProfileSchema = z
+  .object({
+    ...sharedFields.auth,
+    ...sharedFields.user,
+    confirm_password: z.string(),
+  })
+  .partial()
+  .refine(
+    (data) => {
+      if (data.password || data.confirm_password) {
+        return data.password === data.confirm_password
+      }
+      return true
+    },
+    {
+      message: "Passwords do not match",
+      path: ["confirm_password"],
+    }
+  )
+
 export const CommentSchema = z.object({
   message: z
     .string()
