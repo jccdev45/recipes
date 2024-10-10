@@ -1,5 +1,13 @@
 import Image from "next/image"
 import { redirect } from "next/navigation"
+import { getRecipes } from "@/queries/recipe-queries"
+import { createClient } from "@/supabase/server"
+import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query"
 
 import { Typography } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/gradient-banner"
@@ -14,10 +22,14 @@ export const metadata = {
 
 export default async function AddRecipePage() {
   const { user } = await getUser()
+  const queryClient = new QueryClient()
+  const supabase = createClient()
 
   if (!user) {
     redirect("/login")
   }
+
+  await prefetchQuery(queryClient, getRecipes(supabase))
 
   return (
     <section>
@@ -36,10 +48,12 @@ export default async function AddRecipePage() {
             className="mx-auto w-5/6 translate-x-0 md:w-2/3 lg:translate-x-8"
           />
         </div>
-        <AddRecipeForm
-          className="order-last col-span-1 mx-auto grid w-full grid-cols-1 gap-y-6 p-4 md:col-span-3 lg:ml-auto"
-          user={user}
-        />
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <AddRecipeForm
+            className="order-last col-span-1 mx-auto grid w-full grid-cols-1 gap-y-6 p-4 md:col-span-3 lg:ml-auto"
+            user={user}
+          />
+        </HydrationBoundary>
 
         {/* <div className="col-span-1 md:col-span-2">
           <Image
