@@ -21,7 +21,7 @@ export async function Nav() {
   await prefetchQuery(queryClient, searchRecipes(supabase, ""))
 
   return (
-    <header className="container mx-auto grid w-full grid-cols-[auto_1fr_auto] items-center gap-4 py-4 shadow-md sm:px-4 lg:grid-cols-3">
+    <header className="container grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 lg:grid-cols-3">
       <Link
         href="/"
         className="flex items-center justify-start gap-2 self-start"
