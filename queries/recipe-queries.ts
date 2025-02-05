@@ -22,3 +22,10 @@ export const searchRecipes = (
 ) => {
   return client.from("recipes").select().textSearch("search_vector", searchTerm)
 }
+
+export const getRecipesColumn = (
+  client: TypedSupabaseClient,
+  column: string
+) => {
+  return client.from("recipes").select(column)
+}

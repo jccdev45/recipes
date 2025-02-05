@@ -98,25 +98,23 @@ export default async function Index() {
 
 function HomeHero() {
   return (
-    <section className="mb-12 px-4">
-      <div className="relative h-[400px] overflow-hidden rounded-lg">
-        <Image
-          src="https://images.unsplash.com/photo-1527756898251-203e9ce0d9c4?q=80&w=2950&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="Dinner table with two empty glasses, plates of salad, bottle of oil"
-          className="size-full object-cover object-bottom"
-          fill
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 dark:bg-opacity-70">
-          <div className="space-y-4 text-center text-background dark:text-foreground">
-            <Typography variant="h1">Welcome!</Typography>
-            <Typography variant="large">
-              Discover and share beloved recipes passed down through generations
-            </Typography>
-            <div className="isolation-auto">
-              <Button variant="secondary" size="lg" asChild>
-                <Link href="/recipes">Explore Recipes</Link>
-              </Button>
-            </div>
+    <section className="relative h-[400px] overflow-hidden rounded-lg">
+      <Image
+        src="https://images.unsplash.com/photo-1527756898251-203e9ce0d9c4?q=80&w=2950&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        alt="Dinner table with two empty glasses, plates of salad, bottle of oil"
+        className="size-full object-cover object-bottom"
+        fill
+      />
+      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 dark:bg-opacity-70">
+        <div className="space-y-4 text-center text-background dark:text-foreground">
+          <Typography variant="h1">Welcome!</Typography>
+          <Typography variant="large">
+            Discover and share beloved recipes passed down through generations
+          </Typography>
+          <div className="isolation-auto">
+            <Button variant="secondary" size="lg" asChild>
+              <Link href="/recipes">Explore Recipes</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -127,9 +125,9 @@ function HomeHero() {
 function RecipesFallback() {
   return (
     <>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
-      <Skeleton className="col-span-1 mx-auto w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-3/4 md:w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-3/4 md:w-5/6"></Skeleton>
+      <Skeleton className="col-span-1 mx-auto w-3/4 md:w-5/6"></Skeleton>
     </>
   )
 }
