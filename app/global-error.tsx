@@ -6,8 +6,6 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 
-import ErrorSVG from "/public/images/error.svg"
-
 export default function Error({
   error,
   reset,
@@ -20,7 +18,7 @@ export default function Error({
       <body>
         <section className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4 lg:flex-row lg:gap-8">
           <Image
-            src={ErrorSVG}
+            src="/images/error.svg"
             alt="Illustration of a person standing next to a warning symbol"
             height={400}
             width={400}

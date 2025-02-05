@@ -65,3 +65,6 @@ export const NAV_LINKS = [
   { href: "/recipes", label: "Recipes" },
   { href: "/recipes/add", label: "Add Recipe" },
 ]
+
+export const SUPABASE_URL = "https://pyprjpalfbyoflzjdsmz.supabase.co"
+export const STORAGE_URL = "/storage/v1/object/public/photos"

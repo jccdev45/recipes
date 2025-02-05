@@ -14,13 +14,15 @@ import { getUser } from "@/app/(auth)/actions"
 import { UserProfile } from "@/app/profile/[user_id]/user-profile"
 
 type Props = {
-  params: { user_id: string }
+  params: Promise<{ user_id: string }>
 }
 
-export async function generateMetadata({
-  params: { user_id },
-}: Props): Promise<Metadata> {
-  const supabase = createClient()
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params
+
+  const { user_id } = params
+
+  const supabase = await createClient()
   const { data: user } = await supabase
     .from("profiles")
     .select("first_name")
@@ -32,9 +34,13 @@ export async function generateMetadata({
   }
 }
 
-export default async function ProfilePage({ params: { user_id } }: Props) {
+export default async function ProfilePage(props: Props) {
+  const params = await props.params
+
+  const { user_id } = params
+
   const queryClient = new QueryClient()
-  const supabase = createClient()
+  const supabase = await createClient()
   const { user } = await getUser()
 
   if (!user) {

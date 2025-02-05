@@ -17,7 +17,7 @@ import { Typography } from "@/components/ui/typography"
 import { FeaturedRecipes } from "@/components/featured-recipes"
 
 export default async function Index() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const queryClient = new QueryClient()
 
   await prefetchQuery(queryClient, getFeaturedRecipes(supabase))

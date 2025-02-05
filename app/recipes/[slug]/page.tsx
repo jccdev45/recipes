@@ -15,14 +15,18 @@ import { RecipeDisplay } from "@/app/recipes/[slug]/recipe-display"
 import type { Metadata, ResolvingMetadata } from "next"
 
 type RecipePageProps = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata(
-  { params: { slug } }: RecipePageProps,
+  props: RecipePageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const supabase = createClient()
+  const params = await props.params
+
+  const { slug } = params
+
+  const supabase = await createClient()
   const { data: recipe } = await getRecipeBySlug(supabase, slug)
   const previousTitle = (await parent).title?.absolute || ""
 
@@ -31,11 +35,13 @@ export async function generateMetadata(
   }
 }
 
-export default async function RecipePage({
-  params: { slug },
-}: RecipePageProps) {
+export default async function RecipePage(props: RecipePageProps) {
+  const params = await props.params
+
+  const { slug } = params
+
   const queryClient = new QueryClient()
-  const supabase = createClient()
+  const supabase = await createClient()
   const { user } = await getUser()
 
   await prefetchQuery(queryClient, getRecipeBySlug(supabase, slug))

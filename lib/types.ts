@@ -2,7 +2,7 @@ import { createClient } from "@/supabase/server"
 import { Database } from "@/supabase/supabase-types"
 import { QueryData } from "@supabase/supabase-js"
 
-const supabase = createClient()
+const supabase = await createClient()
 const profileQuery = supabase.from("profiles").select(`*, recipes (*)`).single()
 type GeneratedUserWithRecipes = QueryData<typeof profileQuery>
 

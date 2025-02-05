@@ -45,7 +45,7 @@ const containsProfanity = (formData: FormData) => {
 
 // Login function
 export async function login(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const data = {
     email: formData.get("email") as string,
@@ -83,7 +83,7 @@ export async function login(formData: FormData) {
 
 // Signup function
 export async function signup(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const values = {
     email: formData.get("email") as string,
@@ -133,7 +133,7 @@ export async function signup(formData: FormData) {
 }
 
 export async function logout() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.auth.signOut()
 
   if (error) {
@@ -146,7 +146,7 @@ export async function logout() {
 }
 
 export async function getUser() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
     error,
@@ -156,7 +156,7 @@ export async function getUser() {
 }
 
 export async function updateProfile(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   if (containsProfanity(formData)) {
     return {

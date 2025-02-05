@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 
+import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
 import { cn, shimmer, toBase64 } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
@@ -65,6 +66,7 @@ export function RecipeCard({
   display = "compact",
 }: RecipeCardProps) {
   const { author, img, quote, recipe_name, slug, tags, user_id } = recipe
+  const imgURL = `${SUPABASE_URL}${STORAGE_URL}${img}`
   const path = usePathname()
   const [isHovered, setIsHovered] = useState(false)
 
@@ -84,7 +86,7 @@ export function RecipeCard({
       transition={{ duration: 0.3 }}
     >
       <RecipeImage
-        img={img}
+        img={imgURL}
         recipe_name={recipe_name}
         display={display}
         isHovered={isHovered}

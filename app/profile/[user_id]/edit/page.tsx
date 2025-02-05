@@ -5,8 +5,6 @@ import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
 import { getUser } from "@/app/(auth)/actions"
 
-import AccountInfoSvg from "/public/images/AccountInfo.svg"
-
 export const metadata = {
   title: "Edit Profile",
 }
@@ -24,7 +22,7 @@ export default async function EditProfilePage() {
 
       <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:px-16 lg:grid-cols-2">
         <Image
-          src={AccountInfoSvg}
+          src="/images/AccountInfo.svg"
           width={500}
           height={500}
           alt="Cartoon depiction of person editing their profile information"

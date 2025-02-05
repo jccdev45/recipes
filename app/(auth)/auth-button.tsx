@@ -1,9 +1,13 @@
 import { forwardRef } from "react"
 
 import { Button } from "@/components/ui/button"
-import { login, signup, updateProfile } from "@/app/(auth)/actions"
 
-type AuthAction = typeof login | typeof signup | typeof updateProfile
+type AuthAction = (
+  formData: FormData
+) => Promise<
+  | { message: string; errors?: undefined }
+  | { message: string; errors: { email?: string[]; password?: string[] } }
+>
 
 interface AuthButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,11 +18,20 @@ interface AuthButtonProps
 
 export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
   ({ className, label, action, ...props }, ref) => {
+    const handleFormAction = async (formData: FormData) => {
+      const result = await action(formData)
+      // Handle the result as needed, e.g., display a message or handle errors
+      console.log(result.message)
+      if (result.errors) {
+        console.error(result.errors)
+      }
+    }
+
     return (
       <Button
         ref={ref}
         className={className}
-        formAction={action}
+        formAction={handleFormAction}
         type="submit"
         {...props}
       >

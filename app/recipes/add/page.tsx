@@ -14,8 +14,6 @@ import { GradientBanner } from "@/components/gradient-banner"
 import { getUser } from "@/app/(auth)/actions"
 import { AddRecipeForm } from "@/app/recipes/add/add-recipe-form"
 
-import Cooking2 from "/public/images/Cooking2.svg"
-
 export const metadata = {
   title: "Add Recipe",
 }
@@ -23,7 +21,7 @@ export const metadata = {
 export default async function AddRecipePage() {
   const { user } = await getUser()
   const queryClient = new QueryClient()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   if (!user) {
     redirect("/login")
@@ -41,7 +39,7 @@ export default async function AddRecipePage() {
             Add Recipe
           </Typography>
           <Image
-            src={Cooking2}
+            src="/images/Cooking2.svg"
             alt="Cartoonish depiction of two people whisking a bowl (not sure why it takes two but okay). The person on the right is holding the bowl and the one on the left is whisking it. You could argue they're showing the other how to do it but like, I wouldn't show someone while they were holding the bowl because that sounds like a quick way for the bowl to be dropped. Hopefully one day the truth comes to light."
             width={100}
             height={100}

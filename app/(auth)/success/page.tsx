@@ -3,8 +3,6 @@ import Image from "next/image"
 import { Typography } from "@/components/ui/typography"
 import { GradientBanner } from "@/components/gradient-banner"
 
-import Email from "/public/images/email.svg"
-
 export const metadata = {
   title: "Success",
 }
@@ -16,7 +14,7 @@ export default async function SuccessPage() {
 
       <section className="grid -translate-y-16 grid-cols-1 gap-8 p-20 md:-translate-y-32 lg:grid-cols-2">
         <Image
-          src={Email}
+          src="/images/email.svg"
           alt="person with mobile phone showing email"
           height={500}
           width={500}

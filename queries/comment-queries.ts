@@ -20,6 +20,6 @@ export function insertComment(
   return client.from("comments").insert(newComment).select().single()
 }
 
-export function deleteComment(client: TypedSupabaseClient, commentId: number) {
+export function deleteComment(client: TypedSupabaseClient, commentId: string) {
   return client.from("comments").delete().eq("id", commentId).select()
 }

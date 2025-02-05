@@ -14,11 +14,10 @@ export const metadata = {
   title: "Recipes",
 }
 
-export default async function RecipesPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | undefined }
+export default async function RecipesPage(props: {
+  searchParams?: Promise<{ [key: string]: string | undefined }>
 }) {
+  const searchParams = await props.searchParams
   const search = searchParams?.search
   const params = {
     search,
@@ -26,7 +25,7 @@ export default async function RecipesPage({
   // const query = `${apiUrl}/recipes?${queryString.stringify(params)}`
 
   const queryClient = new QueryClient()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   await prefetchQuery(queryClient, getRecipes(supabase))
 
