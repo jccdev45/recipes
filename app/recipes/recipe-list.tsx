@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 
 import { FilterState, Recipe } from "@/lib/types"
 import { useRecipes } from "@/hooks/useRecipes"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
 import { RecipeCard } from "@/app/recipes/recipe-card"
@@ -62,25 +63,37 @@ export function RecipeList() {
   const displayRecipes = filteredRecipes.length > 0 ? filteredRecipes : recipes
 
   return (
-    <section className="mx-auto grid grid-cols-1 gap-0 p-8 md:grid-cols-3 md:gap-4">
-      <div className="sticky inset-x-0 top-2 z-10 col-span-1 mb-6 flex h-fit flex-col items-center gap-4 rounded-lg border border-foreground/50 bg-muted p-4 pb-12 text-muted-foreground md:top-8">
+    <section className="mx-auto flex flex-col items-center justify-center p-8">
+      <div className="mb-6 flex w-2/3 max-w-md flex-col items-center gap-4 rounded-lg border border-foreground/50 bg-muted p-4 pt-4 text-muted-foreground md:top-8 md:w-full md:p-8">
         <Typography variant="h3">Filter Results</Typography>
         <RecipeFilter filters={filters} onFilterChange={handleFilterChange} />
       </div>
-      {displayRecipes.length > 0 ? (
-        <div className="col-span-2 grid grid-cols-1 gap-6 md:gap-8">
-          {displayRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} display="wide" />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center">
-          <Typography variant="h3">No recipes found</Typography>
-          <Typography variant="p" className="mt-2">
-            Try adjusting your search or filters, or add a new recipe.
-          </Typography>
-        </div>
-      )}
+      <Suspense fallback={<RecipeListFallback />}>
+        {displayRecipes.length > 0 ? (
+          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+            {displayRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} display="wide" />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center">
+            <Typography variant="h3">No recipes found</Typography>
+            <Typography variant="p" className="mt-2">
+              Try adjusting your search or filters, or add a new recipe.
+            </Typography>
+          </div>
+        )}
+      </Suspense>
     </section>
+  )
+}
+
+function RecipeListFallback() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <Skeleton key={index} />
+      ))}
+    </div>
   )
 }

@@ -19,10 +19,6 @@ export default async function RecipesPage(props: {
 }) {
   const searchParams = await props.searchParams
   const search = searchParams?.search
-  const params = {
-    search,
-  }
-  // const query = `${apiUrl}/recipes?${queryString.stringify(params)}`
 
   const queryClient = new QueryClient()
   const supabase = await createClient()
@@ -33,7 +29,7 @@ export default async function RecipesPage(props: {
     <>
       <GradientBanner
         text={search ? `Showing results for ${search}` : "Recipes"}
-        size="lg"
+        size="sm"
         variant="accent"
         pattern
       />
