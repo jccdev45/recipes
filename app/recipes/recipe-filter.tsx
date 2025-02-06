@@ -57,33 +57,35 @@ export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
 
   return (
     <>
-      <FilterCombobox<string>
-        items={authors}
-        placeholder="Search author..."
-        emptyText="No author found."
-        selectedItems={filters.authors}
-        onSelect={handleAuthorSelect}
-        getLabel={(author) => author}
-        getValue={(author) => author}
-      />
-      <FilterCombobox<Tag>
-        items={tags}
-        placeholder="Search tag..."
-        emptyText="No tag found."
-        selectedItems={filters.tags}
-        onSelect={handleTagSelect}
-        getLabel={(tag) => tag.tag}
-        getValue={(tag) => tag.id || tag.tag}
-      />
-      <FilterCombobox<Ingredient>
-        items={ingredients}
-        placeholder="Search ingredient..."
-        emptyText="No ingredient found."
-        selectedItems={filters.ingredients}
-        onSelect={handleIngredientSelect}
-        getLabel={(ingredient) => ingredient.ingredient}
-        getValue={(ingredient) => ingredient.id || ingredient.ingredient}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
+        <FilterCombobox<string>
+          items={authors}
+          placeholder="Search author..."
+          emptyText="No author found."
+          selectedItems={filters.authors}
+          onSelect={handleAuthorSelect}
+          getLabel={(author) => author}
+          getValue={(author) => author}
+        />
+        <FilterCombobox<Tag>
+          items={tags}
+          placeholder="Search tag..."
+          emptyText="No tag found."
+          selectedItems={filters.tags}
+          onSelect={handleTagSelect}
+          getLabel={(tag) => tag.tag}
+          getValue={(tag) => tag.id || tag.tag}
+        />
+        <FilterCombobox<Ingredient>
+          items={ingredients}
+          placeholder="Search ingredient..."
+          emptyText="No ingredient found."
+          selectedItems={filters.ingredients}
+          onSelect={handleIngredientSelect}
+          getLabel={(ingredient) => ingredient.ingredient}
+          getValue={(ingredient) => ingredient.id || ingredient.ingredient}
+        />
+      </div>
       <div className="flex flex-col items-center justify-center gap-2">
         <DisplayCurrentFilters
           filters={filters}

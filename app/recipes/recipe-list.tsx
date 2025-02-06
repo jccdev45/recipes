@@ -64,7 +64,7 @@ export function RecipeList() {
 
   return (
     <section className="mx-auto flex flex-col items-center justify-center p-8">
-      <div className="mb-6 flex w-2/3 max-w-md flex-col items-center gap-4 rounded-lg border border-foreground/50 bg-muted p-4 pt-4 text-muted-foreground md:top-8 md:w-full md:p-8">
+      <div className="mb-6 flex w-full max-w-3xl flex-col items-center gap-4 rounded-lg border border-foreground/50 bg-muted p-4 pt-4 text-muted-foreground md:top-8 md:w-full md:p-8">
         <Typography variant="h3">Filter Results</Typography>
         <RecipeFilter filters={filters} onFilterChange={handleFilterChange} />
       </div>

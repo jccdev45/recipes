@@ -84,7 +84,7 @@ export default async function Index() {
         <Typography variant="h2" className="my-4 text-center">
           Featured recipes:
         </Typography>
-        <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-1">
+        <div className="grid w-full grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-3">
           <Suspense fallback={<RecipesFallback />}>
             <HydrationBoundary state={dehydrate(queryClient)}>
               <FeaturedRecipes />
