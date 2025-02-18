@@ -27,9 +27,10 @@ export default async function Index() {
       <Hero
         type="video"
         videoSources={[
-          "/videos/onions.mp4",
-          "/videos/chef.mp4",
-          "/videos/tomatoes.mp4",
+          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/onions-3ijkNNkNxCqwI6UYiQH3sGqk3j3GAV.mp4",
+          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/chef-PRV97AEi58qcIHRNaoZQdleB4V0KBW.mp4",
+          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/parsley-iRI1DTpoGcbhUZsbSjAnRHFRX5SvC5.mp4",
+          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/tomatoes-bznteJ2SHPEQ2S5N4AhshLGytkfQH7.mp4",
         ]}
         title="Welcome!"
         subtitle="Discover and share beloved recipes passed down through generations"
