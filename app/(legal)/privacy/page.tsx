@@ -1,9 +1,11 @@
-import React from "react"
-
 import { Typography } from "@/components/ui/typography"
 
-export const metadata = {
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
   title: "Privacy Policy",
+  description:
+    "Read our privacy policy to understand how we collect, use, and protect your personal information.",
 }
 
 export default function PrivacyPolicyPage() {

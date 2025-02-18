@@ -5,8 +5,12 @@ import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
 
-export const metadata = {
-  title: "Error",
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Authentication Error",
+  description:
+    "An error occurred during authentication. Please try again or contact support.",
 }
 
 export default async function AuthErrorPage(props: {

@@ -17,20 +17,33 @@ type Props = {
   params: Promise<{ user_id: string }>
 }
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
+export async function generateMetadata({
+  params,
+}: {
+  params: { user_id: string }
+}): Promise<Metadata> {
+  const { user_id } = await params
 
-  const { user_id } = params
+  try {
+    const supabase = await createClient()
+    const { data: user } = await supabase
+      .from("profiles")
+      .select("first_name")
+      .eq("id", user_id)
+      .single()
 
-  const supabase = await createClient()
-  const { data: user } = await supabase
-    .from("profiles")
-    .select("first_name")
-    .eq("id", user_id)
-    .single()
+    const name = user?.first_name ?? user_id
 
-  return {
-    title: `${user?.first_name ?? user_id}'s profile | recipes`,
+    return {
+      title: `${name}'s Profile`,
+      description: `View ${name}'s profile and recipes on Family Recipes.`,
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error)
+    return {
+      title: "User Profile",
+      description: "View user profile on Family Recipes.",
+    }
   }
 }
 

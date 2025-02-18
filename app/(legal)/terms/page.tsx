@@ -1,9 +1,11 @@
-import React from "react"
-
 import { Typography } from "@/components/ui/typography"
 
-export const metadata = {
-  title: "Terms & Conditions",
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description:
+    "Review our terms of service to understand the rules and guidelines for using Family Recipes.",
 }
 
 export default function TermsPage() {

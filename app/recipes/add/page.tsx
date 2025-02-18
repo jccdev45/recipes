@@ -14,8 +14,12 @@ import { GradientBanner } from "@/components/gradient-banner"
 import { getUser } from "@/app/(auth)/actions"
 import { AddRecipeForm } from "@/app/recipes/add/add-recipe-form"
 
-export const metadata = {
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
   title: "Add Recipe",
+  description:
+    "Share your favorite family recipe with our community by adding it to our collection.",
 }
 
 export default async function AddRecipePage() {

@@ -18,20 +18,31 @@ type RecipePageProps = {
   params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata(
-  props: RecipePageProps,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const params = await props.params
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const { slug } = await params
 
-  const { slug } = params
+  try {
+    const supabase = await createClient()
+    const { data: recipe } = await getRecipeBySlug(supabase, slug)
 
-  const supabase = await createClient()
-  const { data: recipe } = await getRecipeBySlug(supabase, slug)
-  const previousTitle = (await parent).title?.absolute || ""
+    if (!recipe) {
+      throw new Error("Recipe not found")
+    }
 
-  return {
-    title: `${recipe?.recipe_name} | ${previousTitle}`,
+    return {
+      title: recipe.recipe_name,
+      description: `Discover how to make ${recipe.recipe_name}. A delicious family recipe shared on Family Recipes.`,
+    }
+  } catch (error) {
+    console.error("Error fetching recipe data:", error)
+    return {
+      title: "Recipe Details",
+      description: "View recipe details on Family Recipes.",
+    }
   }
 }
 

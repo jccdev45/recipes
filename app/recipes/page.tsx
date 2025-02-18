@@ -10,8 +10,12 @@ import {
 import { GradientBanner } from "@/components/gradient-banner"
 import { RecipeList } from "@/app/recipes/recipe-list"
 
-export const metadata = {
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
   title: "Recipes",
+  description:
+    "Browse our collection of delicious family recipes, from appetizers to drinks to desserts.",
 }
 
 export default async function RecipesPage(props: {

@@ -1,5 +1,6 @@
 import "./globals.css"
 
+import { Metadata } from "next"
 import { Lexend_Deca, Manrope } from "next/font/google"
 import { AppProviders } from "@/context/root-providers"
 import { Toaster } from "sonner"
@@ -14,7 +15,7 @@ const lexend = Lexend_Deca({
   variable: "--font-lexend-deca",
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     template: "%s | Family Recipes",
     default: "Family Recipes",

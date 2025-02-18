@@ -7,8 +7,12 @@ import { UserProfileForm } from "@/components/user-profile-form"
 import { getUser } from "@/app/(auth)/actions"
 import { LoginForm } from "@/app/(auth)/login/login-form"
 
-export const metadata = {
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
   title: "Login",
+  description:
+    "Log in to your Family Recipes account to access and manage your recipes.",
 }
 
 export default async function LoginPage() {

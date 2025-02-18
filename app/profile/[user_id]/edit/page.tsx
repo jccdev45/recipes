@@ -5,8 +5,13 @@ import { GradientBanner } from "@/components/gradient-banner"
 import { UserProfileForm } from "@/components/user-profile-form"
 import { getUser } from "@/app/(auth)/actions"
 
-export const metadata = {
+import type { Metadata } from "next"
+
+// TODO: Convert to generateMetadata for dynamic data
+export const metadata: Metadata = {
   title: "Edit Profile",
+  description:
+    "Update your Family Recipes profile information and preferences.",
 }
 
 export default async function EditProfilePage() {
