@@ -20,10 +20,37 @@ export const metadata = {
     default: "Family Recipes",
   },
   description:
-    "Collection of signature recipes from the Medina Collective. Expect lots of flavor and lots of love. Enjoy.",
+    "Collection of signature family recipes. Expect lots of flavor and lots of love. Enjoy.",
   keywords: "nextjs, supabase, recipes, cooking",
-  author: "jccdev",
-  creator: "Jordan Cruz-Correa",
+  authors: [{ name: "jccdev", url: "https://jccdev.vercel.app" }],
+  creator: "jccdev",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://family-recipes-v2.vercel.app",
+    siteName: "Family Recipes",
+    title: "Family Recipes",
+    description:
+      "Collection of signature family recipes. Expect lots of flavor and lots of love. Enjoy.",
+    images: [
+      {
+        url: "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/export-7lFgmfoeSrP3pTNiP1GZVo0nf7S0ov.png",
+        width: 1200,
+        height: 630,
+        alt: "Family Recipes OG Image",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Family Recipes",
+    description:
+      "Collection of signature family recipes. Expect lots of flavor and lots of love. Enjoy.",
+    creator: "@jccdev",
+    images: [
+      "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/export-7lFgmfoeSrP3pTNiP1GZVo0nf7S0ov.png",
+    ],
+  },
 }
 
 export default async function RootLayout({
