@@ -92,7 +92,7 @@ function MobileMenu({
           </div>
         </div>
         <SheetFooter>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <ThemeToggle />
             <UserDropdown user={user} logout={logout} />
           </div>

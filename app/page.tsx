@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { getFeaturedRecipes } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
@@ -15,6 +14,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Typography } from "@/components/ui/typography"
 import { FeaturedRecipes } from "@/components/featured-recipes"
+import { Hero } from "@/components/hero"
 
 export default async function Index() {
   const supabase = await createClient()
@@ -24,34 +24,52 @@ export default async function Index() {
 
   return (
     <>
-      <HomeHero />
+      <Hero
+        type="video"
+        videoSources={[
+          "/videos/onions.mp4",
+          "/videos/chef.mp4",
+          "/videos/tomatoes.mp4",
+        ]}
+        title="Welcome!"
+        subtitle="Discover and share beloved recipes passed down through generations"
+        ctaText="Explore Recipes"
+        ctaLink="/recipes"
+      />
 
       <section className="w-full px-4 py-6 md:py-12 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="text-center">
-            <Typography variant="h2" className="border-none">
-              Family Recipes
-            </Typography>
-            <Typography variant="h3" className="mb-4 border-b border-border">
-              <span className="bg-gradient-to-r from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] bg-clip-text text-transparent dark:via-white dark:to-[#004EF1]">
-                Puerto Rican
-              </span>{" "}
-              style
-            </Typography>
-            <Typography variant="p" className="mb-4 text-left lg:text-justify">
-              Welcome to a collection of family recipes, packed with just as
-              much love as flavor. Inside, you'll find a variety of recipes from
-              Puerto Rican classics like pernil and arroz con gandules to dishes
-              like chicken marsala and potato salad, even a refreshing mojito
-              recipe.
-            </Typography>
-            <Typography variant="large" className="mb-4 md:text-xl">
-              There's a little something for everyone.
-            </Typography>
-            <Typography variant="lead" className="">
-              You like flavor don't you? <strong>Good!</strong> <br /> You're in
-              the right place.
-            </Typography>
+          <div className="grid grid-cols-1 place-items-center sm:grid-cols-2 lg:grid-cols-1">
+            <div className="">
+              <Typography variant="h2" className="border-none">
+                Family Recipes
+              </Typography>
+              <Typography variant="h3" className="mb-4 border-b border-border">
+                <span className="bg-gradient-to-r from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] bg-clip-text text-transparent dark:via-white dark:to-[#004EF1]">
+                  Puerto Rican
+                </span>{" "}
+                style
+              </Typography>
+            </div>
+            <div className="">
+              <Typography
+                variant="p"
+                className="mb-4 text-left lg:text-justify"
+              >
+                Welcome to a collection of family recipes, packed with just as
+                much love as flavor. Inside, you'll find a variety of recipes
+                from Puerto Rican classics like pernil and arroz con gandules to
+                dishes like chicken marsala and potato salad, even a refreshing
+                mojito recipe.
+              </Typography>
+              <Typography variant="large" className="mb-4 md:text-xl">
+                There's a little something for everyone.
+              </Typography>
+              <Typography variant="lead" className="">
+                You like flavor don't you? <strong>Good!</strong> <br /> You're
+                in the right place.
+              </Typography>
+            </div>
           </div>
 
           <Separator className="block lg:hidden" />
@@ -93,32 +111,6 @@ export default async function Index() {
         </div>
       </section>
     </>
-  )
-}
-
-function HomeHero() {
-  return (
-    <section className="relative h-[400px] overflow-hidden rounded-lg">
-      <Image
-        src="https://images.unsplash.com/photo-1527756898251-203e9ce0d9c4?q=80&w=2950&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        alt="Dinner table with two empty glasses, plates of salad, bottle of oil"
-        className="size-full object-cover object-bottom"
-        fill
-      />
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 dark:bg-opacity-70">
-        <div className="space-y-4 text-center text-background dark:text-foreground">
-          <Typography variant="h1">Welcome!</Typography>
-          <Typography variant="large">
-            Discover and share beloved recipes passed down through generations
-          </Typography>
-          <div className="isolation-auto">
-            <Button variant="secondary" size="lg" asChild>
-              <Link href="/recipes">Explore Recipes</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
   )
 }
 
