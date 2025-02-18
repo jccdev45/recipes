@@ -24,7 +24,7 @@ export async function Nav() {
     <header className="container grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 lg:grid-cols-3">
       <Link
         href="/"
-        className="flex items-center justify-start gap-2 self-start"
+        className="flex w-fit items-center justify-start gap-2 self-start underline-offset-4 transition-all duration-300 ease-in-out hover:underline hover:opacity-90"
       >
         <UtensilsCrossed className="size-8" />
         <h1 className="text-2xl font-bold text-secondary">Family Recipes</h1>
