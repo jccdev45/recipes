@@ -1,5 +1,5 @@
-import { notFound, redirect } from "next/navigation"
-import { getRecipeBySlug } from "@/queries/recipe-queries"
+import { notFound } from "next/navigation"
+import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import {
@@ -12,7 +12,7 @@ import { getUser } from "@/app/(auth)/actions"
 import { CommentsSection } from "@/app/recipes/[slug]/comments"
 import { RecipeDisplay } from "@/app/recipes/[slug]/recipe-display"
 
-import type { Metadata, ResolvingMetadata } from "next"
+import type { Metadata } from "next"
 
 type RecipePageProps = {
   params: Promise<{ slug: string }>
@@ -27,10 +27,10 @@ export async function generateMetadata({
 
   try {
     const supabase = await createClient()
-    const { data: recipe } = await getRecipeBySlug(supabase, slug)
+    const { data: recipe } = await getRecipeWithComments(supabase, slug)
 
     if (!recipe) {
-      throw new Error("Recipe not found")
+      notFound()
     }
 
     return {
@@ -48,31 +48,26 @@ export async function generateMetadata({
 
 export default async function RecipePage(props: RecipePageProps) {
   const params = await props.params
-
   const { slug } = params
 
   const queryClient = new QueryClient()
   const supabase = await createClient()
   const { user } = await getUser()
 
-  await prefetchQuery(queryClient, getRecipeBySlug(supabase, slug))
-
-  const { data: recipe } = await getRecipeBySlug(supabase, slug)
-
-  if (!recipe) notFound()
+  await prefetchQuery(queryClient, getRecipeWithComments(supabase, slug))
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="space-y-4 px-4">
-        <div className="flex flex-col gap-8">
+    <div className="space-y-4 px-4">
+      <div className="flex flex-col gap-8">
+        <HydrationBoundary state={dehydrate(queryClient)}>
           <RecipeDisplay slug={slug} user={user} />
           <CommentsSection
             currentUser={user}
-            recipe_id={recipe.id}
+            slug={slug}
             className="flex w-full max-w-full flex-col"
           />
-        </div>
+        </HydrationBoundary>
       </div>
-    </HydrationBoundary>
+    </div>
   )
 }

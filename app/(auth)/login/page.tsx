@@ -23,10 +23,10 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="h-full">
+    <>
       <GradientBanner />
 
-      <section className="grid -translate-y-16 grid-cols-1 gap-4 p-8 md:-translate-y-32 md:py-8 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 p-8 md:py-12 lg:grid-cols-2">
         <Image
           src="/images/Login.svg"
           alt="Cartoon depiction of person standing on laptop with lock icon, representing logging in"
@@ -48,6 +48,6 @@ export default async function LoginPage() {
           </TabsContent>
         </Tabs>
       </section>
-    </div>
+    </>
   )
 }

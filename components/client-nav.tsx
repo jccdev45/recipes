@@ -80,14 +80,23 @@ function MobileMenu({
           <div className="mt-6 space-y-6">
             <Searchbar />
             <Separator />
-            <nav className="flex flex-col space-y-4 *:w-fit *:text-foreground *:hover:text-primary">
+            <nav className="flex flex-col space-y-4 *:w-fit *:text-foreground">
               {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href}>
+                // TODO: Create NavLink component
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="hover:text-primary"
+                >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/terms">Terms of Service</Link>
-              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-primary">
+                Terms of Service
+              </Link>
+              <Link href="/privacy" className="hover:text-primary">
+                Privacy Policy
+              </Link>
             </nav>
           </div>
         </div>

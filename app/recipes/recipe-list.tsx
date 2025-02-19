@@ -11,7 +11,7 @@ import { RecipeCard } from "@/app/recipes/recipe-card"
 import { RecipeFilter } from "@/app/recipes/recipe-filter"
 
 export function RecipeList() {
-  const { recipes: data, isLoading, error } = useRecipes()
+  const { recipes, isLoading, error } = useRecipes()
   const [filters, setFilters] = useState<FilterState>({
     authors: [],
     tags: [],
@@ -25,8 +25,6 @@ export function RecipeList() {
   if (isLoading) {
     return <Spinner size="2xl" />
   }
-
-  const recipes = data as Recipe[]
 
   const filteredRecipes = useMemo(() => {
     return recipes.filter((recipe) => {

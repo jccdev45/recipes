@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { getCommentsByRecipeId } from "@/queries/comment-queries"
+import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -11,12 +11,9 @@ import {
   useInsertMutation,
   useQuery,
 } from "@supabase-cache-helpers/postgrest-react-query"
-import { User } from "@supabase/supabase-js"
-import { useQueryClient } from "@tanstack/react-query"
 import { UserCircle2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 
-import { CommentInsert, Comment as CommentType } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CommentFormValues, CommentSchema } from "@/lib/zod/schema"
 import {
@@ -44,27 +41,44 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
 
+import type { CommentInsert, Comment as CommentType } from "@/lib/types"
+import type { User } from "@supabase/supabase-js"
+
 type CommentsSectionProps = {
   className: string
   currentUser: User | null
-  recipe_id: number
+  slug: string
 }
 
 export function CommentsSection({
   className,
   currentUser,
-  recipe_id,
+  slug,
 }: CommentsSectionProps) {
   const supabase = createClient()
-  const queryClient = useQueryClient()
   const router = useRouter()
 
   const {
-    data: comments,
+    data: recipe,
     isLoading,
     error,
-  } = useQuery(getCommentsByRecipeId(supabase, recipe_id))
-  // const comments = data as unknown as CommentType[]
+  } = useQuery(getRecipeWithComments(supabase, slug))
+
+  if (!recipe) {
+    return (
+      <Typography variant="error">
+        {error
+          ? `There was an error displaying comments: ${error.message}`
+          : "An unexpected error has occurred, try refreshing the page."}
+      </Typography>
+    )
+  }
+
+  const comments = recipe?.comments as unknown as CommentType[]
+
+  // TODO: Fix
+  if (isLoading) return <div>Loading comments...</div>
+  if (error) return <div>Error loading comments: {error.message}</div>
 
   const { mutateAsync: insertCommentMutation } = useInsertMutation(
     supabase.from("comments"),
@@ -114,16 +128,13 @@ export function CommentsSection({
       message: values.message,
       liked_by: [],
       likes: 0,
-      recipe_id: recipe_id,
+      recipe_id: recipe.id,
       user_id: currentUser.id,
     }
 
     await insertCommentMutation([newComment])
     form.reset()
   }
-
-  if (isLoading) return <div>Loading comments...</div>
-  if (error) return <div>Error loading comments: {error.message}</div>
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -163,7 +174,7 @@ export function CommentsSection({
         <Typography variant="p">Please login to leave a comment</Typography>
       )}
 
-      {comments?.map((comment) => (
+      {comments.map((comment) => (
         <CommentItem
           key={comment.id}
           comment={comment}
@@ -182,7 +193,6 @@ type CommentProps = {
 }
 
 function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
-  const router = useRouter()
   const {
     author,
     avatar_url,
@@ -191,7 +201,6 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
     liked_by,
     likes,
     message,
-    recipe_id,
     user_id,
   } = comment
   const [liked, setLiked] = useState(likes)

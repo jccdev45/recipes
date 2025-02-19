@@ -3,7 +3,7 @@
 import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { getRecipeBySlug } from "@/queries/recipe-queries"
+import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
@@ -84,7 +84,9 @@ const RecipeContent = ({ recipe }: RecipeContentProps) => (
 
 export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
   const supabase = createClient()
-  const { data, isLoading, error } = useQuery(getRecipeBySlug(supabase, slug))
+  const { data, isLoading, error } = useQuery(
+    getRecipeWithComments(supabase, slug)
+  )
   const recipe = data as unknown as Recipe
 
   if (isLoading) {

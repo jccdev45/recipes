@@ -18,6 +18,7 @@ export async function Nav() {
   const queryClient = new QueryClient()
   const { user } = await getUser()
 
+  // TODO: Research if this prefetch is needed/reevaluate search functionality
   await prefetchQuery(queryClient, searchRecipes(supabase, ""))
 
   return (

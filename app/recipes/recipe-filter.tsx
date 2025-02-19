@@ -1,8 +1,10 @@
+// TODO: Extract filters to URL instead of state
+
 "use client"
 
 import { X } from "lucide-react"
 
-import { FilterState, Ingredient, Recipe, Tag } from "@/lib/types"
+import { FilterState, Ingredient, Tag } from "@/lib/types"
 import { useRecipes } from "@/hooks/useRecipes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,38 +22,38 @@ export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
 
   const handleAuthorSelect = (author: string | null) => {
     if (author) {
-      onFilterChange({
-        ...filters,
-        authors: filters.authors.includes(author)
-          ? filters.authors.filter((a) => a !== author)
-          : [...filters.authors, author],
-      })
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        authors: prevFilters.authors.includes(author)
+          ? prevFilters.authors.filter((a) => a !== author)
+          : [...prevFilters.authors, author],
+      }))
     }
   }
 
   const handleTagSelect = (tag: Tag | null) => {
     if (tag) {
-      onFilterChange({
-        ...filters,
-        tags: filters.tags.some((t) => t.tag === tag.tag)
-          ? filters.tags.filter((t) => t.tag !== tag.tag)
-          : [...filters.tags, tag],
-      })
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        tags: prevFilters.tags.some((t) => t.tag === tag.tag)
+          ? prevFilters.tags.filter((t) => t.tag !== tag.tag)
+          : [...prevFilters.tags, tag],
+      }))
     }
   }
 
   const handleIngredientSelect = (ingredient: Ingredient | null) => {
     if (ingredient) {
-      onFilterChange({
-        ...filters,
-        ingredients: filters.ingredients.some(
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        ingredients: prevFilters.ingredients.some(
           (i) => i.ingredient === ingredient.ingredient
         )
-          ? filters.ingredients.filter(
+          ? prevFilters.ingredients.filter(
               (i) => i.ingredient !== ingredient.ingredient
             )
-          : [...filters.ingredients, ingredient],
-      })
+          : [...prevFilters.ingredients, ingredient],
+      }))
     }
   }
 
@@ -99,26 +101,28 @@ export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
 function DisplayCurrentFilters({ filters, onFilterChange }: FilterProps) {
   function handleRemoveTag(tag: Tag) {
     return () =>
-      onFilterChange({
-        ...filters,
-        tags: filters.tags.filter((item) => item !== tag),
-      })
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        tags: prevFilters.tags.filter((item) => item !== tag),
+      }))
   }
 
   function handleRemoveIngredient(ingredient: Ingredient) {
     return () =>
-      onFilterChange({
-        ...filters,
-        ingredients: filters.ingredients.filter((item) => item !== ingredient),
-      })
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        ingredients: prevFilters.ingredients.filter(
+          (item) => item !== ingredient
+        ),
+      }))
   }
 
   function handleRemoveAuthor(author: string) {
     return () =>
-      onFilterChange({
-        ...filters,
-        authors: filters.authors.filter((item) => item !== author),
-      })
+      onFilterChange((prevFilters) => ({
+        ...prevFilters,
+        authors: prevFilters.authors.filter((item) => item !== author),
+      }))
   }
 
   return (

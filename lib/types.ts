@@ -1,18 +1,20 @@
-import { createClient } from "@/supabase/server"
 import { Database } from "@/supabase/supabase-types"
-import { QueryData } from "@supabase/supabase-js"
 
-const supabase = await createClient()
-const profileQuery = supabase.from("profiles").select(`*, recipes (*)`).single()
-type GeneratedUserWithRecipes = QueryData<typeof profileQuery>
+// Database types
+namespace DB {
+  export type Tables = Database["public"]["Tables"]
+  export type TableName = keyof Tables
 
-type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"]
-type TablesInsert<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Insert"]
-type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Update"]
+  export type Row<T extends TableName> = Tables[T]["Row"]
+  export type Insert<T extends TableName> = Tables[T]["Insert"]
+  export type Update<T extends TableName> = Tables[T]["Update"]
+}
 
+// Utility types
+type WithoutFields<T, K extends keyof T> = Omit<T, K>
+type WithFields<T, K extends Record<string, any>> = T & K
+
+// Custom types
 export type Tag = {
   id?: string
   tag: string
@@ -32,39 +34,53 @@ export type Ingredient = {
 
 export type UnitMeasurement = Ingredient["unitMeasurement"]
 
-export interface Recipe
-  extends Omit<Tables<"recipes">, "tags" | "steps" | "ingredients"> {
-  tags: Tag[]
-  steps: Step[]
-  ingredients: Ingredient[]
+// Recipe types
+export type Recipe = WithFields<
+  WithoutFields<DB.Row<"recipes">, "tags" | "steps" | "ingredients">,
+  {
+    tags: Tag[]
+    steps: Step[]
+    ingredients: Ingredient[]
+  }
+>
+
+export type RecipeInsert = WithFields<
+  WithoutFields<DB.Insert<"recipes">, "tags" | "steps" | "ingredients">,
+  {
+    tags?: Tag[]
+    steps?: Step[]
+    ingredients?: Ingredient[]
+  }
+>
+
+export type RecipeUpdate = WithFields<
+  WithoutFields<DB.Update<"recipes">, "tags" | "steps" | "ingredients">,
+  {
+    tags?: Tag[]
+    steps?: Step[]
+    ingredients?: Ingredient[]
+  }
+>
+
+export type RecipeWithComments = Recipe & {
+  comments: Comment[]
 }
 
-export interface RecipeInsert
-  extends Omit<TablesInsert<"recipes">, "tags" | "steps" | "ingredients"> {
-  tags?: Tag[]
-  steps?: Step[]
-  ingredients?: Ingredient[]
-}
+// Comment types
+export type Comment = DB.Row<"comments">
+export type CommentInsert = DB.Insert<"comments">
+export type CommentUpdate = DB.Update<"comments">
 
-export interface RecipeUpdate
-  extends Omit<TablesUpdate<"recipes">, "tags" | "steps" | "ingredients"> {
-  tags?: Tag[]
-  steps?: Step[]
-  ingredients?: Ingredient[]
-}
+// User types
+export type User = DB.Row<"profiles">
+export type UserInsert = DB.Insert<"profiles">
+export type UserUpdate = DB.Update<"profiles">
 
-export type Comment = Tables<"comments">
-export type CommentInsert = TablesInsert<"comments">
-export type CommentUpdate = TablesUpdate<"comments">
-
-export type User = Tables<"profiles">
-export type UserInsert = TablesInsert<"profiles">
-export type UserUpdate = TablesUpdate<"profiles">
-export interface UserWithRecipes
-  extends Omit<GeneratedUserWithRecipes, "recipes"> {
+export type UserWithRecipes = User & {
   recipes: Recipe[]
 }
 
+// Filter state
 export interface FilterState {
   authors: string[]
   tags: Tag[]
