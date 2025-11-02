@@ -66,7 +66,7 @@ const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
           alt={recipe.recipe_name || "Generic fallback"}
           width={450}
           height={325}
-          className="aspect-square rounded-md object-cover shadow shadow-foreground"
+          className="aspect-square rounded-md object-cover shadow-sm shadow-foreground"
           placeholder="blur"
           blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 325))}`}
         />
@@ -146,7 +146,7 @@ const LoadingSkeleton = () => (
           </div>
         </div>
         <div className="flex items-center justify-center">
-          <SVGSkeleton className="aspect-square h-[325px] w-[450px] rounded-md object-cover shadow shadow-foreground" />
+          <SVGSkeleton className="aspect-square h-[325px] w-[450px] rounded-md object-cover shadow-sm shadow-foreground" />
         </div>
       </header>
       <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -161,7 +161,7 @@ const LoadingSkeleton = () => (
           </div>
           <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
             <span className="flex items-center justify-center">
-              <div className="flex h-9 w-16 border border-input px-3 py-1 shadow-sm transition-colors file:border-0"></div>
+              <div className="flex h-9 w-16 border border-input px-3 py-1 shadow-xs transition-colors file:border-0"></div>
               <span>
                 <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
                   <SVGSkeleton className="lucide-arrow-up h-[24px] w-[24px]" />
@@ -312,7 +312,7 @@ const LoadingSkeleton = () => (
           </ul>
         </div>
       </div>
-      <div className="h-[1px] w-full shrink-0 bg-border"></div>
+      <div className="h-px w-full shrink-0 bg-border"></div>
     </div>
   </>
 )

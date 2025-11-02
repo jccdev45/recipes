@@ -12,7 +12,7 @@ import { AuthButton } from "@/app/(auth)/auth-button"
 export function LoginForm() {
   return (
     <form
-      className="w-full border bg-background p-8 shadow md:px-24"
+      className="w-full border bg-background p-8 shadow-sm md:px-24"
       autoComplete="off"
     >
       <fieldset className="flex flex-col items-start gap-4">

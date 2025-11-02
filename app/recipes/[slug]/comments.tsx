@@ -270,7 +270,7 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
         <Heart
           color="red"
           className={cn(
-            `active:animate-ping bg-gradient-to-br bg-clip-text from-red-500 to-red-800 fill-red-400`,
+            `active:animate-ping bg-linear-to-br bg-clip-text from-red-500 to-red-800 fill-red-400`,
             liked_by.includes(user_id) && `cursor-default`
           )}
           onClick={handleLike}
@@ -298,7 +298,7 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={onDelete}
-                className="bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90"
               >
                 Confirm
               </AlertDialogAction>

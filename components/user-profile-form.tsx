@@ -48,7 +48,7 @@ export function UserProfileForm({
 }: UserProfileFormProps) {
   return (
     <form
-      className="rounded border bg-background p-8 drop-shadow"
+      className="rounded border bg-background p-8 drop-shadow-sm"
       autoComplete="off"
       aria-labelledby="form-title"
     >

@@ -50,7 +50,7 @@ export default async function Index() {
                   variant="h3"
                   className="mb-4 border-b border-border pb-2"
                 >
-                  <span className="bg-gradient-to-r from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] bg-clip-text text-transparent dark:via-white dark:to-[#004EF1]">
+                  <span className="bg-linear-to-r from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] bg-clip-text text-transparent dark:via-white dark:to-[#004EF1]">
                     Puerto Rican
                   </span>{" "}
                   style
