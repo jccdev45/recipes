@@ -98,13 +98,14 @@ post_date: "2025-11-02"
 ### Current Progress – Phase 4
 
 - Added `@tanstack/react-form` and migrated the recipe comments form to the new TanStack Form + Field primitives stack, confirming mutation flows and error handling.
+- Rebuilt `app/recipes/add/add-recipe-form.tsx` on TanStack Form, covering array fields for ingredients/steps/tags, wiring shadcn Field primitives, and keeping Supabase upload + submission workflows intact.
+- Ran `bun x tsc --noEmit` after the migration to verify type safety before proceeding to additional form conversions.
 
 ### Upcoming Tasks – Phase 4
 
 - Remove react-hook-form and `@hookform/resolvers` once all forms are migrated.
 - Encapsulate Zod parsing via TanStack Form transformers (e.g., `customValidate` or `zodValidator`) inside `lib/zod/schema`.
 - Replace `components/ui/form.tsx` with wrappers around shadcn Field primitives plus TanStack Form context helpers (`Form`, `FieldGroup`, `FieldError`).
-- In `app/recipes/add/add-recipe-form.tsx`, migrate to `const form = useForm({ defaultValues, validators })`, using `form.Field` render props for each control and `form.Push()` for arrays.
 - Swap `useFieldArray` usage for `mode="array"` fields; handle dynamic lists by mapping `field.state.value` and using `field.push`, `field.remove`.
 - Reconcile file upload and Supabase actions with TanStack Form submission (e.g., `form.handleSubmit` + `form.Subscribe` for pending state) and integrate server actions where beneficial.
 - Ensure form-level errors map to `FieldError` components, preserving accessibility instructions (aria-invalid, descriptions).
