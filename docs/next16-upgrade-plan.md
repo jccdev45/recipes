@@ -16,11 +16,12 @@ summary: "Step-by-step modernization plan covering the Next.js 16 upgrade, Tailw
 post_date: "2025-11-02"
 ---
 
-# Family Recipes Upgrade Guide
+<!-- markdownlint-disable-next-line MD041 -->
+## Family Recipes Upgrade Guide
 
 ## Executive Summary
 
-- Modernize the Recipes app by sequentially upgrading Next.js, Tailwind CSS, and shadcn/ui primitives before reworking form and data layers.
+- Modernize the Recipes app by sequentially refreshing Tailwind CSS, shadcn/ui primitives, and the data layer now that the Next.js 16 upgrade is complete.
 - Adopt @tanstack/react-form and refreshed shadcn Field primitives to replace react-hook-form and custom wrappers.
 - Refresh the visual system via shadcn registry components while aligning Tailwind 4 tokens with the design direction.
 - Tighten TanStack Query usage for cache hygiene, stale-time defaults, and Suspense alignment post-upgrade.
@@ -28,28 +29,44 @@ post_date: "2025-11-02"
 - Execute repo-wide dependency refreshes with `bun update --interactive`, prioritizing major frameworks first and sweeping remaining packages after each phase gate.
 - Re-evaluate Supabase browser client usage post-upgrade to ensure consistent initialization, session handling, and query ergonomics without touching backend helpers.
 
+## Changelog
+
+- November 2, 2025 – Verified Node 22.14 and Bun toolchain, confirmed clean git state, and documented current package manager usage.
+- November 2, 2025 – Ran `npx @next/codemod@canary upgrade latest`; project already on Next.js 16.0.1 and React 19.2.0 with no further codemod changes required.
+- November 2, 2025 – Replaced `ThemeProviderProps` import with `React.ComponentProps<typeof NextThemesProvider>` to eliminate reliance on `next-themes/dist/types`.
+- November 2, 2025 – Renamed `middleware.ts` to `proxy.ts` and updated the exported handler to `proxy`, keeping Supabase session management intact.
+- November 2, 2025 – Removed the deprecated `--turbopack` flag from the `dev` script and accepted Next.js tsconfig updates (`jsx: react-jsx`, `.next/dev/types`).
+- November 2, 2025 – Confirmed `bun run build` succeeds and exercised `/`, `/recipes`, and `/recipes/mojito` via browser automation without client-side errors (note: existing image aspect-ratio warning persists).
+
 ## Current State Assessment
 
-- Next.js 15.1.6 with Turbopack flag in scripts, legacy middleware entrypoint, and limited cacheComponents usage.
+- Next.js 16.0.1 with Turbopack default tooling, `proxy.ts` entrypoint for Supabase sessions, and codemod-aligned tsconfig.
 - Tailwind CSS 3.4 with classic @tailwind directives, PostCSS autoprefixer plugin, and custom config requiring duplication cleanup.
 - Forms rely on react-hook-form and bespoke `components/ui/form.tsx`, while Zod schemas already exist for migration.
 - TanStack Query v5.56.2 lacks suspense-first hooks and standardized query defaults.
 - shadcn/ui catalog predates Field and FieldGroup primitives, leading to inconsistent form markup.
 
-## Phase 1 – Next.js 16 Upgrade
+## Phase 1 – Next.js 16 Upgrade (Status)
 
-- Prerequisites: confirm Node 20+, Bun latest, and clean git status; snapshot environment variables.
-- Run `bun update --interactive` targeting Next.js, React, Supabase SDK, and other major frameworks first, then rerun to accept remaining safe updates once builds succeed.
-- Run `npx @next/codemod@canary upgrade latest` to rewrite config, scripts, and lint scaffolding.
-- Update `package.json` scripts to drop `--turbopack`, align with Next 16 defaults, and add cacheComponents guardrails.
-- Migrate `next.config.js` to ESM/TypeScript, promote `turbopack` top-level options, and replace deprecated flags (`skipMiddlewareUrlNormalize` → `skipProxyUrlNormalize`).
-- Rename `middleware.ts` to `proxy.ts`, update Supabase middleware imports, and validate matcher semantics.
-- Audit app routes for parallel slot defaults; add `default.tsx` calling `notFound()` where required.
-- Verify dev/build by running `bun dev` and `bun run build`, resolving new warnings (e.g., lint CLI change).
+### Completed
+
+- Verified tooling prerequisites (Node 22.14.0, Bun, clean git) and recorded the environment baseline.
+- Confirmed application already on Next.js 16.0.1 / React 19.2.0; codemod reported no additional edits.
+- Dropped the deprecated `--turbopack` flag from scripts and accepted Next.js tsconfig guidance.
+- Migrated from `middleware.ts` to `proxy.ts` with the required handler rename.
+- Fixed `ThemeProviderProps` typing to rely on published `next-themes` exports.
+- Validated production build and performed browser-based smoke tests on key routes.
+
+### Remaining
+
+- Review `next.config.js`; consider ESM/TypeScript conversion, promote `turbopack` options, and ensure no deprecated flags linger.
+- Audit for parallel route slots requiring `default.tsx` fallbacks (none detected yet; keep check on future additions).
+- Address outstanding warnings (Browserslist data freshness, Mojito image aspect ratio) as part of ongoing maintenance.
+- Schedule a dependency sweep with `bun update --interactive` for non-framework packages once Tailwind and shadcn upgrades are queued.
 
 ## Phase 2 – Tailwind CSS v4 Migration
 
-- Execute `npx @tailwindcss/upgrade` after Next 16 succeeds to automate dependency, config, and template updates.
+- Execute `npx @tailwindcss/upgrade` now that the Next 16 upgrade is complete, automating dependency, config, and template updates.
 - Replace `tailwind.config.js` with `tailwind.config.ts` exporting the new default preset and migrating tokens to CSS variables.
 - Update PostCSS configuration to use `@tailwindcss/postcss`, removing `postcss-import`/`autoprefixer`, and ensure Bun respects `.mjs` modules.
 - Convert `app/globals.css` to `@import "tailwindcss";` and move layer definitions into the new file structure.
@@ -120,7 +137,7 @@ post_date: "2025-11-02"
 
 ## Suggested Timeline
 
-- Week 1: Next.js 16 upgrade, repo-wide dependency sweep, config cleanup, baseline tests.
+- Week 1 (completed): Next.js 16 upgrade, repo-wide dependency sweep kickoff, config cleanup validation, baseline tests.
 - Week 2: Tailwind CSS v4 migration and shadcn registry sync.
 - Week 3: TanStack Form conversion for add/edit recipes plus shared components.
 - Week 4: Supabase frontend realignment, TanStack Query refinements, UI overhaul rollout, final QA and accessibility review.
