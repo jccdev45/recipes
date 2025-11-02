@@ -1,13 +1,14 @@
 "use client"
 
-import { Suspense } from "react"
+import { Fragment, Suspense } from "react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import { Loader2, UserCircle } from "lucide-react"
+import { Loader2, MessageCircleWarning, UserCircle } from "lucide-react"
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -18,70 +19,88 @@ import { RecipeCard } from "@/app/recipes/recipe-card"
 import type { UserWithRecipes } from "@/lib/types"
 import type { User } from "@supabase/supabase-js"
 
-function ProfileInfo({ user }: { user: UserWithRecipes }) {
-  return (
-    <div className="flex items-center space-x-4">
-      <Avatar className="aspect-square size-20 border">
-        <AvatarImage
-          alt={`${user.first_name} ${user.last_name}`}
-          src={user.avatar_url ?? "https://placehold.co/80"}
-        />
-        <AvatarFallback>
-          {user.first_name?.[0]}
-          {user.last_name?.[0]}
-        </AvatarFallback>
-      </Avatar>
-      <div className="text-sm">
-        <Typography variant="h4" className="font-semibold">
-          {user.first_name} {user.last_name}
+const ProfileInfo = ({
+  userWithRecipes,
+}: {
+  userWithRecipes: UserWithRecipes
+}) => (
+  <div className="flex items-center space-x-4">
+    <Avatar className="aspect-square size-20 border">
+      <AvatarImage
+        alt={`${userWithRecipes.first_name} ${userWithRecipes.last_name}`}
+        src={userWithRecipes.avatar_url ?? "https://placehold.co/80"}
+      />
+      <AvatarFallback>
+        {userWithRecipes.first_name?.[0]}
+        {userWithRecipes.last_name?.[0]}
+      </AvatarFallback>
+    </Avatar>
+    <div className="text-sm">
+      <Typography variant="h4" className="font-semibold">
+        {userWithRecipes.first_name} {userWithRecipes.last_name}
+      </Typography>
+    </div>
+  </div>
+)
+
+const AuthUserInfo = ({ user }: { user: User }) => (
+  <div className="grid grid-cols-3 gap-2">
+    {[
+      { label: "Email", value: user.email },
+      {
+        label: "Joined",
+        value: new Date(user.created_at).toLocaleDateString("en-US"),
+      },
+      {
+        label: "Last login",
+        value: new Date(user.last_sign_in_at!).toLocaleDateString("en-US"),
+      },
+    ].map(({ label, value }) => (
+      <Fragment key={label}>
+        <Typography variant="muted">{label}</Typography>
+        <Typography variant="small" className="col-span-2">
+          {value}
         </Typography>
-      </div>
-    </div>
-  )
-}
+      </Fragment>
+    ))}
+  </div>
+)
 
-function AuthUserInfo({ user }: { user: User }) {
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      <Typography variant="muted">Email</Typography>
-      <Typography variant="small" className="col-span-2">
-        {user.email}
-      </Typography>
-      <Typography variant="muted">Joined</Typography>
-      <Typography variant="small" className="col-span-2">
-        {new Date(user.created_at).toLocaleDateString("en-US")}
-      </Typography>
-      <Typography variant="muted">Last login</Typography>
-      <Typography variant="small" className="col-span-2">
-        {new Date(user.last_sign_in_at!).toLocaleDateString("en-US")}
-      </Typography>
-    </div>
-  )
-}
-
-function RecipesList({ recipes }: { recipes: UserWithRecipes["recipes"] }) {
+const RecipesList = ({ recipes }: { recipes: UserWithRecipes["recipes"] }) => {
   if (!recipes.length) {
-    return <Typography variant="large">No recipes yet</Typography>
+    return (
+      <Alert>
+        <MessageCircleWarning className="size-5" />
+        <AlertTitle>Oh</AlertTitle>
+        <AlertDescription>
+          No recipes yet!{" "}
+          <Link
+            href="/recipes/add"
+            className="font-semibold underline transition-colors duration-200 ease-in-out hover:text-foreground/90"
+          >
+            Add one today!
+          </Link>
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   return (
-    <>
+    <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
       {recipes.map((recipe) => (
         <RecipeCard key={recipe.id} recipe={recipe} />
       ))}
-    </>
+    </div>
   )
 }
 
-function RecipesFallback() {
-  return (
-    <>
-      {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="col-span-1 mx-auto w-5/6" />
-      ))}
-    </>
-  )
-}
+const RecipesFallback = () => (
+  <>
+    {[1, 2, 3].map((i) => (
+      <Skeleton key={i} className="col-span-1 mx-auto h-40 w-5/6" />
+    ))}
+  </>
+)
 
 export function UserProfile({
   currentUser,
@@ -91,10 +110,11 @@ export function UserProfile({
   currentUser: User | null
 }) {
   const supabase = createClient()
-  const { data, isLoading, error } = useQuery(
-    getUserWithRecipes(supabase, user_id)
-  )
-  const profileUser = data as unknown as UserWithRecipes
+  const {
+    data: profileUser,
+    isLoading,
+    error,
+  } = useQuery(getUserWithRecipes(supabase, user_id))
 
   const isOwnProfile = currentUser?.id === user_id
 
@@ -103,18 +123,29 @@ export function UserProfile({
   }
 
   if (isLoading) {
-    return <Loader2 className="size-20 animate-spin" />
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="size-20 animate-spin" />
+      </div>
+    )
   }
 
   if (error || !profileUser) {
-    return <div>Error loading profile: {error?.message || "Unknown error"}</div>
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {error?.message || "Failed to load profile. Please try again."}
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   return (
-    <div className="mx-auto grid grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 p-4 backdrop-blur-md md:grid-cols-2 lg:p-6 lg:py-16">
       <section className="space-y-6">
         <div className="space-y-8">
-          <ProfileInfo user={profileUser} />
+          <ProfileInfo userWithRecipes={profileUser} />
           {isOwnProfile && currentUser && <AuthUserInfo user={currentUser} />}
           {isOwnProfile && (
             <Button asChild size="lg">
@@ -131,16 +162,21 @@ export function UserProfile({
       <section className="space-y-6 lg:space-y-10">
         <Card>
           <CardHeader className="p-4">
-            <Typography variant="h3" className="text-lg font-bold">
-              Recipes by {profileUser.first_name || "user"}:
+            <Typography
+              variant="h3"
+              className="text-lg font-semibold text-muted-foreground"
+            >
+              Recipes by{" "}
+              <span className="font-bold text-foreground">
+                {profileUser.first_name || "user"}
+              </span>
+              :
             </Typography>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
-              <Suspense fallback={<RecipesFallback />}>
-                <RecipesList recipes={profileUser.recipes} />
-              </Suspense>
-            </div>
+            <Suspense fallback={<RecipesFallback />}>
+              <RecipesList recipes={profileUser.recipes} />
+            </Suspense>
           </CardContent>
         </Card>
       </section>

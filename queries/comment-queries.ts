@@ -2,17 +2,6 @@ import { TypedSupabaseClient } from "@/supabase/client"
 
 import { CommentInsert } from "@/lib/types"
 
-export const getCommentsByRecipeId = (
-  client: TypedSupabaseClient,
-  recipeId: number
-) => {
-  return client
-    .from("comments")
-    .select("*")
-    .eq("recipe_id", recipeId)
-    .order("created_at", { ascending: false })
-}
-
 export function insertComment(
   client: TypedSupabaseClient,
   newComment: CommentInsert
