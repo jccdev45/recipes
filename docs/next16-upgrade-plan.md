@@ -37,6 +37,8 @@ post_date: "2025-11-02"
 - November 2, 2025 – Renamed `middleware.ts` to `proxy.ts` and updated the exported handler to `proxy`, keeping Supabase session management intact.
 - November 2, 2025 – Removed the deprecated `--turbopack` flag from the `dev` script and accepted Next.js tsconfig updates (`jsx: react-jsx`, `.next/dev/types`).
 - November 2, 2025 – Confirmed `bun run build` succeeds and exercised `/`, `/recipes`, and `/recipes/mojito` via browser automation without client-side errors (note: existing image aspect-ratio warning persists).
+- November 2, 2025 – Completed the Tailwind CSS v4 migration (ran the upgrade script, converted the config to TypeScript, updated PostCSS, and stabilized global styles).
+- November 2, 2025 – Ran `bunx shadcn add -a --overwrite` to sync the UI primitives, adding Field, Item, InputGroup, Sidebar scaffolding, and the `use-mobile` hook baseline.
 
 ## Current State Assessment
 
@@ -48,7 +50,7 @@ post_date: "2025-11-02"
 
 ## Phase 1 – Next.js 16 Upgrade (Status)
 
-### Completed
+### Completed Work
 
 - Verified tooling prerequisites (Node 22.14.0, Bun, clean git) and recorded the environment baseline.
 - Confirmed application already on Next.js 16.0.1 / React 19.2.0; codemod reported no additional edits.
@@ -57,7 +59,7 @@ post_date: "2025-11-02"
 - Fixed `ThemeProviderProps` typing to rely on published `next-themes` exports.
 - Validated production build and performed browser-based smoke tests on key routes.
 
-### Remaining
+### Remaining Tasks
 
 - Review `next.config.js`; consider ESM/TypeScript conversion, promote `turbopack` options, and ensure no deprecated flags linger.
 - Audit for parallel route slots requiring `default.tsx` fallbacks (none detected yet; keep check on future additions).
@@ -66,22 +68,29 @@ post_date: "2025-11-02"
 
 ## Phase 2 – Tailwind CSS v4 Migration
 
-- Execute `npx @tailwindcss/upgrade` now that the Next 16 upgrade is complete, automating dependency, config, and template updates.
-- Replace `tailwind.config.js` with `tailwind.config.ts` exporting the new default preset and migrating tokens to CSS variables.
-- Update PostCSS configuration to use `@tailwindcss/postcss`, removing `postcss-import`/`autoprefixer`, and ensure Bun respects `.mjs` modules.
-- Convert `app/globals.css` to `@import "tailwindcss";` and move layer definitions into the new file structure.
+### Completed
+
+- Executed `npx @tailwindcss/upgrade` to handle dependency bumps and template scaffolding.
+- Replaced `tailwind.config.js` with the TypeScript equivalent, keeping shared design tokens intact.
+- Updated PostCSS to rely on `@tailwindcss/postcss` and migrated `app/globals.css` to the new `@import "tailwindcss";` entry point while preserving accessibility helpers.
+
+### Remaining
+
 - Re-evaluate plugins: upgrade `tailwindcss-animate`, confirm compatibility, or replace with Tailwind Motion equivalents.
 - Normalize utility usage (`grow-*`, `text-ellipsis`, etc.) per upgrade guide; run `bun run lint` to catch stragglers.
 - Validate the design token layer (e.g., CSS variables, dark mode) renders correctly under Tailwind 4 JIT behavior.
 
 ## Phase 3 – shadcn/ui Catalog Refresh
 
-- Pull the newest registry metadata via the shadcn MCP search terms: `landing`, `marketing`, `profile`, `auth`, `form`, `filters` for layout inspiration.
-- Run `bunx shadcn add -a --overwrite` post-Tailwind migration to sync primitives and utility components.
-- Prioritize adoption of new Field, FieldGroup, Empty, Item, and layout blocks to standardize spacing and typography.
+### Current Status
+
+- Pulled the latest registry with `bunx shadcn add -a --overwrite`, generating Field, Item, InputGroup, Sidebar primitives, the `Empty` layout component, and the `use-mobile` hook.
+
+### Next Actions
+
 - Map legacy components (e.g., `hero`, `featured-recipes`, `recipe-card`) to updated shadcn marketing and list patterns.
 - Document component-level swaps in a migration spreadsheet, noting bespoke variants needing Tailwind token alignment.
-- Establish a shared `components/ui/field.tsx` (or alias) that re-exports registry Field primitives for cohesive imports.
+- Establish shared Field usage across forms by replacing legacy wrappers with the new primitives and reorganizing imports.
 
 ## Phase 4 – Forms: TanStack React Form Adoption
 
