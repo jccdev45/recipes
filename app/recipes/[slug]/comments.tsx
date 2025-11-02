@@ -5,17 +5,16 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
-import { zodResolver } from "@hookform/resolvers/zod"
 import {
   useDeleteMutation,
   useInsertMutation,
   useQuery,
 } from "@supabase-cache-helpers/postgrest-react-query"
 import { UserCircle2 } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm } from "@tanstack/react-form"
 
 import { cn } from "@/lib/utils"
-import { CommentFormValues, CommentSchema } from "@/lib/zod/schema"
+import { CommentSchema } from "@/lib/zod/schema"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,13 +30,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
 
@@ -103,73 +101,96 @@ export function CommentsSection({
   )
 
   const form = useForm({
-    resolver: zodResolver(CommentSchema),
     defaultValues: {
       message: "",
     },
+    validators: {
+      onChange: CommentSchema,
+      onSubmit: CommentSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!currentUser) {
+        console.error("No user logged in")
+        return
+      }
+
+      const author = currentUser.user_metadata.first_name || currentUser.email
+      const newComment: CommentInsert = {
+        author: author.toString(),
+        avatar_url: currentUser.user_metadata.avatar_url,
+        message: value.message,
+        liked_by: [],
+        likes: 0,
+        recipe_id: recipe.id,
+        user_id: currentUser.id,
+      }
+
+      await insertCommentMutation([newComment])
+      form.reset()
+    },
   })
-
-  const {
-    handleSubmit,
-    formState: { errors, isDirty, isValid, isSubmitting },
-  } = form
-  const isSubmittable = isValid && isDirty
-
-  const handleSubmitComment = async (values: CommentFormValues) => {
-    if (!currentUser) {
-      console.error("No user logged in")
-      return
-    }
-
-    const author = currentUser.user_metadata.first_name || currentUser.email
-    const newComment: CommentInsert = {
-      author: author.toString(),
-      avatar_url: currentUser.user_metadata.avatar_url,
-      message: values.message,
-      liked_by: [],
-      likes: 0,
-      recipe_id: recipe.id,
-      user_id: currentUser.id,
-    }
-
-    await insertCommentMutation([newComment])
-    form.reset()
-  }
 
   return (
     <div className={cn("space-y-4", className)}>
       {currentUser ? (
-        <Form {...form}>
-          <form onSubmit={handleSubmit(handleSubmitComment)}>
-            <FormField
-              control={form.control}
+        <form
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit()
+          }}
+        >
+          <FieldSet className="gap-4">
+            <form.Field
               name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Leave a comment</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      disabled={!currentUser}
-                      placeholder={
-                        currentUser
-                          ? "Wow great recipe!"
-                          : "You must be signed in to comment"
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Leave a comment</FieldLabel>
+                    <FieldContent>
+                      <Textarea
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) =>
+                          field.handleChange(event.target.value)
+                        }
+                        disabled={!currentUser}
+                        placeholder={
+                          currentUser
+                            ? "Wow great recipe!"
+                            : "You must be signed in to comment"
+                        }
+                        aria-invalid={isInvalid}
+                        aria-describedby={
+                          isInvalid ? `${field.name}-error` : undefined
+                        }
+                      />
+                      {isInvalid && (
+                        <FieldError
+                          id={`${field.name}-error`}
+                          errors={field.state.meta.errors}
+                        />
+                      )}
+                    </FieldContent>
+                  </Field>
+                )
+              }}
             />
             <Button
               type="submit"
-              disabled={!isSubmittable || isSubmitting || !currentUser}
+              disabled={
+                !currentUser || !form.state.canSubmit || form.state.isSubmitting
+              }
             >
               Submit
             </Button>
-          </form>
-        </Form>
+          </FieldSet>
+        </form>
       ) : (
         <Typography variant="p">Please login to leave a comment</Typography>
       )}

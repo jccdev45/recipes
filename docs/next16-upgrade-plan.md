@@ -85,6 +85,7 @@ post_date: "2025-11-02"
 ### Current Status
 
 - Pulled the latest registry with `bunx shadcn add -a --overwrite`, generating Field, Item, InputGroup, Sidebar primitives, the `Empty` layout component, and the `use-mobile` hook.
+- Converted the login form to the new Field primitives to validate layout, accessibility, and form semantics before broader adoption.
 
 ### Next Actions
 
@@ -94,7 +95,13 @@ post_date: "2025-11-02"
 
 ## Phase 4 – Forms: TanStack React Form Adoption
 
-- Add `@tanstack/react-form` and optional adapters (`@tanstack/react-form/devtools` if needed); remove react-hook-form and `@hookform/resolvers`.
+### Current Progress – Phase 4
+
+- Added `@tanstack/react-form` and migrated the recipe comments form to the new TanStack Form + Field primitives stack, confirming mutation flows and error handling.
+
+### Upcoming Tasks – Phase 4
+
+- Remove react-hook-form and `@hookform/resolvers` once all forms are migrated.
 - Encapsulate Zod parsing via TanStack Form transformers (e.g., `customValidate` or `zodValidator`) inside `lib/zod/schema`.
 - Replace `components/ui/form.tsx` with wrappers around shadcn Field primitives plus TanStack Form context helpers (`Form`, `FieldGroup`, `FieldError`).
 - In `app/recipes/add/add-recipe-form.tsx`, migrate to `const form = useForm({ defaultValues, validators })`, using `form.Field` render props for each control and `form.Push()` for arrays.
