@@ -1,0 +1,257 @@
+"use client"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useFormStatus } from "react-dom"
+import type { User } from "@supabase/supabase-js"
+import {
+  LogIn,
+  LogOut,
+  Menu,
+  UserCircle2,
+  UserIcon,
+  UserPen,
+} from "lucide-react"
+
+import { Searchbar } from "@/app/recipes/search"
+import { logout } from "@/app/(auth)/actions"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
+
+const secondaryLinks = [
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/privacy", label: "Privacy Policy" },
+]
+
+type NavLink = {
+  href: string
+  label: string
+}
+
+type NavClientProps = {
+  navLinks: NavLink[]
+  user: User | null
+}
+
+export function NavClient({ navLinks, user }: NavClientProps) {
+  return (
+    <div className="flex flex-1 items-center justify-end gap-3 lg:gap-4">
+      <DesktopNav links={navLinks} />
+      <div className="hidden md:w-64 xl:w-80 lg:block">
+        <Searchbar />
+      </div>
+      <div className="hidden items-center gap-3 lg:flex">
+        <ThemeToggle />
+        <AccountMenu user={user} />
+      </div>
+      <MobileMenu navLinks={navLinks} user={user} />
+    </div>
+  )
+}
+
+function DesktopNav({ links }: { links: NavLink[] }) {
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === href
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  if (links.length === 0) {
+    return null
+  }
+
+  return (
+    <NavigationMenu className="hidden flex-1 justify-center lg:flex">
+      <NavigationMenuList>
+        {links.map(({ href, label }) => (
+          <NavigationMenuItem key={href}>
+            <NavigationMenuLink asChild>
+              <Link
+                href={href}
+                data-active={isActive(href)}
+                className="rounded-md px-4 py-2 text-sm font-medium text-foreground/80 transition-colors duration-200 ease-in-out hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[active=true]:text-primary"
+              >
+                {label}
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
+  )
+}
+
+function AccountMenu({ user }: { user: User | null }) {
+  if (!user) {
+    return (
+      <Button asChild variant="secondary">
+        <Link href="/login" className="flex items-center gap-2">
+          <LogIn className="size-4" aria-hidden="true" />
+          <span>Log in</span>
+        </Link>
+      </Button>
+    )
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          aria-label="Open account menu"
+        >
+          <Avatar>
+            <AvatarImage
+              src={user.user_metadata?.avatar_url}
+              alt="Account avatar"
+              className="object-cover"
+            />
+            <AvatarFallback>
+              <UserCircle2 className="size-5" aria-hidden="true" />
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-56" forceMount>
+        <div className="flex items-center gap-3 px-2 py-1.5">
+          <Avatar className="size-10">
+            <AvatarImage
+              src={user.user_metadata?.avatar_url}
+              alt="Account avatar"
+              className="object-cover"
+            />
+            <AvatarFallback>
+              <UserCircle2 className="size-6" aria-hidden="true" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="text-sm">
+            {user.user_metadata?.first_name && user.user_metadata?.last_name ? (
+              <p className="font-medium">{`${user.user_metadata.first_name} ${user.user_metadata.last_name}`}</p>
+            ) : (
+              <p className="font-medium">{user.email}</p>
+            )}
+            <p className="text-muted-foreground text-xs">{user.email}</p>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={`/profile/${user.id}`} className="flex items-center">
+            <UserIcon className="mr-2 size-4" aria-hidden="true" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/profile/${user.id}/edit`}
+            className="flex items-center"
+          >
+            <UserPen className="mr-2 size-4" aria-hidden="true" />
+            <span>Edit profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <LogoutMenuItem />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function LogoutMenuItem() {
+  return (
+    <form action={logout} className="w-full">
+      <LogoutButton />
+    </form>
+  )
+}
+
+function LogoutButton() {
+  const { pending } = useFormStatus()
+
+  return (
+    <DropdownMenuItem asChild disabled={pending} className="cursor-pointer">
+      <button
+        type="submit"
+        className={cn(
+          "flex w-full items-center text-destructive",
+          pending && "opacity-70"
+        )}
+      >
+        <LogOut className="mr-2 size-4" aria-hidden="true" />
+        <span>{pending ? "Signing out..." : "Sign out"}</span>
+      </button>
+    </DropdownMenuItem>
+  )
+}
+
+function MobileMenu({ navLinks, user }: NavClientProps) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="size-5" aria-hidden="true" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        className="flex h-full w-[320px] flex-col gap-6 sm:w-[400px]"
+      >
+        <SheetHeader>
+          <SheetTitle>Navigation</SheetTitle>
+        </SheetHeader>
+        <Searchbar />
+        <Separator />
+        <nav className="flex flex-col gap-3" aria-label="Mobile navigation">
+          {[...navLinks, ...secondaryLinks].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-left text-base font-medium text-foreground/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <SheetFooter>
+          <div className="flex w-full items-center justify-between gap-4">
+            <ThemeToggle />
+            <AccountMenu user={user} />
+          </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  )
+}
