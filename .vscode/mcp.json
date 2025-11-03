@@ -6,6 +6,10 @@
         "shadcn@latest",
         "mcp"
       ]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=pyprjpalfbyoflzjdsmz&features=storage%2Cdocs%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions"
     }
   }
 }
