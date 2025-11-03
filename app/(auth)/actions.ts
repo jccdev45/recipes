@@ -36,7 +36,7 @@ const matcher = new RegExpMatcher({
 // Helper function to check for profanity
 const containsProfanity = (formData: FormData) => {
   for (const pair of formData.entries()) {
-    if (matcher.hasMatch(pair[1] as string)) {
+    if (typeof pair[1] === "string" && matcher.hasMatch(pair[1])) {
       return true
     }
   }
@@ -74,7 +74,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -125,7 +125,7 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -138,7 +138,7 @@ export async function logout() {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -164,12 +164,21 @@ export async function updateProfile(formData: FormData) {
     }
   }
 
+  const normalizeOptional = (value: FormDataEntryValue | null) => {
+    if (typeof value !== "string") {
+      return undefined
+    }
+
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : undefined
+  }
+
   const values = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    confirm_password: formData.get("confirm_password") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
+    email: normalizeOptional(formData.get("email")),
+    password: normalizeOptional(formData.get("password")),
+    confirm_password: normalizeOptional(formData.get("confirm_password")),
+    first_name: normalizeOptional(formData.get("first_name")),
+    last_name: normalizeOptional(formData.get("last_name")),
   }
 
   const validatedFields = EditProfileSchema.safeParse(values)

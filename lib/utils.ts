@@ -157,3 +157,17 @@ export function trimAvatarUrl(fullUrl: string) {
   }
   return ""
 }
+
+export function isRedirectError(error: unknown): boolean {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string"
+  ) {
+    const digestValue = (error as { digest: string }).digest
+    return digestValue.startsWith("NEXT_REDIRECT")
+  }
+
+  return false
+}
