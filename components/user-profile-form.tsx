@@ -97,21 +97,31 @@ interface UserProfileFormProps {
   title: string
   formType: "register" | "edit"
   userData?: User
+  className?: string
 }
 
 export function UserProfileForm({
   title,
   formType,
   userData,
+  className,
 }: UserProfileFormProps) {
   if (formType === "register") {
-    return <RegisterProfileForm title={title} />
+    return <RegisterProfileForm title={title} className={className} />
   }
 
-  return <EditProfileForm title={title} userData={userData} />
+  return (
+    <EditProfileForm title={title} userData={userData} className={className} />
+  )
 }
 
-function RegisterProfileForm({ title }: { title: string }) {
+function RegisterProfileForm({
+  title,
+  className,
+}: {
+  title: string
+  className?: string
+}) {
   const headingId = useId()
   const formRef = useRef<HTMLFormElement>(null)
   const [formError, setFormError] = useState<string | null>(null)
@@ -182,27 +192,29 @@ function RegisterProfileForm({ title }: { title: string }) {
   return (
     <form
       ref={formRef}
-      className="bg-background rounded border p-8 drop-shadow-sm"
+      className={cn("flex flex-col gap-6", className)}
       autoComplete="on"
       noValidate
       onSubmit={handleSubmit}
       aria-labelledby={headingId}
     >
-      <Typography id={headingId} variant="h2">
+      <h2 id={headingId} className="sr-only">
         {title}
-      </Typography>
-      {formError ? (
-        <Alert variant="destructive" className="mt-4">
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      ) : null}
+      </h2>
       <FieldSet
-        className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
         aria-describedby={`${headingId}-legend`}
       >
         <FieldLegend id={`${headingId}-legend`} className="sr-only">
-          Create your profile
+          {title}
         </FieldLegend>
+
+        {formError ? (
+          <Alert variant="destructive" className="md:col-span-2">
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        ) : null}
+
         {registerFormItems.map(
           ({ fieldName, label, placeholder, type, required }) => {
             const inputId = `register-${fieldName}`
@@ -266,7 +278,7 @@ function RegisterProfileForm({ title }: { title: string }) {
             <div className="md:col-span-2">
               <Button
                 type="submit"
-                className="w-full sm:w-1/2"
+                className="w-full"
                 disabled={isSubmitting || !canSubmit}
                 aria-busy={isSubmitting}
               >
@@ -288,9 +300,11 @@ function RegisterProfileForm({ title }: { title: string }) {
 function EditProfileForm({
   title,
   userData,
+  className,
 }: {
   title: string
   userData?: User
+  className?: string
 }) {
   const headingId = useId()
   const formRef = useRef<HTMLFormElement>(null)
@@ -377,7 +391,10 @@ function EditProfileForm({
   return (
     <form
       ref={formRef}
-      className="bg-background rounded border p-8 drop-shadow-sm"
+      className={cn(
+        "bg-background rounded border p-8 drop-shadow-sm",
+        className
+      )}
       autoComplete="on"
       noValidate
       onSubmit={handleSubmit}

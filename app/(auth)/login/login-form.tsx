@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 
 import { loginFormItems } from "@/lib/constants"
-import { isRedirectError } from "@/lib/utils"
+import { cn, isRedirectError } from "@/lib/utils"
 import { LoginSchema } from "@/lib/zod/schema"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -18,10 +18,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { Typography } from "@/components/ui/typography"
 import { login } from "@/app/(auth)/actions"
 
 import type { LoginFormValues } from "@/lib/zod/schema"
+
+type LoginFormProps = {
+  className?: string
+}
 
 type LoginFieldName = keyof LoginFormValues
 
@@ -35,7 +38,7 @@ const autocompleteByField: Record<LoginFieldName, string> = {
   password: "current-password",
 }
 
-export function LoginForm() {
+export function LoginForm({ className }: LoginFormProps) {
   const [formError, setFormError] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const defaultValues = useMemo(() => ({ ...DEFAULT_VALUES }), [])
@@ -117,19 +120,16 @@ export function LoginForm() {
 
   return (
     <form
-      className="bg-background w-full border p-8 shadow-sm md:px-24"
+      ref={formRef}
+      className={cn("flex flex-col gap-6", className)}
       autoComplete="on"
       noValidate
-      ref={formRef}
       onSubmit={handleSubmit}
     >
-      <FieldSet className="flex flex-col gap-6" aria-labelledby="login-heading">
+      <FieldSet className="grid gap-5" aria-labelledby="login-heading">
         <FieldLegend id="login-heading" className="sr-only" variant="legend">
           Login
         </FieldLegend>
-        <Typography variant="h2" className="text-center text-balance">
-          Login
-        </Typography>
 
         {formError ? (
           <Alert variant="destructive" role="alert">
@@ -149,9 +149,7 @@ export function LoginForm() {
 
                 return (
                   <FieldWrapper data-invalid={hasError || undefined}>
-                    <FieldLabel htmlFor={inputId} className="text-lg">
-                      {label}
-                    </FieldLabel>
+                    <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
                     <FieldContent>
                       <Input
                         id={inputId}
@@ -164,7 +162,6 @@ export function LoginForm() {
                         }
                         aria-invalid={hasError}
                         aria-describedby={hasError ? errorId : undefined}
-                        className="text-lg"
                         onBlur={field.handleBlur}
                         onChange={(event) =>
                           field.handleChange(event.target.value)
@@ -191,7 +188,6 @@ export function LoginForm() {
           {({ isSubmitting, canSubmit }) => (
             <Button
               type="submit"
-              className="w-full"
               disabled={isSubmitting || !canSubmit}
               aria-busy={isSubmitting}
             >
