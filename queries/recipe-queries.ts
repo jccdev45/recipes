@@ -1,6 +1,6 @@
 import { TypedSupabaseClient } from "@/supabase/client"
 
-import { Recipe } from "@/lib/types"
+import { Recipe, Tag } from "@/lib/types"
 
 export const getRecipes = (client: TypedSupabaseClient) => {
   return client.from("recipes").select(`
@@ -50,23 +50,67 @@ export const getRecipeWithComments = (
     .single()
 }
 
-export const getFeaturedRecipes = (client: TypedSupabaseClient) => {
-  return client
-    .from("recipes")
-    .select(
+export interface LandingStats {
+  totalRecipes: number
+  featuredCount: number
+  contributorCount: number
+  tagCount: number
+}
+
+type RecipeMetadata = Pick<Recipe, "author" | "tags">
+
+export const getLandingHighlights = async (client: TypedSupabaseClient) => {
+  const [featuredResponse, totalResponse, metadataResponse] = await Promise.all(
+    [
+      client
+        .from("recipes")
+        .select(
+          `
+        author,
+        id,
+        img,
+        quote,
+        recipe_name,
+        slug,
+        tags
       `
-      author,
-      id,
-      img,
-      quote,
-      recipe_name,
-      slug,
-      tags
-    `
-    )
-    .order("id", { ascending: true })
-    .limit(3)
-    .returns<Recipe[]>()
+        )
+        .order("created_at", { ascending: false })
+        .limit(3)
+        .returns<Recipe[]>(),
+      client.from("recipes").select("id", { head: true, count: "exact" }),
+      client.from("recipes").select("author, tags").returns<RecipeMetadata[]>(),
+    ]
+  )
+
+  if (featuredResponse.error) throw featuredResponse.error
+  if (totalResponse.error) throw totalResponse.error
+  if (metadataResponse.error) throw metadataResponse.error
+
+  const recipes = featuredResponse.data ?? []
+  const totalRecipes = totalResponse.count ?? recipes.length
+
+  const contributorCount = new Set(
+    (metadataResponse.data ?? [])
+      .map((entry) => entry.author?.trim())
+      .filter((author): author is string => Boolean(author))
+  ).size
+
+  const tagCount = new Set(
+    (metadataResponse.data ?? [])
+      .flatMap((entry) => entry.tags ?? [])
+      .map((tag: Tag) => tag.tag?.toLowerCase())
+      .filter((tag): tag is string => Boolean(tag))
+  ).size
+
+  const stats: LandingStats = {
+    totalRecipes,
+    featuredCount: recipes.length,
+    contributorCount,
+    tagCount,
+  }
+
+  return { recipes, stats }
 }
 
 export const searchRecipes = (

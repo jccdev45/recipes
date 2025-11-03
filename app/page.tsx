@@ -1,26 +1,46 @@
-import { Suspense } from "react"
-import Link from "next/link"
-import { getFeaturedRecipes } from "@/queries/recipe-queries"
+import { getLandingHighlights } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
-import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query"
 
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Typography } from "@/components/ui/typography"
-import { FeaturedRecipes } from "@/components/featured-recipes"
 import { Hero } from "@/components/hero"
+import { BlogSection } from "@/components/landing/blog-section"
+import { CtaSection } from "@/components/landing/cta-section"
+import { FeatureSection } from "@/components/landing/feature-section"
+import { FeaturedRecipes } from "@/components/landing/featured-recipes"
+import { StatsSection } from "@/components/landing/stats-section"
+import { TestimonialsSection } from "@/components/landing/testimonials-section"
+
+const numberFormatter = new Intl.NumberFormat()
 
 export default async function Index() {
   const supabase = await createClient()
-  const queryClient = new QueryClient()
+  const { recipes, stats } = await getLandingHighlights(supabase)
 
-  await prefetchQuery(queryClient, getFeaturedRecipes(supabase))
+  const statsItems = [
+    {
+      id: "total",
+      label: "Recipes shared",
+      value: numberFormatter.format(stats.totalRecipes),
+      description: "Family-approved dishes collected in one welcoming kitchen.",
+    },
+    {
+      id: "contributors",
+      label: "Home cooks contributing",
+      value: numberFormatter.format(stats.contributorCount),
+      description: "Voices keeping beloved flavors alive across generations.",
+    },
+    {
+      id: "tags",
+      label: "Flavor tags to explore",
+      value: numberFormatter.format(stats.tagCount),
+      description: "Browse by ingredients, celebrations, and cooking styles.",
+    },
+    {
+      id: "featured",
+      label: "Featured this week",
+      value: numberFormatter.format(stats.featuredCount),
+      description: "A sampling of recipes getting extra love right now.",
+    },
+  ]
 
   return (
     <>
@@ -38,104 +58,62 @@ export default async function Index() {
         ctaLink="/recipes"
       />
 
-      <section className="w-full px-4 py-8 md:py-16 lg:py-24">
-        <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            <div className="space-y-6">
-              <header className="text-center">
-                <Typography variant="h2" className="mb-2 border-none">
-                  Family Recipes
-                </Typography>
-                <Typography
-                  variant="h3"
-                  className="mb-4 border-b border-border pb-2"
-                >
-                  <span className="bg-linear-to-r from-[#EF0000] from-10% via-black/10 via-20% to-[#004EF1] bg-clip-text text-transparent dark:via-white dark:to-[#004EF1]">
-                    Puerto Rican
-                  </span>{" "}
-                  style
-                </Typography>
-              </header>
-              <div className="space-y-4">
-                <Typography variant="p" className="text-left lg:text-justify">
-                  Welcome to a collection of family recipes, packed with just as
-                  much love as flavor. Inside, you'll find a variety of recipes
-                  from Puerto Rican classics like pernil and arroz con gandules
-                  to dishes like chicken marsala and potato salad, even a
-                  refreshing mojito recipe.
-                </Typography>
-                <Typography variant="large" className="text-center md:text-xl">
-                  There's a little something for everyone.
-                </Typography>
-                <Typography variant="lead" className="text-center">
-                  You like flavor don't you? <strong>Good!</strong> <br />{" "}
-                  You're in the right place.
-                </Typography>
-              </div>
-            </div>
+      <FeatureSection
+        id="family-recipes"
+        tagline="Family favorites"
+        title="Cook, collect, and celebrate the meals that tell your story"
+        description={
+          "Keep treasured Puerto Rican dishes alongside new family staples so everyone can recreate them with confidence."
+        }
+        actions={[
+          { label: "Browse recipes", href: "/recipes" },
+          {
+            label: "Share a recipe",
+            href: "/recipes/add",
+            ariaLabel: "Share a family recipe",
+          },
+        ]}
+        image={{
+          src: "/images/Cooking2.svg",
+          alt: "Illustration of a person preparing a meal",
+          aspectRatio: 4 / 3,
+        }}
+      />
 
-            <Separator className="block lg:hidden" />
+      <StatsSection
+        id="community-stats"
+        tagline="Community at a glance"
+        title="A growing table of shared dishes"
+        description="Every contribution keeps traditions vibrant. Here's a quick snapshot of the flavors you can explore."
+        stats={statsItems}
+        media={{
+          src: "/images/CookingSvg.svg",
+          alt: "Colorful spread of ingredients on a counter",
+        }}
+      />
 
-            <div className="flex flex-col items-center justify-center gap-8">
-              <div className="text-center">
-                <Typography variant="h4" className="mb-3">
-                  Ready to explore?
-                </Typography>
-                <Typography variant="muted">
-                  Dive into our collection or share your own family favorites.
-                </Typography>
-              </div>
-              <div className="w-full max-w-md space-y-4 rounded-lg bg-secondary/10 p-8 shadow-inner">
-                <Button asChild className="w-full" size="lg">
-                  <Link href="/recipes">Browse Recipes</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full" size="lg">
-                  <Link href="/recipes/add">Contribute a Recipe</Link>
-                </Button>
-              </div>
-              <Typography variant="small" className="text-center md:text-left">
-                Join our community of food lovers and family recipe enthusiasts!
-              </Typography>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="bg-secondary/5 px-4 py-12"
-        aria-label="Featured recipes"
+      <BlogSection
+        id="featured-recipes-heading"
+        title="Featured recipes"
+        tagline="Weekly highlights"
+        description="Hand-picked dishes to inspire your next meal."
+        className="bg-secondary/5"
       >
-        <div className="container mx-auto max-w-7xl">
-          <Typography variant="h2" className="mb-8 text-center">
-            Featured recipes:
-          </Typography>
-          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-            <Suspense fallback={<RecipesFallback />}>
-              <HydrationBoundary state={dehydrate(queryClient)}>
-                <FeaturedRecipes />
-              </HydrationBoundary>
-            </Suspense>
-          </div>
-        </div>
-      </section>
-    </>
-  )
-}
+        <FeaturedRecipes recipes={recipes} />
+      </BlogSection>
 
-function RecipesFallback() {
-  return (
-    <>
-      <Skeleton
-        className="col-span-1 mx-auto w-3/4 md:w-5/6"
-        aria-label="Loading recipe card"
-      />
-      <Skeleton
-        className="col-span-1 mx-auto w-3/4 md:w-5/6"
-        aria-label="Loading recipe card"
-      />
-      <Skeleton
-        className="col-span-1 mx-auto w-3/4 md:w-5/6"
-        aria-label="Loading recipe card"
+      <TestimonialsSection />
+
+      <CtaSection
+        id="join-the-table"
+        tagline="Pass it on"
+        title="Share the dish that friends always request"
+        description="Upload a favorite, add photos, and capture the story behind every bite."
+        action={{
+          label: "Contribute a recipe",
+          href: "/recipes/add",
+          ariaLabel: "Contribute a new recipe",
+        }}
       />
     </>
   )
