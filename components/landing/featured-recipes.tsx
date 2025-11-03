@@ -1,6 +1,5 @@
-"use client"
-
-import { Fragment } from "react"
+import { Fragment, ReactNode } from "react"
+import { Bean, Drumstick, LucideIcon, Sprout } from "lucide-react"
 
 import {
   Empty,
@@ -8,7 +7,8 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { RecipeCard } from "@/app/recipes/recipe-card"
+import { FeaturedRecipeCard } from "@/components/landing/featured-recipe-card"
+import { getUser } from "@/app/(auth)/actions"
 
 import type { Recipe } from "@/lib/types"
 
@@ -16,7 +16,9 @@ interface FeaturedRecipesProps {
   recipes: Recipe[]
 }
 
-export function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
+export async function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
+  const { user } = await getUser()
+
   if (!recipes.length) {
     return (
       <Empty>
@@ -33,7 +35,12 @@ export function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
   return (
     <Fragment>
       {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} className="h-full" />
+        <FeaturedRecipeCard
+          key={recipe.id}
+          recipe={recipe}
+          user={user}
+          className="h-full"
+        />
       ))}
     </Fragment>
   )
