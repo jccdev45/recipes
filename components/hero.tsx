@@ -91,8 +91,8 @@ export function Hero({
       ) : (
         <>{videoSources.map((_, index) => renderVideo(index))}</>
       )}
-      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 dark:bg-opacity-70">
-        <div className="space-y-4 text-center text-background dark:text-foreground">
+      <div className="absolute inset-0 flex items-center justify-center bg-black/50 dark:bg-black/70">
+        <div className="text-background dark:text-foreground space-y-4 text-center">
           <Typography variant="h1">{title}</Typography>
           <Typography variant="large">{subtitle}</Typography>
           <div className="isolation-auto">
