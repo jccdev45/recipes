@@ -11,6 +11,16 @@ import { TestimonialsSection } from "@/components/landing/testimonials-section"
 
 const numberFormatter = new Intl.NumberFormat()
 
+const VIDEOS =
+  process.env.NODE_ENV !== "production"
+    ? ["/sample.mp4"]
+    : [
+        "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/onions-3ijkNNkNxCqwI6UYiQH3sGqk3j3GAV.mp4",
+        "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/chef-PRV97AEi58qcIHRNaoZQdleB4V0KBW.mp4",
+        "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/parsley-iRI1DTpoGcbhUZsbSjAnRHFRX5SvC5.mp4",
+        "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/tomatoes-bznteJ2SHPEQ2S5N4AhshLGytkfQH7.mp4",
+      ]
+
 export default async function Index() {
   const supabase = await createClient()
   const { recipes, stats } = await getLandingHighlights(supabase)
@@ -46,12 +56,7 @@ export default async function Index() {
     <>
       <Hero
         type="video"
-        videoSources={[
-          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/onions-3ijkNNkNxCqwI6UYiQH3sGqk3j3GAV.mp4",
-          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/chef-PRV97AEi58qcIHRNaoZQdleB4V0KBW.mp4",
-          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/parsley-iRI1DTpoGcbhUZsbSjAnRHFRX5SvC5.mp4",
-          "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/tomatoes-bznteJ2SHPEQ2S5N4AhshLGytkfQH7.mp4",
-        ]}
+        videoSources={VIDEOS}
         title="Welcome!"
         subtitle="Discover and share beloved recipes passed down through generations"
         ctaText="Explore Recipes"
