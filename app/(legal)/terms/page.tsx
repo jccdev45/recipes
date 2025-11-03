@@ -8,96 +8,196 @@ export const metadata: Metadata = {
     "Review our terms of service to understand the rules and guidelines for using Family Recipes.",
 }
 
+const LAST_UPDATED = "November 3, 2025"
+
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-8">
-      <header>
-        <Typography
-          variant="lead"
-          className="mx-auto w-fit bg-destructive p-8 text-center text-destructive-foreground"
-        >
-          (this isn't real)
-        </Typography>
-        <Typography variant="h1" className="mb-6 text-center">
-          Terms of Service
-        </Typography>
-        <Typography variant="large" className="text-center">
-          (again, not real)
+    <div className="mx-auto max-w-3xl space-y-12 px-6 py-12">
+      <header className="space-y-4 text-center">
+        <Typography variant="muted">Last updated: {LAST_UPDATED}</Typography>
+        <Typography variant="h1">Terms of Service</Typography>
+        <Typography variant="lead">
+          These Terms of Service explain the agreement between you and Family
+          Recipes regarding access to and use of our website, mobile
+          applications, and related services (collectively, the "Services").
         </Typography>
       </header>
 
-      <Typography variant="p">
-        Welcome to Family Recipes, the place where we collect and share recipes
-        that have been passed down through generations! We’re glad you’re here,
-        but before you start using our site, we want to make sure you’re aware
-        of a few things.
-      </Typography>
-      <Typography variant="list">
-        <li>
-          This is a community-driven site, which means that all of the content
-          on here has been submitted by users like you.
-        </li>
-        <li>
-          While we do our best to moderate and ensure that everything is
-          family-friendly, we can’t guarantee that every single recipe will meet
-          your standards or preferences.
-        </li>
-      </Typography>
-
-      <section>
-        <Typography variant="h2" className="mb-4">
-          User Guidelines:
-        </Typography>
-        <Typography variant="p" className="mb-6">
-          By using our site, you agree not to:
-          <br />
-          • Use any discriminatory language or imagery in your submissions or
-          comments
-          <br />
-          • Share any personal information about yourself or others without
-          consent
-          <br />
-          • Infringe upon anyone else’s intellectual property rights (i.e.,
-          don’t steal someone else’s recipe!)
-          <br />• Engage in spamming or other disruptive behavior
+      <section className="space-y-4">
+        <Typography variant="h2">1. Acceptance of Terms</Typography>
+        <Typography variant="p">
+          By accessing or using the Services you agree to be bound by these
+          Terms and any policies referenced herein, including our Privacy
+          Policy. If you do not agree, you must not use the Services. You may
+          use the Services only if you have the legal capacity to form a binding
+          contract in your jurisdiction.
         </Typography>
       </section>
 
-      <section>
-        <Typography variant="h2" className="mb-4">
-          Content Ownership:
-        </Typography>
-        <Typography variant="p" className="mb-6">
-          When you submit a recipe to Family Recipes, you retain ownership of
-          that recipe, but you grant us a perpetual, non-exclusive, royalty-free
-          license to use, reproduce, adapt, modify, publish, distribute,
-          perform, translate, and display that recipe (in whole or in part) in
-          any format or medium currently known or later developed. This includes
-          promoting and advertising Family Recipes and its services.
+      <section className="space-y-4">
+        <Typography variant="h2">2. Account Responsibilities</Typography>
+        <Typography variant="p">
+          If you create an account, you are responsible for maintaining the
+          confidentiality of your login credentials and for all activity that
+          occurs under your account. Notify us immediately of any unauthorized
+          use. You agree that the information you provide is accurate and will
+          be kept current.
         </Typography>
       </section>
 
-      <section>
-        <Typography variant="h2" className="mb-4">
-          Disclaimer:
+      <section className="space-y-4">
+        <Typography variant="h2">3. User Contributions</Typography>
+        <Typography variant="p">
+          The Services allow you to submit recipes, comments, photos, and other
+          content (collectively, "User Content"). You retain ownership of your
+          User Content, but grant Family Recipes a worldwide, perpetual,
+          non-exclusive, royalty-free, transferable, and sublicensable license
+          to host, store, reproduce, modify, publish, distribute, and display
+          such content in connection with operating, promoting, and improving
+          the Services.
         </Typography>
-        <Typography variant="p" className="mb-6">
-          Please note that while we strive to provide accurate and helpful
-          information on our site, we cannot be held liable for any errors,
-          omissions, or damages resulting from the use of this site or any of
-          its contents. By using Family Recipes, you acknowledge that you are
-          doing so at your own risk.
+        <Typography variant="p">
+          You represent that you have all rights necessary to grant this
+          license, and that your User Content does not infringe or violate the
+          rights of any third party.
         </Typography>
       </section>
 
-      <section>
-        <Typography variant="p" className="text-center">
-          Thanks for taking the time to read through our Terms of Service. If
-          you have any questions or concerns, feel free to reach out to us at{" "}
-          <span className="underline hover:no-underline">
-            contact@familyrecipes.com
-          </span>
-          . Happy cooking!
+      <section className="space-y-4">
+        <Typography variant="h2">4. Community Guidelines</Typography>
+        <Typography variant="p">
+          We expect everyone to contribute respectfully. You agree that you will
+          not post or share content that is unlawful, defamatory, obscene,
+          hateful, harassing, discriminatory, misleading, or otherwise
+          objectionable. We reserve the right to remove User Content or suspend
+          accounts at our sole discretion if we believe these Terms have been
+          violated.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">5. Prohibited Activities</Typography>
+        <Typography variant="p">
+          In addition to the Community Guidelines, you agree not to:
+        </Typography>
+        <Typography variant="list">
+          <li>Use the Services for any unlawful purpose.</li>
+          <li>
+            Attempt to gain unauthorized access to the Services or systems.
+          </li>
+          <li>
+            Interfere with or disrupt the integrity or performance of the
+            Services.
+          </li>
+          <li>Harvest or collect data about other users without consent.</li>
+          <li>
+            Reverse engineer or otherwise attempt to discover the source code of
+            the Services.
+          </li>
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">6. Intellectual Property</Typography>
+        <Typography variant="p">
+          All content and materials provided by Family Recipes, including logos,
+          designs, text, graphics, and software, are owned by or licensed to us
+          and protected by intellectual property laws. Except for your own User
+          Content, you may not copy, modify, distribute, or create derivative
+          works without our prior written permission.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">7. Feedback</Typography>
+        <Typography variant="p">
+          If you submit feedback, suggestions, or ideas, you agree that we may
+          use them without restriction or compensation to you, and you waive any
+          claims to ownership of such feedback.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">8. Third-Party Links</Typography>
+        <Typography variant="p">
+          The Services may contain links to third-party websites or resources.
+          We are not responsible for the content, products, or services on those
+          sites. You acknowledge sole responsibility for and assume all risk
+          arising from your use of any third-party resources.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">9. Disclaimer of Warranties</Typography>
+        <Typography variant="p">
+          The Services are provided on an "as is" and "as available" basis.
+          Family Recipes expressly disclaims all warranties of any kind, whether
+          express or implied, including the implied warranties of
+          merchantability, fitness for a particular purpose, title, and
+          non-infringement. We do not guarantee that the Services will be
+          uninterrupted, error-free, or secure.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">10. Limitation of Liability</Typography>
+        <Typography variant="p">
+          To the fullest extent permitted by law, Family Recipes and its
+          affiliates, officers, employees, agents, and licensors will not be
+          liable for any indirect, incidental, special, consequential, or
+          punitive damages, or any loss of profits or revenues, arising out of
+          or relating to your use of or inability to use the Services.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">11. Indemnification</Typography>
+        <Typography variant="p">
+          You agree to defend, indemnify, and hold harmless Family Recipes and
+          its affiliates from and against any claims, liabilities, damages,
+          losses, and expenses, including reasonable attorney fees, arising out
+          of or in any way connected with your access to or use of the Services,
+          your User Content, or your violation of these Terms.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">12. Termination</Typography>
+        <Typography variant="p">
+          We may suspend or terminate your access to the Services at any time,
+          with or without notice, for conduct that we believe violates these
+          Terms or is otherwise harmful to other users or Family Recipes. Upon
+          termination, the licenses granted to you will end, but Sections 3, 6,
+          and 9 through 13 will survive.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">13. Governing Law</Typography>
+        <Typography variant="p">
+          These Terms are governed by the laws of the jurisdiction where Family
+          Recipes is headquartered, without regard to its conflict of law
+          principles. Any disputes will be resolved in the courts located in
+          that jurisdiction, unless applicable law requires otherwise.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">14. Changes to These Terms</Typography>
+        <Typography variant="p">
+          We may update these Terms from time to time. If we make material
+          changes, we will provide reasonable notice, such as updating the "Last
+          updated" date, sending an email, or posting a notice on the Services.
+          Your continued use after the changes become effective constitutes
+          acceptance of the revised Terms.
+        </Typography>
+      </section>
+
+      <section className="space-y-4">
+        <Typography variant="h2">15. Contact Us</Typography>
+        <Typography variant="p">
+          If you have questions about these Terms or the Services, please reach
+          out to us at legal@familyrecipes.com
         </Typography>
       </section>
     </div>
