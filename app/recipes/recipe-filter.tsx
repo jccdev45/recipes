@@ -58,8 +58,8 @@ export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         <FilterCombobox<string>
           items={authors}
           placeholder="Search author..."
@@ -88,17 +88,19 @@ export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
           getValue={(ingredient) => ingredient.id || ingredient.ingredient}
         />
       </div>
-      <div className="flex flex-col items-center justify-center gap-2">
-        <DisplayCurrentFilters
-          filters={filters}
-          onFilterChange={onFilterChange}
-        />
-      </div>
-    </>
+      <DisplayCurrentFilters
+        filters={filters}
+        onFilterChange={onFilterChange}
+      />
+    </div>
   )
 }
 
 function DisplayCurrentFilters({ filters, onFilterChange }: FilterProps) {
+  const hasFilters =
+    filters.authors.length + filters.tags.length + filters.ingredients.length >
+    0
+
   function handleRemoveTag(tag: Tag) {
     return () =>
       onFilterChange((prevFilters) => ({
@@ -126,61 +128,69 @@ function DisplayCurrentFilters({ filters, onFilterChange }: FilterProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2">
-      <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-2">
         {filters.authors.map((author) => (
-          <Badge key={author} variant="default" className="relative">
+          <Badge key={author} variant="secondary" className="relative pr-7">
             {author}
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
+              className="absolute top-1/2 right-1 size-5 -translate-y-1/2 rounded-full p-0"
               onClick={handleRemoveAuthor(author)}
+              aria-label={`Remove author filter ${author}`}
             >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </Badge>
         ))}
         {filters.tags.map((tag) => (
-          <Badge key={tag.tag} variant="default" className="relative">
+          <Badge key={tag.tag} variant="secondary" className="relative pr-7">
             {tag.tag}
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
+              className="absolute top-1/2 right-1 size-5 -translate-y-1/2 rounded-full p-0"
               onClick={handleRemoveTag(tag)}
+              aria-label={`Remove tag filter ${tag.tag}`}
             >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </Badge>
         ))}
         {filters.ingredients.map((ingredient) => (
           <Badge
             key={ingredient.ingredient}
-            variant="default"
-            className="relative"
+            variant="secondary"
+            className="relative pr-7"
           >
             {ingredient.ingredient}
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
+              className="absolute top-1/2 right-1 size-5 -translate-y-1/2 rounded-full p-0"
               onClick={handleRemoveIngredient(ingredient)}
+              aria-label={`Remove ingredient filter ${ingredient.ingredient}`}
             >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </Badge>
         ))}
       </div>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() =>
-          onFilterChange({ authors: [], tags: [], ingredients: [] })
-        }
-      >
-        Clear Filters
-      </Button>
+      {hasFilters ? (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-fit"
+          onClick={() =>
+            onFilterChange({ authors: [], tags: [], ingredients: [] })
+          }
+        >
+          Clear filters
+        </Button>
+      ) : (
+        <p className="text-muted-foreground text-xs">No filters applied yet.</p>
+      )}
     </div>
   )
 }

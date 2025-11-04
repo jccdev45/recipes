@@ -66,7 +66,13 @@ const AuthUserInfo = ({ user }: { user: User }) => (
   </div>
 )
 
-const RecipesList = ({ recipes }: { recipes: UserWithRecipes["recipes"] }) => {
+const RecipesList = ({
+  recipes,
+  user,
+}: {
+  recipes: UserWithRecipes["recipes"]
+  user: User | null
+}) => {
   if (!recipes.length) {
     return (
       <Alert>
@@ -76,7 +82,7 @@ const RecipesList = ({ recipes }: { recipes: UserWithRecipes["recipes"] }) => {
           No recipes yet!{" "}
           <Link
             href="/recipes/add"
-            className="font-semibold underline transition-colors duration-200 ease-in-out hover:text-foreground/90"
+            className="hover:text-foreground/90 font-semibold underline transition-colors duration-200 ease-in-out"
           >
             Add one today!
           </Link>
@@ -88,7 +94,7 @@ const RecipesList = ({ recipes }: { recipes: UserWithRecipes["recipes"] }) => {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:gap-6">
       {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} />
+        <RecipeCard key={recipe.id} recipe={recipe} user={user} />
       ))}
     </div>
   )
@@ -164,10 +170,10 @@ export function UserProfile({
           <CardHeader className="p-4">
             <Typography
               variant="h3"
-              className="text-lg font-semibold text-muted-foreground"
+              className="text-muted-foreground text-lg font-semibold"
             >
               Recipes by{" "}
-              <span className="font-bold text-foreground">
+              <span className="text-foreground font-bold">
                 {profileUser.first_name || "user"}
               </span>
               :
@@ -175,7 +181,7 @@ export function UserProfile({
           </CardHeader>
           <CardContent className="p-4">
             <Suspense fallback={<RecipesFallback />}>
-              <RecipesList recipes={profileUser.recipes} />
+              <RecipesList recipes={profileUser.recipes} user={currentUser} />
             </Suspense>
           </CardContent>
         </Card>
