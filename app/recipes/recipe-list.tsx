@@ -1,10 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { User } from "@supabase/supabase-js"
 import { LayoutGrid, PanelLeft, SlidersHorizontal } from "lucide-react"
 
-import { FilterState } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRecipes } from "@/hooks/useRecipes"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -30,17 +30,56 @@ interface RecipeListProps {
 }
 
 export function RecipeList({ user, searchTerm }: RecipeListProps) {
-  const { recipes, isLoading, error } = useRecipes()
-  const [filters, setFilters] = useState<FilterState>({
-    authors: [],
-    tags: [],
-    ingredients: [],
-  })
+  const { recipes, isLoading, error, authors, tags, ingredients } = useRecipes()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [displayMode, setDisplayMode] = useState<"wide" | "compact">("wide")
 
+  const searchParamsKey = searchParams.toString()
+
+  const selectedAuthors = useMemo(
+    () => searchParams.getAll("author"),
+    [searchParamsKey]
+  )
+  const selectedTags = useMemo(
+    () => searchParams.getAll("tag"),
+    [searchParamsKey]
+  )
+  const selectedIngredients = useMemo(
+    () => searchParams.getAll("ingredient"),
+    [searchParamsKey]
+  )
+
   const appliedFilterCount =
-    filters.authors.length + filters.tags.length + filters.ingredients.length
+    selectedAuthors.length + selectedTags.length + selectedIngredients.length
+
+  const replaceSearchParams = (params: URLSearchParams) => {
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    })
+  }
+
+  const toggleFilterValue = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    const values = params.getAll(key)
+    const hasValue = values.includes(value)
+    const nextValues = hasValue
+      ? values.filter((item) => item !== value)
+      : [...values, value]
+
+    params.delete(key)
+    nextValues.forEach((item) => params.append(key, item))
+    replaceSearchParams(params)
+  }
+
+  const clearAllFilters = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    ;["author", "tag", "ingredient"].forEach((key) => params.delete(key))
+    replaceSearchParams(params)
+  }
 
   if (error) {
     return (
@@ -65,40 +104,39 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
   }
 
   const filteredRecipes = useMemo(() => {
+    const hasAuthorFilters = selectedAuthors.length > 0
+    const hasTagFilters = selectedTags.length > 0
+    const hasIngredientFilters = selectedIngredients.length > 0
+
+    if (!hasAuthorFilters && !hasTagFilters && !hasIngredientFilters) {
+      return recipes
+    }
+
     return recipes.filter((recipe) => {
-      const authorMatch =
-        filters.authors.length === 0 || filters.authors.includes(recipe.author)
-      const tagMatch =
-        filters.tags.length === 0 ||
-        filters.tags.some((filterTag) =>
-          recipe.tags.some((recipeTag) => recipeTag.tag === filterTag.tag)
-        )
-      const ingredientMatch =
-        filters.ingredients.length === 0 ||
-        filters.ingredients.some((filterIngredient) =>
-          recipe.ingredients.some(
-            (recipeIngredient) =>
-              recipeIngredient.ingredient === filterIngredient.ingredient
-          )
-        )
-      return authorMatch && tagMatch && ingredientMatch
+      const matchesAuthor =
+        hasAuthorFilters &&
+        recipe.author !== undefined &&
+        recipe.author !== null
+          ? selectedAuthors.includes(recipe.author)
+          : false
+      const matchesTag =
+        hasTagFilters && recipe.tags.length > 0
+          ? recipe.tags.some((recipeTag) =>
+              selectedTags.includes(recipeTag.tag)
+            )
+          : false
+      const matchesIngredient =
+        hasIngredientFilters && recipe.ingredients.length > 0
+          ? recipe.ingredients.some((recipeIngredient) =>
+              selectedIngredients.includes(recipeIngredient.ingredient)
+            )
+          : false
+
+      return matchesAuthor || matchesTag || matchesIngredient
     })
-  }, [recipes, filters])
+  }, [recipes, selectedAuthors, selectedTags, selectedIngredients])
 
   const hasActiveFilters = appliedFilterCount > 0
-  const handleFilterChange = (
-    newFilters: FilterState | ((prevFilters: FilterState) => FilterState)
-  ) => {
-    setFilters((prevFilters) => {
-      if (typeof newFilters === "function") {
-        return newFilters(prevFilters)
-      }
-      return newFilters
-    })
-  }
-  const resetFilters = () =>
-    handleFilterChange({ authors: [], tags: [], ingredients: [] })
-
   const displayRecipes = hasActiveFilters ? filteredRecipes : recipes
   const totalRecipes = recipes.length
   const visibleRecipes = displayRecipes.length
@@ -176,8 +214,25 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
                     className="justify-start"
                   />
                   <RecipeFilter
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
+                    authors={authors}
+                    tags={tags}
+                    ingredients={ingredients}
+                    selectedAuthors={selectedAuthors}
+                    selectedTags={selectedTags}
+                    selectedIngredients={selectedIngredients}
+                    onToggleAuthor={(value: string) =>
+                      toggleFilterValue("author", value)
+                    }
+                    onToggleTag={(value: string) =>
+                      toggleFilterValue("tag", value)
+                    }
+                    onToggleIngredient={(value: string) =>
+                      toggleFilterValue("ingredient", value)
+                    }
+                    onClearAll={() => {
+                      clearAllFilters()
+                      setIsFilterOpen(false)
+                    }}
                   />
                 </div>
               </SheetContent>
@@ -203,8 +258,20 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
               </Typography>
               <LayoutToggle value={displayMode} onChange={setDisplayMode} />
               <RecipeFilter
-                filters={filters}
-                onFilterChange={handleFilterChange}
+                authors={authors}
+                tags={tags}
+                ingredients={ingredients}
+                selectedAuthors={selectedAuthors}
+                selectedTags={selectedTags}
+                selectedIngredients={selectedIngredients}
+                onToggleAuthor={(value: string) =>
+                  toggleFilterValue("author", value)
+                }
+                onToggleTag={(value: string) => toggleFilterValue("tag", value)}
+                onToggleIngredient={(value: string) =>
+                  toggleFilterValue("ingredient", value)
+                }
+                onClearAll={clearAllFilters}
               />
             </div>
           </aside>
@@ -218,7 +285,7 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
                   also clear all filters to view every recipe.
                 </AlertDescription>
                 <div className="mt-4">
-                  <Button variant="outline" size="sm" onClick={resetFilters}>
+                  <Button variant="outline" size="sm" onClick={clearAllFilters}>
                     Clear all filters
                   </Button>
                 </div>
