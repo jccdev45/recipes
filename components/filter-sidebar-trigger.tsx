@@ -9,7 +9,12 @@ export function FilterSidebarTrigger() {
   const { toggleSidebar } = useSidebar()
 
   return (
-    <Button onClick={toggleSidebar} variant="default" size="lg">
+    <Button
+      onClick={toggleSidebar}
+      variant="default"
+      size="lg"
+      className="hidden lg:inline-flex"
+    >
       <SlidersHorizontal /> Filters
     </Button>
   )
