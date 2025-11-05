@@ -5,6 +5,7 @@ import { Check } from "lucide-react"
 
 import { Ingredient, Tag } from "@/lib/types"
 import { Button } from "@/components/ui/button"
+import { Typography } from "@/components/ui/typography"
 import {
   Tags,
   TagsContent,
@@ -15,10 +16,11 @@ import {
   TagsList,
   TagsTrigger,
   TagsValue,
-} from "@/components/kibo-ui/tags"
+} from "@/components/tags"
 
 interface RecipeFilterProps {
   authors: string[]
+  appliedFilterCount: number
   tags: Tag[]
   ingredients: Ingredient[]
   selectedAuthors: string[]
@@ -105,6 +107,7 @@ function FilterSection({
 
 export function RecipeFilter({
   authors,
+  appliedFilterCount,
   tags,
   ingredients,
   selectedAuthors,
@@ -178,20 +181,26 @@ export function RecipeFilter({
         onToggle={onToggleIngredient}
         emptyText="No ingredients found."
       />
+
       <div className="flex items-center justify-between">
         {hasFilters ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClearAll}
-            aria-label="Clear all applied filters"
-          >
-            Clear filters
-          </Button>
+          <div className="space-y-2">
+            <Typography variant="p">
+              Applying{" "}
+              <span className="text-secondary">{appliedFilterCount}</span>{" "}
+              filters.
+            </Typography>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClearAll}
+              aria-label="Clear all applied filters"
+            >
+              Clear filters
+            </Button>
+          </div>
         ) : (
-          <p className="text-muted-foreground text-xs">
-            No filters applied yet.
-          </p>
+          <Typography variant="p">No filters applied yet.</Typography>
         )}
       </div>
     </div>
