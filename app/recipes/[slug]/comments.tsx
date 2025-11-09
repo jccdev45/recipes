@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { getRecipeWithComments } from "@/queries/recipe-queries"
@@ -10,8 +9,8 @@ import {
   useInsertMutation,
   useQuery,
 } from "@supabase-cache-helpers/postgrest-react-query"
-import { UserCircle2 } from "lucide-react"
 import { useForm } from "@tanstack/react-form"
+import { UserCircle2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { CommentSchema } from "@/lib/zod/schema"
@@ -27,7 +26,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -36,10 +34,16 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
 
-import type { CommentInsert, Comment as CommentType } from "@/lib/types"
+import type {
+  CommentInsert,
+  Comment as CommentType,
+  RecipeWithComments,
+} from "@/lib/types"
 import type { User } from "@supabase/supabase-js"
 
 type CommentsSectionProps = {
@@ -56,27 +60,61 @@ export function CommentsSection({
   const supabase = createClient()
   const router = useRouter()
 
-  const {
-    data: recipe,
-    isLoading,
-    error,
-  } = useQuery(getRecipeWithComments(supabase, slug))
+  const { data, isLoading, error } = useQuery(
+    getRecipeWithComments(supabase, slug)
+  )
 
-  if (!recipe) {
+  if (isLoading) {
     return (
-      <Typography variant="error">
-        {error
-          ? `There was an error displaying comments: ${error.message}`
-          : "An unexpected error has occurred, try refreshing the page."}
-      </Typography>
+      <section
+        className={cn(
+          "border-border/60 bg-background/80 flex min-h-[200px] items-center justify-center rounded-xl border",
+          className
+        )}
+        aria-label="Comments loading"
+      >
+        <Spinner size="lg" icon="pinwheel" />
+        <span className="sr-only">Loading comments</span>
+      </section>
     )
   }
 
-  const comments = recipe?.comments as unknown as CommentType[]
+  if (error) {
+    return (
+      <section
+        className={cn(
+          "border-destructive/40 bg-destructive/10 rounded-xl border p-6",
+          className
+        )}
+      >
+        <Typography variant="error">
+          There was an error displaying comments: {error.message}
+        </Typography>
+      </section>
+    )
+  }
 
-  // TODO: Fix
-  if (isLoading) return <div>Loading comments...</div>
-  if (error) return <div>Error loading comments: {error.message}</div>
+  const recipe = (data ?? null) as RecipeWithComments | null
+
+  if (!recipe) {
+    return (
+      <section
+        className={cn(
+          "border-border/60 bg-muted/20 rounded-xl border p-6",
+          className
+        )}
+      >
+        <Typography variant="error">
+          An unexpected error has occurred, try refreshing the page.
+        </Typography>
+      </section>
+    )
+  }
+
+  const comments = (recipe.comments ?? []) as CommentType[]
+  const commentCount = comments.length
+  const commentCountLabel =
+    commentCount === 1 ? "1 comment" : `${commentCount} comments`
 
   const { mutateAsync: insertCommentMutation } = useInsertMutation(
     supabase.from("comments"),
@@ -131,7 +169,22 @@ export function CommentsSection({
   })
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <section
+      className={cn("flex flex-col gap-6", className)}
+      aria-label="Comments"
+    >
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <Typography variant="h2">Comments</Typography>
+          <Typography variant="p">
+            Share feedback, tips, or substitutions with the community.
+          </Typography>
+        </div>
+        <span className="text-muted-foreground text-sm">
+          {commentCountLabel}
+        </span>
+      </header>
+
       {currentUser ? (
         <form
           noValidate
@@ -139,8 +192,9 @@ export function CommentsSection({
             event.preventDefault()
             void form.handleSubmit()
           }}
+          className="border-border/60 bg-background/80 rounded-xl border p-4 shadow-sm"
         >
-          <FieldSet className="gap-4">
+          <FieldSet className="gap-3">
             <form.Field
               name="message"
               children={(field) => {
@@ -148,8 +202,13 @@ export function CommentsSection({
                   field.state.meta.isTouched && !field.state.meta.isValid
 
                 return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Leave a comment</FieldLabel>
+                  <Field data-invalid={isInvalid} className="space-y-2">
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-sm font-medium"
+                    >
+                      Leave a comment
+                    </FieldLabel>
                     <FieldContent>
                       <Textarea
                         id={field.name}
@@ -160,11 +219,8 @@ export function CommentsSection({
                           field.handleChange(event.target.value)
                         }
                         disabled={!currentUser}
-                        placeholder={
-                          currentUser
-                            ? "Wow great recipe!"
-                            : "You must be signed in to comment"
-                        }
+                        placeholder="Share your thoughts or substitutions"
+                        rows={4}
                         aria-invalid={isInvalid}
                         aria-describedby={
                           isInvalid ? `${field.name}-error` : undefined
@@ -181,29 +237,47 @@ export function CommentsSection({
                 )
               }}
             />
-            <Button
-              type="submit"
-              disabled={
-                !currentUser || !form.state.canSubmit || form.state.isSubmitting
-              }
-            >
-              Submit
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={
+                  !currentUser ||
+                  !form.state.canSubmit ||
+                  form.state.isSubmitting
+                }
+              >
+                {form.state.isSubmitting ? "Posting..." : "Submit"}
+              </Button>
+            </div>
           </FieldSet>
         </form>
       ) : (
-        <Typography variant="p">Please login to leave a comment</Typography>
+        <Typography variant="p" className="text-muted-foreground text-sm">
+          Please login to leave a comment.
+        </Typography>
       )}
 
-      {comments.map((comment) => (
-        <CommentItem
-          key={comment.id}
-          comment={comment}
-          currentUser={currentUser}
-          onDelete={() => deleteCommentMutation({ id: comment.id })}
-        />
-      ))}
-    </div>
+      <div className="relative">
+        <ScrollArea className="h-[480px] pr-3">
+          {commentCount ? (
+            <ul className="space-y-4 pr-2">
+              {comments.map((comment) => (
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  currentUser={currentUser}
+                  onDelete={() => deleteCommentMutation({ id: comment.id })}
+                />
+              ))}
+            </ul>
+          ) : (
+            <div className="border-border/70 bg-muted/20 text-muted-foreground rounded-lg border border-dashed px-6 py-12 text-center text-sm">
+              No comments yet. Be the first to share your thoughts.
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+    </section>
   )
 }
 
@@ -214,119 +288,97 @@ type CommentProps = {
 }
 
 function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
-  const {
-    author,
-    avatar_url,
-    created_at,
-    id,
-    liked_by,
-    likes,
-    message,
-    user_id,
-  } = comment
-  const [liked, setLiked] = useState(likes)
-  const supabase = createClient()
+  const { author, avatar_url, created_at, message, user_id } = comment
 
-  // TODO: EXTRACT + COMPLETE FUNCTIONALITY
-  const handleLike = async () => {
-    if (liked_by.includes(user_id)) {
-      return
-    } else {
-      const { data, error } = await supabase
-        .from("comments")
-        .update({ likes: likes + 1, liked_by: [...liked_by, user_id] })
-        .eq("id", id!)
-        .select()
+  const createdDate = new Date(created_at)
+  const isoCreatedAt = Number.isNaN(createdDate.getTime())
+    ? undefined
+    : createdDate.toISOString()
+  const formattedDate = isoCreatedAt
+    ? createdDate.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Date unavailable"
 
-      if (data) {
-        // setLiked(data?.[0].likes);
-        console.log(data)
-      }
-    }
-  }
-
-  // TODO: EXTRACT
-  // const handleDelete = async () => {
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from("comments")
-  //       .delete()
-  //       .eq("id", id!)
-  //       .select()
-
-  //     if (data) {
-  //       router.refresh()
-  //     }
-  //     if (error) {
-  //     }
-  //   } catch (error) {
-  //     console.error("Error: ", error)
-  //     return null
-  //   }
-  // }
+  const authorHref = user_id ? `/profile/${user_id}` : undefined
+  const canDelete = currentUser?.id === user_id
 
   return (
-    <div className="relative flex w-full rounded-md border border-foreground/40 bg-background p-2 shadow-md dark:bg-slate-900 md:w-1/2">
-      <Avatar className="mr-2">
-        <AvatarImage src={avatar_url || ``} />
-        <AvatarFallback>
-          <UserCircle2 />
-        </AvatarFallback>
-      </Avatar>
+    <li>
+      <article className="border-border/60 bg-card text-card-foreground flex gap-4 rounded-xl border p-4 shadow-sm transition-colors">
+        <Avatar className="mt-1">
+          <AvatarImage src={avatar_url ?? undefined} alt="" />
+          <AvatarFallback>{author.charAt(0)}</AvatarFallback>
+        </Avatar>
 
-      <div className="m-0 flex w-full flex-col">
-        <Link
-          href={`/profile/${user_id}`}
-          className="max-w-max gap-x-4 font-bold underline"
-        >
-          {author}
-        </Link>
-        <span className="max-w-max text-sm">
-          {new Date(created_at).toLocaleDateString("en-US")}
-        </span>
-        <Typography variant="p">{message}</Typography>
-      </div>
-
-      {/* <div className="flex items-center justify-center h-10 ml-auto gap-x-2">
-        <Heart
-          color="red"
-          className={cn(
-            `active:animate-ping bg-linear-to-br bg-clip-text from-red-500 to-red-800 fill-red-400`,
-            liked_by.includes(user_id) && `cursor-default`
-          )}
-          onClick={handleLike}
-        />
-        <span>{liked}</span>
-      </div> */}
-
-      {currentUser?.id === user_id && (
-        <AlertDialog>
-          <AlertDialogTrigger>
-            <Badge variant="destructive" className="absolute bottom-2 right-2">
-              Delete
-            </Badge>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Are you sure you want to delete this comment?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                This cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDelete}
-                className="bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90"
+        <div className="flex flex-1 flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {authorHref ? (
+              <Link
+                href={authorHref}
+                className="text-foreground hover:text-primary focus-visible:ring-ring font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                Confirm
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-    </div>
+                {author}
+              </Link>
+            ) : (
+              <span className="text-foreground font-semibold">{author}</span>
+            )}
+            {isoCreatedAt ? (
+              <time
+                dateTime={isoCreatedAt}
+                className="text-muted-foreground text-xs"
+              >
+                {formattedDate}
+              </time>
+            ) : null}
+          </div>
+
+          <Typography
+            variant="p"
+            className="text-foreground text-sm leading-relaxed not-first:mt-0"
+          >
+            {message}
+          </Typography>
+
+          {canDelete ? (
+            <div className="flex justify-end">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive focus-visible:ring-destructive/40"
+                  >
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you sure you want to delete this comment?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={onDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs"
+                    >
+                      Confirm
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          ) : null}
+        </div>
+      </article>
+    </li>
   )
 }

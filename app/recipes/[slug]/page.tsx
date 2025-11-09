@@ -57,17 +57,28 @@ export default async function RecipePage(props: RecipePageProps) {
   await prefetchQuery(queryClient, getRecipeWithComments(supabase, slug))
 
   return (
-    <div className="space-y-4 px-4">
-      <div className="flex flex-col gap-8">
+    <>
+      <a
+        href="#recipe-main"
+        className="focus-visible:bg-primary focus-visible:text-primary-foreground sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:px-4 focus-visible:py-2"
+      >
+        Skip to recipe details
+      </a>
+      <main id="recipe-main" className="space-y-12 px-4 pb-16">
         <HydrationBoundary state={dehydrate(queryClient)}>
           <RecipeDisplay slug={slug} user={user} />
-          <CommentsSection
-            currentUser={user}
-            slug={slug}
-            className="flex w-full max-w-full flex-col"
-          />
+          <section
+            id="recipe-comments"
+            className="mx-auto flex w-full max-w-6xl flex-col gap-4"
+          >
+            <CommentsSection
+              currentUser={user}
+              slug={slug}
+              className="flex w-full max-w-full flex-col"
+            />
+          </section>
         </HydrationBoundary>
-      </div>
-    </div>
+      </main>
+    </>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { getRecipeWithComments } from "@/queries/recipe-queries"
@@ -10,15 +10,16 @@ import { User } from "@supabase/supabase-js"
 
 import { Recipe } from "@/lib/types"
 import { resolveStorageImageUrl, shimmer, toBase64 } from "@/lib/utils"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
-interface RecipeHeaderProps {
+interface RecipeHeroProps {
   recipe: Recipe
   user: User | null
 }
@@ -32,54 +33,179 @@ interface RecipeDisplayProps {
   user: User | null
 }
 
-const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
+const formatDisplayDate = (input?: string | null) => {
+  if (!input) return null
+
+  const parsed = new Date(input)
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return {
+    dateTime: parsed.toISOString(),
+    label: parsed.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+  }
+}
+
+const RecipeHero = ({ recipe, user }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
   const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
-  const imgUrl =
+  const imageUrl =
     resolvedImageUrl ||
-    `https://placehold.co/450x325?text=${encodeURIComponent(recipe.recipe_name)}`
+    `https://placehold.co/640x480?text=${encodeURIComponent(recipe.recipe_name)}`
+
+  const createdAt = formatDisplayDate(recipe.created_at)
+  const updatedAt = formatDisplayDate(recipe.last_updated)
+  const authorDisplayName = recipe.author || "Unknown author"
+  const authorHref = isAuthor
+    ? "/profile"
+    : recipe.user_id
+      ? `/profile/${recipe.user_id}`
+      : undefined
 
   return (
-    <header className="bg-primary/30 grid grid-cols-1 gap-8 rounded-md py-8 md:grid-cols-2">
-      <div className="my-auto grid h-fit place-items-center gap-4 text-center">
-        <Typography variant="h1">{recipe.recipe_name}</Typography>
-        <Typography variant="blockquote">{recipe.quote}</Typography>
-        {isAuthor ? (
-          <Link
-            href="/profile"
-            className="mb-4 inline-flex items-center text-lg underline"
-          >
-            - {recipe.author} (You)
-          </Link>
-        ) : (
-          <Typography>- {recipe.author}</Typography>
-        )}
-        <div className="flex flex-wrap justify-center gap-2">
-          {recipe.tags.map(({ id, tag }) => (
-            <Badge key={id}>{tag}</Badge>
-          ))}
+    <section className="from-background via-muted/30 to-muted relative overflow-hidden rounded-3xl border bg-linear-to-br shadow-xl">
+      <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
+        <div className="order-2 flex flex-col gap-6 lg:order-1">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-sm">
+            {isAuthor ? (
+              <Badge
+                variant="outline"
+                className="border-primary/60 bg-primary/10 text-primary rounded-full px-3 py-1"
+              >
+                Your recipe
+              </Badge>
+            ) : null}
+            <span className="flex items-center gap-1.5">
+              <span className="text-foreground font-medium">By</span>
+              {authorHref ? (
+                <Link
+                  href={authorHref}
+                  className="focus-visible:ring-ring font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  {authorDisplayName}
+                  {isAuthor ? " (You)" : ""}
+                </Link>
+              ) : (
+                <span className="text-foreground font-medium">
+                  {authorDisplayName}
+                  {isAuthor ? " (You)" : ""}
+                </span>
+              )}
+            </span>
+            {createdAt ? (
+              <time
+                dateTime={createdAt.dateTime}
+                className="flex items-center gap-1"
+              >
+                <span aria-hidden="true">•</span>
+                Created {createdAt.label}
+              </time>
+            ) : null}
+            {updatedAt &&
+            (!createdAt || updatedAt.dateTime !== createdAt.dateTime) ? (
+              <time
+                dateTime={updatedAt.dateTime}
+                className="flex items-center gap-1"
+              >
+                <span aria-hidden="true">•</span>
+                Updated {updatedAt.label}
+              </time>
+            ) : null}
+          </div>
+
+          <div className="space-y-4">
+            <Typography variant="h1" className="text-balance">
+              {recipe.recipe_name}
+            </Typography>
+            {recipe.quote ? (
+              <Typography
+                variant="blockquote"
+                className="text-muted-foreground text-lg leading-relaxed text-balance"
+              >
+                {recipe.quote}
+              </Typography>
+            ) : null}
+          </div>
+
+          {recipe.tags.length ? (
+            <ul className="flex flex-wrap gap-2" aria-label="Recipe tags">
+              {recipe.tags.map(({ id, tag }) => (
+                <li key={id ?? tag}>
+                  <Badge
+                    className="rounded-full px-3 py-1 text-sm"
+                    variant="secondary"
+                  >
+                    {tag}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+            >
+              <a href="#recipe-ingredients">Jump to ingredients</a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+            >
+              <a href="#recipe-steps">Jump to steps</a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+            >
+              <a href="#recipe-comments">View comments</a>
+            </Button>
+          </div>
+        </div>
+
+        <div className="order-1 lg:order-2">
+          <div className="border-border/60 bg-background/80 relative mx-auto max-w-[480px] overflow-hidden rounded-3xl border shadow-2xl">
+            <AspectRatio ratio={4 / 3}>
+              <Image
+                src={imageUrl}
+                alt={recipe.recipe_name || "Recipe presentation"}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 420px, (min-width: 640px) 80vw, 100vw"
+                placeholder="blur"
+                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(640, 480))}`}
+              />
+            </AspectRatio>
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-center">
-        <Image
-          src={imgUrl}
-          alt={recipe.recipe_name || "Generic fallback"}
-          width={450}
-          height={325}
-          className="shadow-foreground aspect-square rounded-md object-cover shadow-sm"
-          placeholder="blur"
-          blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 325))}`}
-        />
-      </div>
-    </header>
+    </section>
   )
 }
 
 const RecipeContent = ({ recipe }: RecipeContentProps) => (
-  <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-    <Ingredients ingredients={recipe.ingredients} className="flex flex-col" />
-    <Steps steps={recipe.steps} className="flex flex-col" />
-  </div>
+  <section
+    aria-labelledby="recipe-overview-heading"
+    className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]"
+  >
+    <h2 id="recipe-overview-heading" className="sr-only">
+      Recipe overview
+    </h2>
+    <Ingredients ingredients={recipe.ingredients} className="h-full" />
+    <Steps steps={recipe.steps} className="h-full" />
+  </section>
 )
 
 export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
@@ -87,232 +213,90 @@ export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
   const { data, isLoading, error } = useQuery(
     getRecipeWithComments(supabase, slug)
   )
-  const recipe = data as unknown as Recipe
+  const recipe = useMemo(() => data as unknown as Recipe, [data])
 
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-start justify-center">
-        <Spinner size="xl" icon="pinwheel" />
-      </div>
-    )
+    return <LoadingSkeleton />
   }
 
   if (error) {
     return (
-      <div className="bg-destructive/20 flex flex-1 items-start justify-center rounded py-20">
-        <Typography variant="error" className="text-2xl">
-          An error occurred: {error.message}
+      <div className="border-destructive/50 bg-destructive/10 mx-auto w-full max-w-4xl rounded-3xl border p-10 text-center shadow">
+        <Typography variant="error" className="text-lg">
+          We couldn't load this recipe: {error.message}
         </Typography>
       </div>
     )
   }
 
+  if (!recipe) {
+    return null
+  }
+
   return (
-    <div className="container mx-auto px-4">
-      <Suspense fallback={<LoadingSkeleton />}>
-        <RecipeHeader recipe={recipe} user={user} />
-        <RecipeContent recipe={recipe} />
-      </Suspense>
-      <Separator />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+      <RecipeHero recipe={recipe} user={user} />
+      <RecipeContent recipe={recipe} />
+      <Separator className="mx-auto w-full max-w-5xl" />
     </div>
   )
 }
 
-const SVGSkeleton = ({ className }: { className: string }) => (
-  <svg className={className + " animate-pulse rounded bg-gray-300"} />
-)
-
 const LoadingSkeleton = () => (
-  <>
-    <div className="container mx-auto px-4">
-      <header className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2">
-        <div className="my-auto grid h-fit place-items-center gap-4">
-          <h1 className="scroll-m-20 tracking-tight">
-            <Skeleton className="w-[120px] max-w-full" />
-          </h1>
-          <blockquote className="mt-6 border-l-2 pl-6">
-            <Skeleton className="w-32 max-w-full" />
-          </blockquote>
-          <p className="[&amp;:not(:first-child)]:mt-6 leading-7">
-            <Skeleton className="w-16 max-w-full" />
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-12 max-w-full" />
-            </div>
-            <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-14 max-w-full" />
-            </div>
+  <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+    <section className="bg-card relative overflow-hidden rounded-3xl border shadow-xl">
+      <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
+        <div className="order-2 flex flex-col gap-6 lg:order-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-6 w-32 rounded-full" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-3/4 max-w-[340px]" />
+            <Skeleton className="h-16 w-full max-w-[460px]" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton
+                key={`tag-skeleton-${index}`}
+                className="h-6 w-20 rounded-full"
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton
+                key={`cta-skeleton-${index}`}
+                className="h-9 w-36 rounded-full"
+              />
+            ))}
           </div>
         </div>
-        <div className="flex items-center justify-center">
-          <SVGSkeleton className="shadow-foreground aspect-square h-[325px] w-[450px] rounded-md object-cover shadow-sm" />
-        </div>
-      </header>
-      <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-        <section className="flex flex-col">
-          <div className="flex items-center gap-4 border-b">
-            <h2 className="scroll-m-20 border-0 pb-2 tracking-tight transition-colors first:mt-0">
-              <Skeleton className="w-[88px] max-w-full" />
-            </h2>
-            <a>
-              <SVGSkeleton className="h-6 w-6" />
-            </a>
-          </div>
-          <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
-            <span className="flex items-center justify-center">
-              <div className="border-input flex h-9 w-16 border px-3 py-1 shadow-xs transition-colors file:border-0"></div>
-              <span>
-                <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-up h-6 w-6" />
-                </div>
-                <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-down h-6 w-6" />
-                </div>
-              </span>
-              <label className="leading-none">
-                <Skeleton className="w-16 max-w-full" />
-              </label>
-            </span>
-          </span>
-          <ul className="[&amp;>li]:mt-2 my-6 md:ml-6">
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-20 max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-40 max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-6 max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-20 max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-[88px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[88px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-20 max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-12 max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-20 max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-10 max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-3.5 max-w-full" />
-              </div>
-              <label className="border-border my-auto w-5/6 space-x-2 border-b">
-                <span>
-                  <Skeleton className="w-20 max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[264px] max-w-full" />
-                </span>
-              </label>
-            </li>
-          </ul>
-        </section>
-        <div className="flex flex-col">
-          <h2 className="scroll-m-20 border-b pb-2 tracking-tight transition-colors first:mt-0">
-            <Skeleton className="w-10 max-w-full" />
-          </h2>
-          <ul className="[&amp;>li]:mt-2 my-6 mt-4 flex flex-col space-y-2 md:ml-6">
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[552px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[184px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[488px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[248px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[504px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[336px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-20 max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
-              <label className="m-0">
-                <Skeleton className="w-[264px] max-w-full" />
-              </label>
-            </li>
-          </ul>
+        <div className="order-1 flex justify-center lg:order-2">
+          <Skeleton className="h-[260px] w-full max-w-[460px] rounded-3xl" />
         </div>
       </div>
-      <div className="bg-border h-px w-full shrink-0"></div>
+    </section>
+
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
+      <section className="bg-card rounded-2xl border p-6 shadow">
+        <Skeleton className="h-9 w-32" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
+      </section>
+      <section className="bg-card rounded-2xl border p-6 shadow">
+        <Skeleton className="h-9 w-28" />
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton
+              key={`step-${index}`}
+              className="h-20 w-full rounded-xl"
+            />
+          ))}
+        </div>
+      </section>
     </div>
-  </>
+  </div>
 )
