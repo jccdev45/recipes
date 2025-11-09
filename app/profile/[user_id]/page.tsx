@@ -9,7 +9,6 @@ import {
   QueryClient,
 } from "@tanstack/react-query"
 
-import { GradientBanner } from "@/components/gradient-banner"
 import { getUser } from "@/app/(auth)/actions"
 import { UserProfile } from "@/app/profile/[user_id]/user-profile"
 
@@ -63,12 +62,10 @@ export default async function ProfilePage(props: Props) {
   await prefetchQuery(queryClient, getUserWithRecipes(supabase, user_id))
 
   return (
-    <div className="mx-auto space-y-4">
-      <GradientBanner pattern text="Profile" variant="secondary" />
-
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 sm:px-6 lg:px-8">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <UserProfile user_id={user_id} currentUser={user} />
       </HydrationBoundary>
-    </div>
+    </main>
   )
 }
