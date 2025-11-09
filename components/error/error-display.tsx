@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 interface FormErrorDisplayProps {
   error: string | null
   title: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function ErrorDisplay({
