@@ -1,6 +1,7 @@
 import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
 import { Ingredient } from "@/lib/types"
 
 import type { ClassValue } from "clsx"
@@ -170,4 +171,26 @@ export function isRedirectError(error: unknown): boolean {
   }
 
   return false
+}
+
+export function resolveStorageImageUrl(
+  imagePath?: string | null
+): string | null {
+  if (!imagePath) {
+    return null
+  }
+
+  const trimmed = imagePath.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`
+
+  return `${SUPABASE_URL}${STORAGE_URL}${normalized}`
 }

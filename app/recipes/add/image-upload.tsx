@@ -12,6 +12,7 @@ interface FileInputProps {
   isUploading?: boolean
   onFileChange: (file: File | null) => void
   type?: string
+  disabled?: boolean
 }
 
 export function FileInput({
@@ -19,6 +20,7 @@ export function FileInput({
   isUploading,
   onFileChange,
   type,
+  disabled = false,
 }: FileInputProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [fileName, setFileName] = useState<string>("")
@@ -36,6 +38,10 @@ export function FileInput({
   }
 
   const handleChooseFile = () => {
+    if (disabled) {
+      return
+    }
+
     if (fileInputRef.current) {
       fileInputRef.current.click()
     }
@@ -54,6 +60,7 @@ export function FileInput({
         className="hidden"
         onChange={handleFileChange}
         aria-label="Upload image"
+        disabled={disabled}
       />
       {isUploading ? (
         <ButtonLoading className="mx-auto w-1/3" />
@@ -62,6 +69,8 @@ export function FileInput({
           variant="secondary"
           className="text-sm"
           onClick={handleChooseFile}
+          disabled={disabled}
+          aria-disabled={disabled}
         >
           {type === "recipe" ? (
             <Pizza className="m-0.5" />

@@ -4,9 +4,7 @@ import { maxAmount, minAmount } from "../constants"
 
 const sharedFields = {
   auth: {
-    email: z
-      .string()
-      .email({ message: "Must be a valid email" }),
+    email: z.string().email({ message: "Must be a valid email" }),
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters" })
@@ -75,12 +73,16 @@ export const TagSchema = z
 export const RecipeFormSchema = z.object({
   recipe_name: z
     .string()
+    .trim()
     .min(3, { message: "Name must be at least 3 characters" })
     .max(50, { message: "Name must be less than 50 characters" }),
   quote: z
     .string()
-    .min(3, { message: "Quote must be at least 3 characters" })
-    .max(50, { message: "Quote must be less than 50 characters" }),
+    .trim()
+    .max(50, { message: "Quote must be less than 50 characters" })
+    .refine((value) => value.length === 0 || value.length >= 3, {
+      message: "Quote must be at least 3 characters",
+    }),
   ingredients: IngredientSchema,
   steps: StepSchema,
   tags: TagSchema,

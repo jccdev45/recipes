@@ -42,6 +42,33 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
 
+  const ensureUniqueSlug = async (baseSlug: string) => {
+    let attempt = 0
+    let candidate = baseSlug
+
+    while (attempt < 20) {
+      const { count, error } = await supabase
+        .from("recipes")
+        .select("slug", { count: "exact", head: true })
+        .eq("slug", candidate)
+
+      if (error && error.code !== "PGRST116") {
+        throw error
+      }
+
+      if (!count || count === 0) {
+        return candidate
+      }
+
+      attempt += 1
+      candidate = `${baseSlug}-${attempt}`
+    }
+
+    throw new Error(
+      "We could not generate a unique URL for this recipe. Try a different name."
+    )
+  }
+
   const form = useAddRecipeForm({
     defaultValues: createAddRecipeDefaultValues(),
     validators: {
@@ -58,14 +85,59 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         return
       }
 
+      if (value.ingredients.length === 0 || value.steps.length === 0) {
+        setFormError(
+          "Add at least one ingredient and one step before publishing your recipe."
+        )
+        return
+      }
+
+      const recipeName = value.recipe_name.trim()
+
+      if (!recipeName) {
+        setFormError("Add a recipe name before publishing your recipe.")
+        return
+      }
+
+      const baseSlug = toSlug(recipeName)
+
+      if (!baseSlug) {
+        setFormError(
+          "Recipe name must include letters or numbers before publishing."
+        )
+        return
+      }
+
+      let uniqueSlug = baseSlug
+
+      try {
+        uniqueSlug = await ensureUniqueSlug(baseSlug)
+      } catch (slugError) {
+        setFormError(
+          slugError instanceof Error
+            ? slugError.message
+            : "We could not generate a URL for this recipe."
+        )
+        return
+      }
+
+      const normalizedQuote = value.quote?.trim() ?? ""
+
+      const storageImagePath =
+        imgURL && imgURL.trim().length > 0
+          ? imgURL.startsWith("/")
+            ? imgURL
+            : `/${imgURL}`
+          : null
+
       const updatedValues = {
         ...value,
+        recipe_name: recipeName,
         author: user?.user_metadata.first_name || "Anonymous User",
         user_id: user?.id,
-        slug: toSlug(value.recipe_name),
-        img: imgURL
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
-          : "http://loremflickr.com/g/500/500/food",
+        slug: uniqueSlug,
+        quote: normalizedQuote.length > 0 ? normalizedQuote : null,
+        img: storageImagePath,
       }
 
       try {
@@ -79,7 +151,8 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         formApi.reset(createAddRecipeDefaultValues())
         setImgURL("")
         setIsConfirmed(false)
-        router.push(`/recipes/${data[0].slug}`)
+        const nextSlug = data?.[0]?.slug ?? uniqueSlug
+        router.push(`/recipes/${nextSlug}`)
         router.refresh()
       } catch (error) {
         console.error("Error submitting recipe:", error)
@@ -93,27 +166,52 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
   })
 
   const handleImageUpload = async (file: File | null) => {
-    const recipeName = form.state.values.recipe_name
-    const fileExt = file?.name.split(".").pop()
-    const filePath = `recipes/${recipeName}/${Math.random()}.${fileExt}`
-
     if (!file) {
       setFormError("No file selected")
       return
     }
 
+    const recipeName = form.state.values.recipe_name?.trim()
+
+    if (!recipeName) {
+      setFormError("Add a recipe name before uploading an image.")
+      return
+    }
+
+    const safeRecipeName = toSlug(recipeName)
+
+    if (!safeRecipeName) {
+      setFormError(
+        "Recipe name must include letters or numbers before uploading an image."
+      )
+      return
+    }
+
+    const fileExt = file.name.split(".").pop()?.toLowerCase()
+    const uniqueSuffix =
+      typeof crypto !== "undefined" ? crypto.randomUUID() : `${Date.now()}`
+    const fileName = fileExt
+      ? `${safeRecipeName}-${uniqueSuffix}.${fileExt}`
+      : `${safeRecipeName}-${uniqueSuffix}`
+    const filePath = `recipes/${safeRecipeName}/${fileName}`
+
+    setFormError(null)
     setIsUploading(true)
     const { data, error } = await supabase.storage
       .from("photos")
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
+        contentType: file.type || undefined,
       })
 
     if (error) {
       setFormError(error.message)
     } else if (data) {
-      setImgURL(data.path)
+      const normalizedPath = data.path.startsWith("/")
+        ? data.path
+        : `/${data.path}`
+      setImgURL(normalizedPath)
       setFormError(null)
     }
 

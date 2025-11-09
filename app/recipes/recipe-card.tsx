@@ -7,8 +7,7 @@ import { User } from "@supabase/supabase-js"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Heart, MoreHorizontal, Pencil } from "lucide-react"
 
-import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
-import { cn } from "@/lib/utils"
+import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -78,9 +77,10 @@ function RecipeImage({
   recipe_name: Recipe["recipe_name"]
   isCompact: boolean
 }) {
-  const imageUrl = img
-    ? `${SUPABASE_URL}${STORAGE_URL}${img}`
-    : `https://placehold.co/700x475?text=${encodeURIComponent(recipe_name)}`
+  const resolvedImageUrl = resolveStorageImageUrl(img)
+  const imageUrl =
+    resolvedImageUrl ||
+    `https://placehold.co/700x475?text=${encodeURIComponent(recipe_name)}`
 
   return (
     <motion.figure

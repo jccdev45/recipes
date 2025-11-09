@@ -13,8 +13,7 @@ import {
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
-import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
-import { cn } from "@/lib/utils"
+import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -52,9 +51,10 @@ export function FeaturedRecipeCard({
   const [isHovered, setIsHovered] = React.useState(false)
   const isAuthor = user?.id === recipe.user_id
 
-  const imageUrl = img
-    ? `${SUPABASE_URL}${STORAGE_URL}${img}`
-    : `https://placehold.co/900x600?text=${encodeURIComponent(recipe_name)}`
+  const resolvedImageUrl = resolveStorageImageUrl(img)
+  const imageUrl =
+    resolvedImageUrl ||
+    `https://placehold.co/900x600?text=${encodeURIComponent(recipe_name)}`
 
   const srTags = tags.length
     ? `Tags: ${tags.map((tag) => tag.tag).join(", ")}.`

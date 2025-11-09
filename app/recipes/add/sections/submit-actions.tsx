@@ -1,3 +1,4 @@
+import { RecipeFormSchema } from "@/lib/zod/schema"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
@@ -15,34 +16,51 @@ export const SubmitActions = withAddRecipeForm({
         selector={(state) => ({
           canSubmit: state.canSubmit,
           isSubmitting: state.isSubmitting,
+          values: state.values,
         })}
       >
-        {({ canSubmit, isSubmitting }) => (
-          <div className="border-border/60 bg-background/80 flex flex-col gap-4 rounded-2xl border border-dashed p-6 sm:flex-row sm:items-center sm:justify-between">
-            <Typography
-              variant="muted"
-              className="text-muted-foreground text-sm"
-            >
-              Submit now and you will be redirected to your published recipe for
-              a final review.
-            </Typography>
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full sm:w-auto"
-              disabled={!canSubmit || isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Spinner />
-                  Submitting...
-                </>
-              ) : (
-                "Publish"
-              )}
-            </Button>
-          </div>
-        )}
+        {({ canSubmit, isSubmitting, values }) => {
+          const isFormValid = RecipeFormSchema.safeParse(values).success
+          const hasIngredients = Array.isArray(values.ingredients)
+            ? values.ingredients.length > 0
+            : false
+          const hasSteps = Array.isArray(values.steps)
+            ? values.steps.length > 0
+            : false
+          const meetsContentRequirements = hasIngredients && hasSteps
+          const shouldDisable =
+            !canSubmit ||
+            isSubmitting ||
+            !isFormValid ||
+            !meetsContentRequirements
+
+          return (
+            <div className="border-border/60 bg-background/80 flex flex-col gap-4 rounded-2xl border border-dashed p-6 sm:flex-row sm:items-center sm:justify-between">
+              <Typography
+                variant="muted"
+                className="text-muted-foreground text-sm"
+              >
+                Submit now and you will be redirected to your published recipe
+                for a final review.
+              </Typography>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full sm:w-auto"
+                disabled={shouldDisable}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Spinner />
+                    Submitting...
+                  </>
+                ) : (
+                  "Publish"
+                )}
+              </Button>
+            </div>
+          )
+        }}
       </form.Subscribe>
     )
   },

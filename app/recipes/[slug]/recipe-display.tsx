@@ -8,9 +8,8 @@ import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
 
-import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
 import { Recipe } from "@/lib/types"
-import { shimmer, toBase64 } from "@/lib/utils"
+import { resolveStorageImageUrl, shimmer, toBase64 } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -35,12 +34,13 @@ interface RecipeDisplayProps {
 
 const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
   const isAuthor = user && recipe.user_id === user.id
+  const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
   const imgUrl =
-    `${SUPABASE_URL}${STORAGE_URL}${recipe.img}` ||
-    `https://placehold.co/450x325?text=${recipe.recipe_name}`
+    resolvedImageUrl ||
+    `https://placehold.co/450x325?text=${encodeURIComponent(recipe.recipe_name)}`
 
   return (
-    <header className="grid grid-cols-1 gap-8 rounded-md bg-primary/30 py-8 md:grid-cols-2">
+    <header className="bg-primary/30 grid grid-cols-1 gap-8 rounded-md py-8 md:grid-cols-2">
       <div className="my-auto grid h-fit place-items-center gap-4 text-center">
         <Typography variant="h1">{recipe.recipe_name}</Typography>
         <Typography variant="blockquote">{recipe.quote}</Typography>
@@ -66,7 +66,7 @@ const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
           alt={recipe.recipe_name || "Generic fallback"}
           width={450}
           height={325}
-          className="aspect-square rounded-md object-cover shadow-sm shadow-foreground"
+          className="shadow-foreground aspect-square rounded-md object-cover shadow-sm"
           placeholder="blur"
           blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 325))}`}
         />
@@ -99,7 +99,7 @@ export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
 
   if (error) {
     return (
-      <div className="flex flex-1 items-start justify-center rounded bg-destructive/20 py-20">
+      <div className="bg-destructive/20 flex flex-1 items-start justify-center rounded py-20">
         <Typography variant="error" className="text-2xl">
           An error occurred: {error.message}
         </Typography>
@@ -131,22 +131,22 @@ const LoadingSkeleton = () => (
             <Skeleton className="w-[120px] max-w-full" />
           </h1>
           <blockquote className="mt-6 border-l-2 pl-6">
-            <Skeleton className="w-[128px] max-w-full" />
+            <Skeleton className="w-32 max-w-full" />
           </blockquote>
           <p className="[&amp;:not(:first-child)]:mt-6 leading-7">
-            <Skeleton className="w-[64px] max-w-full" />
+            <Skeleton className="w-16 max-w-full" />
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-[48px] max-w-full" />
+              <Skeleton className="w-12 max-w-full" />
             </div>
             <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-[56px] max-w-full" />
+              <Skeleton className="w-14 max-w-full" />
             </div>
           </div>
         </div>
         <div className="flex items-center justify-center">
-          <SVGSkeleton className="aspect-square h-[325px] w-[450px] rounded-md object-cover shadow-sm shadow-foreground" />
+          <SVGSkeleton className="shadow-foreground aspect-square h-[325px] w-[450px] rounded-md object-cover shadow-sm" />
         </div>
       </header>
       <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -156,57 +156,57 @@ const LoadingSkeleton = () => (
               <Skeleton className="w-[88px] max-w-full" />
             </h2>
             <a>
-              <SVGSkeleton className="h-[24px] w-[24px]" />
+              <SVGSkeleton className="h-6 w-6" />
             </a>
           </div>
           <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
             <span className="flex items-center justify-center">
-              <div className="flex h-9 w-16 border border-input px-3 py-1 shadow-xs transition-colors file:border-0"></div>
+              <div className="border-input flex h-9 w-16 border px-3 py-1 shadow-xs transition-colors file:border-0"></div>
               <span>
                 <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-up h-[24px] w-[24px]" />
+                  <SVGSkeleton className="lucide-arrow-up h-6 w-6" />
                 </div>
                 <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-down h-[24px] w-[24px]" />
+                  <SVGSkeleton className="lucide-arrow-down h-6 w-6" />
                 </div>
               </span>
               <label className="leading-none">
-                <Skeleton className="w-[64px] max-w-full" />
+                <Skeleton className="w-16 max-w-full" />
               </label>
             </span>
           </span>
           <ul className="[&amp;>li]:mt-2 my-6 md:ml-6">
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
-                  <Skeleton className="w-[80px] max-w-full" />
+                  <Skeleton className="w-20 max-w-full" />
                 </span>
                 <span>
-                  <Skeleton className="w-[160px] max-w-full" />
+                  <Skeleton className="w-40 max-w-full" />
                 </span>
               </label>
             </li>
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
-                  <Skeleton className="w-[24px] max-w-full" />
+                  <Skeleton className="w-6 max-w-full" />
                 </span>
                 <span>
-                  <Skeleton className="w-[80px] max-w-full" />
+                  <Skeleton className="w-20 max-w-full" />
                 </span>
               </label>
             </li>
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
                   <Skeleton className="w-[88px] max-w-full" />
                 </span>
@@ -217,37 +217,37 @@ const LoadingSkeleton = () => (
             </li>
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
-                  <Skeleton className="w-[80px] max-w-full" />
+                  <Skeleton className="w-20 max-w-full" />
                 </span>
                 <span>
-                  <Skeleton className="w-[48px] max-w-full" />
+                  <Skeleton className="w-12 max-w-full" />
                 </span>
               </label>
             </li>
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
-                  <Skeleton className="w-[80px] max-w-full" />
+                  <Skeleton className="w-20 max-w-full" />
                 </span>
                 <span>
-                  <Skeleton className="w-[40px] max-w-full" />
+                  <Skeleton className="w-10 max-w-full" />
                 </span>
               </label>
             </li>
             <li className="my-1 flex items-center justify-start gap-x-1">
               <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
+                <Skeleton className="w-3.5 max-w-full" />
               </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
+              <label className="border-border my-auto w-5/6 space-x-2 border-b">
                 <span>
-                  <Skeleton className="w-[80px] max-w-full" />
+                  <Skeleton className="w-20 max-w-full" />
                 </span>
                 <span>
                   <Skeleton className="w-[264px] max-w-full" />
@@ -258,53 +258,53 @@ const LoadingSkeleton = () => (
         </section>
         <div className="flex flex-col">
           <h2 className="scroll-m-20 border-b pb-2 tracking-tight transition-colors first:mt-0">
-            <Skeleton className="w-[40px] max-w-full" />
+            <Skeleton className="w-10 max-w-full" />
           </h2>
           <ul className="[&amp;>li]:mt-2 my-6 mt-4 flex flex-col space-y-2 md:ml-6">
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[552px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[184px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[488px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[248px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[504px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[336px] max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
-                <Skeleton className="w-[80px] max-w-full" />
+                <Skeleton className="w-20 max-w-full" />
               </label>
             </li>
             <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
+              <div className="border-primary m-0 h-4 w-4 shrink-0 border"></div>
               <label className="m-0">
                 <Skeleton className="w-[264px] max-w-full" />
               </label>
@@ -312,7 +312,7 @@ const LoadingSkeleton = () => (
           </ul>
         </div>
       </div>
-      <div className="h-px w-full shrink-0 bg-border"></div>
+      <div className="bg-border h-px w-full shrink-0"></div>
     </div>
   </>
 )

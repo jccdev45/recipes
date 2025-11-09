@@ -25,6 +25,7 @@ export const getRecipeWithComments = (
     .select(
       `
       author,
+      created_at,
       id,
       img,
       ingredients,
@@ -47,7 +48,9 @@ export const getRecipeWithComments = (
       `
     )
     .eq("slug", slug)
-    .single()
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
 }
 
 export interface LandingStats {

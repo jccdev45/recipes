@@ -34,10 +34,6 @@ export const FeatureImageSection = withAddRecipeForm({
       recipeNameValue.trim().length > 0 &&
       (recipeNameMeta?.errors?.length ?? 0) === 0
 
-    if (!nameForImage) {
-      return null
-    }
-
     return (
       <Card className="shadow-md">
         <CardHeader className="space-y-3">
@@ -47,12 +43,19 @@ export const FeatureImageSection = withAddRecipeForm({
             step and add one later.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {!nameForImage && (
+            <p className="text-muted-foreground text-sm">
+              Add a recipe name to enable image uploads. The recipe name helps
+              title the file in storage.
+            </p>
+          )}
           <FileInput
             onFileChange={onFileChange}
             isUploading={isUploading}
             className="border-primary/30 bg-muted/40 rounded-xl border border-dashed px-4 py-6"
             type="recipe"
+            disabled={!nameForImage}
           />
         </CardContent>
       </Card>
