@@ -80,7 +80,7 @@ function RecipeImage({
   const resolvedImageUrl = resolveStorageImageUrl(img)
   const imageUrl =
     resolvedImageUrl ||
-    `https://placehold.co/700x475?text=${encodeURIComponent(recipe_name)}`
+    `https://placehold.co/700x475.png?text=${encodeURIComponent(recipe_name)}`
 
   return (
     <motion.figure

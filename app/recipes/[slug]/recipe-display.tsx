@@ -57,7 +57,7 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
   const imageUrl =
     resolvedImageUrl ||
-    `https://placehold.co/640x480?text=${encodeURIComponent(recipe.recipe_name)}`
+    `https://placehold.co/640x480.png?text=${encodeURIComponent(recipe.recipe_name)}`
 
   const createdAt = formatDisplayDate(recipe.created_at)
   const updatedAt = formatDisplayDate(recipe.last_updated)

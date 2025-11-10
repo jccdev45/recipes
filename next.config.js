@@ -12,21 +12,6 @@ const nextConfig = {
         hostname: "placehold.co",
         port: "",
       },
-      {
-        protocol: "https",
-        hostname: "unsplash.it",
-        port: "",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-      },
-      {
-        protocol: "https",
-        hostname: "loremflickr.com",
-        port: "",
-      },
     ],
   },
 }

@@ -54,10 +54,9 @@ export function FeaturedRecipeCard({
   const resolvedImageUrl = resolveStorageImageUrl(img)
   const imageUrl =
     resolvedImageUrl ||
-    `https://placehold.co/900x600?text=${encodeURIComponent(recipe_name)}`
+    `https://placehold.co/900x600.png?text=${encodeURIComponent(recipe_name)}`
 
   const authorSafe = author?.trim() ?? "Unknown cook"
-  const authorInitial = authorSafe.charAt(0).toUpperCase() || "?"
   const authorSegments = authorSafe.includes("@")
     ? []
     : authorSafe
@@ -68,10 +67,6 @@ export function FeaturedRecipeCard({
   const authorFirstName = authorSegments[0]
   const authorLastName =
     authorSegments.length > 1 ? authorSegments.slice(1).join(" ") : undefined
-
-  const authorPlaceholderUrl = `https://placehold.co/100?text=${encodeURIComponent(
-    authorInitial
-  )}`
 
   const srTags = tags.length
     ? `Tags: ${tags.map((tag) => tag.tag).join(", ")}.`
@@ -117,8 +112,7 @@ export function FeaturedRecipeCard({
               size="sm"
               firstName={authorFirstName}
               lastName={authorLastName}
-              src={authorPlaceholderUrl}
-              alt={`${authorSafe}'s avatar placeholder`}
+              alt={`${authorSafe}'s avatar`}
             />
           </ItemMedia>
           <ItemContent className="gap-0">
