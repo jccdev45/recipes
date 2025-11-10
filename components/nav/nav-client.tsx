@@ -220,8 +220,9 @@ function MobileMenu({ navLinks, user }: NavClientProps) {
         <SheetHeader>
           <SheetTitle>Navigation</SheetTitle>
         </SheetHeader>
+
         <Searchbar />
-        <Separator />
+
         <nav className="flex flex-col gap-3" aria-label="Mobile navigation">
           {[...navLinks, ...secondaryLinks].map(({ href, label }) => (
             <Link
@@ -233,6 +234,7 @@ function MobileMenu({ navLinks, user }: NavClientProps) {
             </Link>
           ))}
         </nav>
+
         <SheetFooter>
           <div className="flex w-full items-center justify-between gap-4">
             <ThemeToggle />

@@ -2,6 +2,18 @@ import { TypedSupabaseClient } from "@/supabase/client"
 
 import { Recipe, Tag } from "@/lib/types"
 
+export type RecipeSearchResult = Pick<
+  Recipe,
+  | "id"
+  | "slug"
+  | "recipe_name"
+  | "author"
+  | "quote"
+  | "img"
+  | "tags"
+  | "created_at"
+>
+
 export const getRecipes = (client: TypedSupabaseClient) => {
   return client.from("recipes").select(`
       author,
@@ -143,11 +155,134 @@ export const getLandingHighlights = async (client: TypedSupabaseClient) => {
   return { recipes, stats }
 }
 
-export const searchRecipes = (
+const DEFAULT_SEARCH_LIMIT = 8
+export const MIN_SEARCH_QUERY_LENGTH = 2
+const MIN_FTS_TERM_LENGTH = 3
+
+export const sanitizeSearchTerm = (term: string) =>
+  term
+    .replace(/[\0-\x1F]+/g, " ")
+    .replace(/[^a-z0-9\s]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+
+const buildPrefixTextSearchQuery = (term: string) => {
+  const tokens = term
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0)
+
+  if (tokens.length === 0) {
+    return null
+  }
+
+  return tokens.map((token) => `${token}:*`).join(" & ")
+}
+
+const buildIlikePattern = (term: string) => {
+  const escaped = term.replace(/[%_]/g, "\\$&")
+  return `%${escaped.split(" ").join("%")}%`
+}
+
+export const searchRecipes = async (
   client: TypedSupabaseClient,
-  searchTerm: string
+  rawSearchTerm: string,
+  options?: {
+    limit?: number
+  }
 ) => {
-  return client.from("recipes").select().textSearch("search_vector", searchTerm)
+  const limit = options?.limit ?? DEFAULT_SEARCH_LIMIT
+  const searchTerm = sanitizeSearchTerm(rawSearchTerm)
+
+  if (searchTerm.length < MIN_SEARCH_QUERY_LENGTH) {
+    return [] as RecipeSearchResult[]
+  }
+
+  const selection = `
+      id,
+      slug,
+      recipe_name,
+      author,
+      quote,
+      img,
+      tags,
+      created_at
+    `
+
+  const results: RecipeSearchResult[] = []
+
+  if (searchTerm.length >= MIN_FTS_TERM_LENGTH) {
+    const prefixQuery = buildPrefixTextSearchQuery(searchTerm)
+
+    if (prefixQuery) {
+      const { data, error } = await client
+        .from("recipes")
+        .select(selection)
+        .textSearch("search_vector", prefixQuery, {
+          type: "plain",
+          config: "english",
+        })
+        .order("created_at", { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      if (data?.length) {
+        results.push(...(data as RecipeSearchResult[]))
+      }
+    }
+  }
+
+  if (results.length < limit) {
+    const pattern = buildIlikePattern(searchTerm)
+    const fallbackColumns = [
+      "recipe_name",
+      "author",
+      "tags::text",
+      "ingredients::text",
+    ] as const
+
+    const existingIds = new Set(results.map((recipe) => recipe.id))
+
+    for (const column of fallbackColumns) {
+      if (results.length >= limit) {
+        break
+      }
+
+      const { data: fallbackData, error: fallbackError } = await client
+        .from("recipes")
+        .select(selection)
+        .filter(column, "ilike", pattern)
+        .order("created_at", { ascending: false })
+        .limit(limit)
+
+      if (fallbackError) {
+        continue
+      }
+
+      if (!fallbackData?.length) {
+        continue
+      }
+
+      for (const recipe of fallbackData as RecipeSearchResult[]) {
+        if (existingIds.has(recipe.id)) {
+          continue
+        }
+
+        results.push(recipe)
+        existingIds.add(recipe.id)
+
+        if (results.length >= limit) {
+          break
+        }
+      }
+    }
+  }
+
+  return results.slice(0, limit)
 }
 
 export const getRecipesColumn = (
