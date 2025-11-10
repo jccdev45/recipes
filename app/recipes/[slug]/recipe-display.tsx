@@ -22,6 +22,7 @@ import { Steps } from "@/app/recipes/[slug]/steps"
 interface RecipeHeroProps {
   recipe: Recipe
   user: User | null
+  fallbackSlug: string
 }
 
 interface RecipeContentProps {
@@ -51,7 +52,7 @@ const formatDisplayDate = (input?: string | null) => {
   }
 }
 
-const RecipeHero = ({ recipe, user }: RecipeHeroProps) => {
+const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
   const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
   const imageUrl =
@@ -172,6 +173,13 @@ const RecipeHero = ({ recipe, user }: RecipeHeroProps) => {
             >
               <a href="#recipe-comments">View comments</a>
             </Button>
+            {isAuthor ? (
+              <Button asChild size="sm" className="rounded-full">
+                <Link href={`/recipes/${recipe.slug ?? fallbackSlug}/edit`}>
+                  Edit recipe
+                </Link>
+              </Button>
+            ) : null}
           </div>
         </div>
 
@@ -235,7 +243,7 @@ export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
-      <RecipeHero recipe={recipe} user={user} />
+      <RecipeHero recipe={recipe} user={user} fallbackSlug={slug} />
       <RecipeContent recipe={recipe} />
       <Separator className="mx-auto w-full max-w-5xl" />
     </div>

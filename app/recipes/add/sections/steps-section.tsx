@@ -199,7 +199,7 @@ export const StepsSection = withAddRecipeForm({
                         if (isEditing && editingStep) {
                           return (
                             <li
-                              key={step.id}
+                              key={`${step.id}-${index}`}
                               className="border-border/60 bg-background/70 rounded-2xl border p-4 shadow-sm"
                             >
                               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -263,7 +263,7 @@ export const StepsSection = withAddRecipeForm({
 
                         return (
                           <li
-                            key={step.id}
+                            key={`${step.id}-${index}`}
                             className="border-border/60 bg-background/70 flex flex-col gap-3 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
                           >
                             <span className="text-foreground text-sm sm:text-base">

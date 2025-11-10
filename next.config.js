@@ -9,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "placehold.it",
+        hostname: "placehold.co",
         port: "",
       },
       {

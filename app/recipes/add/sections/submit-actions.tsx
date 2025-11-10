@@ -10,16 +10,23 @@ import {
 
 export const SubmitActions = withAddRecipeForm({
   defaultValues: addRecipeDefaultValuesShape,
-  render: function Render({ form }) {
+  props: {
+    submitLabel: "Publish" as string,
+    helperText:
+      "Submit now and you will be redirected to your published recipe for a final review." as string,
+    submittingLabel: "Submitting..." as string,
+  },
+  render: function Render({ form, submitLabel, helperText, submittingLabel }) {
     return (
       <form.Subscribe
         selector={(state) => ({
           canSubmit: state.canSubmit,
           isSubmitting: state.isSubmitting,
+          isDirty: state.isDirty,
           values: state.values,
         })}
       >
-        {({ canSubmit, isSubmitting, values }) => {
+        {({ canSubmit, isSubmitting, isDirty, values }) => {
           const isFormValid = RecipeFormSchema.safeParse(values).success
           const hasIngredients = Array.isArray(values.ingredients)
             ? values.ingredients.length > 0
@@ -29,10 +36,10 @@ export const SubmitActions = withAddRecipeForm({
             : false
           const meetsContentRequirements = hasIngredients && hasSteps
           const shouldDisable =
-            !canSubmit ||
             isSubmitting ||
             !isFormValid ||
-            !meetsContentRequirements
+            !meetsContentRequirements ||
+            (!isDirty && !canSubmit)
 
           return (
             <div className="border-border/60 bg-background/80 flex flex-col gap-4 rounded-2xl border border-dashed p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -40,8 +47,7 @@ export const SubmitActions = withAddRecipeForm({
                 variant="muted"
                 className="text-muted-foreground text-sm"
               >
-                Submit now and you will be redirected to your published recipe
-                for a final review.
+                {helperText}
               </Typography>
               <Button
                 type="submit"
@@ -52,10 +58,10 @@ export const SubmitActions = withAddRecipeForm({
                 {isSubmitting ? (
                   <>
                     <Spinner />
-                    Submitting...
+                    {submittingLabel}
                   </>
                 ) : (
-                  "Publish"
+                  submitLabel
                 )}
               </Button>
             </div>

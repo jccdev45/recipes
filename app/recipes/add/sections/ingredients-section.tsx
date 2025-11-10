@@ -387,7 +387,7 @@ export const IngredientsSection = withAddRecipeForm({
                         if (isEditing && editingIngredient) {
                           return (
                             <li
-                              key={ingredient.id}
+                              key={`${ingredient.id}-${index}`}
                               className="border-border/60 bg-background/70 flex flex-col gap-3 rounded-2xl border p-4 shadow-sm"
                             >
                               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,2fr)]">
@@ -484,7 +484,7 @@ export const IngredientsSection = withAddRecipeForm({
 
                         return (
                           <li
-                            key={ingredient.id}
+                            key={`${ingredient.id}-${index}`}
                             className="border-border/60 bg-background/70 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4 shadow-sm"
                           >
                             <div className="flex flex-col">

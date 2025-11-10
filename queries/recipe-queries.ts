@@ -12,8 +12,35 @@ export const getRecipes = (client: TypedSupabaseClient) => {
       tags,
       slug,
       steps,
-      ingredients
+      ingredients,
+      user_id,
+      created_at,
+      last_updated
     `)
+}
+
+export const getRecipeBySlug = (client: TypedSupabaseClient, slug: string) => {
+  return client
+    .from("recipes")
+    .select(
+      `
+      author,
+      created_at,
+      id,
+      img,
+      ingredients,
+      last_updated,
+      quote,
+      recipe_name,
+      slug,
+      steps,
+      tags,
+      user_id
+    `
+    )
+    .eq("slug", slug)
+    .limit(1)
+    .maybeSingle()
 }
 
 export const getRecipeWithComments = (

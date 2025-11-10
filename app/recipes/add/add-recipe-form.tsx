@@ -338,7 +338,12 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
           </div>
         </div>
 
-        <SubmitActions form={form} />
+        <SubmitActions
+          form={form}
+          submitLabel="Publish Recipe"
+          helperText="Make sure all fields are filled out correctly before submitting."
+          submittingLabel="Publishing..."
+        />
 
         {formError && (
           <ErrorDisplay error={formError} title="Heads up">
