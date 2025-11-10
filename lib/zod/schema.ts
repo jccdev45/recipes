@@ -108,6 +108,12 @@ export const EditProfileSchema = z
     ...sharedFields.auth,
     ...sharedFields.user,
     confirm_password: z.string(),
+    avatar_url: z
+      .string()
+      .min(1, { message: "Avatar path must include at least one character" })
+      .max(2048, {
+        message: "Avatar path must be less than 2048 characters",
+      }),
   })
   .partial()
   .refine(

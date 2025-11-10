@@ -14,12 +14,13 @@ import {
   UserCircle,
 } from "lucide-react"
 
+import { resolveStorageImageUrl } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Typography } from "@/components/ui/typography"
+import { UserAvatar } from "@/components/user-avatar"
 import { RecipeCard } from "@/app/recipes/recipe-card"
 
 import type { UserWithRecipes } from "@/lib/types"
@@ -57,19 +58,16 @@ const ProfileSummary = ({
   profileUser,
   isOwnProfile,
   recipeCount,
+  currentUserEmail,
 }: {
   profileUser: UserWithRecipes
   isOwnProfile: boolean
   recipeCount: number
+  currentUserEmail?: string | null
 }) => {
   const displayName = createDisplayName(profileUser)
-  const avatarSrc =
-    profileUser.avatar_url ??
-    `https://placehold.co/160?text=${encodeURIComponent(displayName)}`
-  const fallbackInitials =
-    `${profileUser.first_name?.[0] ?? ""}${profileUser.last_name?.[0] ?? ""}`
-      .toUpperCase()
-      .trim()
+  const resolvedAvatar = resolveStorageImageUrl(profileUser.avatar_url)
+  const avatarEmail = isOwnProfile ? currentUserEmail : undefined
 
   return (
     <section
@@ -78,14 +76,14 @@ const ProfileSummary = ({
     >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-4 sm:gap-6">
-          <Avatar className="border-background ring-primary/10 size-20 border-2 shadow-lg ring-4 sm:size-24">
-            <AvatarImage alt={displayName} src={avatarSrc} />
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {fallbackInitials || (
-                <UserCircle className="h-6 w-6" aria-hidden="true" />
-              )}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            size="xl"
+            firstName={profileUser.first_name}
+            lastName={profileUser.last_name}
+            email={avatarEmail ?? undefined}
+            src={resolvedAvatar}
+            className="border-background ring-primary/10 size-20 border-2 shadow-lg ring-4 sm:size-24"
+          />
           <div className="space-y-3">
             <Typography
               variant="h2"
@@ -357,6 +355,7 @@ export function UserProfile({
         profileUser={profileUser}
         isOwnProfile={isOwnProfile}
         recipeCount={recipeCount}
+        currentUserEmail={currentUser?.email ?? null}
       />
 
       {showAccountPanel ? (
