@@ -8,7 +8,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
 
 let client: TypedSupabaseClient | undefined
 
-function getSupabaseClient() {
+export function createClient() {
   if (client) {
     return client
   }
@@ -19,8 +19,4 @@ function getSupabaseClient() {
   )
 
   return client
-}
-
-export const createClient = () => {
-  return useMemo(getSupabaseClient, [])
 }

@@ -6,6 +6,7 @@ import { createClient } from "@/supabase/client"
 
 import { cn, toSlug } from "@/lib/utils"
 import { RecipeFormSchema } from "@/lib/zod/schema"
+import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { useRecipes } from "@/hooks/useRecipes"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -39,7 +40,6 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
 
   const [imgURL, setImgURL] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
 
   const ensureUniqueSlug = async (baseSlug: string) => {
@@ -165,9 +165,51 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     },
   })
 
+  const {
+    addFiles: addRecipeImageFiles,
+    reset: resetRecipeImageUpload,
+    onUpload: uploadRecipeImage,
+    loading: isUploadingImage,
+  } = useSupabaseUpload({
+    bucketName: "photos",
+    maxFiles: 1,
+    allowedMimeTypes: ["image/*"],
+    maxFileSize: 10 * 1024 * 1024,
+    cacheControl: 3600,
+    upsert: false,
+    createFilePath: ({ file, defaultPath }) => {
+      const recipeNameValue = form.state.values.recipe_name?.trim() ?? ""
+      const safeRecipeName = toSlug(recipeNameValue)
+      const baseName = safeRecipeName || "recipe"
+
+      const extension = file.name.split(".").pop()?.toLowerCase()
+      const normalizedExtension = extension?.replace(/[^a-z0-9]/gi, "")
+      const uniqueSuffix =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}`
+
+      const fileName = normalizedExtension
+        ? `${baseName}-${uniqueSuffix}.${normalizedExtension}`
+        : `${baseName}-${uniqueSuffix}`
+
+      return `recipes/${baseName}/${fileName}`
+    },
+    onUploadComplete: ({ path }) => {
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`
+      setImgURL(normalizedPath)
+      setFormError(null)
+      setIsConfirmed(false)
+    },
+    onUploadError: ({ message }) => {
+      setFormError(message)
+    },
+  })
+
   const handleImageUpload = async (file: File | null) => {
     if (!file) {
       setFormError("No file selected")
+      resetRecipeImageUpload()
       return
     }
 
@@ -175,6 +217,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
 
     if (!recipeName) {
       setFormError("Add a recipe name before uploading an image.")
+      resetRecipeImageUpload()
       return
     }
 
@@ -184,38 +227,37 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       setFormError(
         "Recipe name must include letters or numbers before uploading an image."
       )
+      resetRecipeImageUpload()
       return
     }
 
-    const fileExt = file.name.split(".").pop()?.toLowerCase()
-    const uniqueSuffix =
-      typeof crypto !== "undefined" ? crypto.randomUUID() : `${Date.now()}`
-    const fileName = fileExt
-      ? `${safeRecipeName}-${uniqueSuffix}.${fileExt}`
-      : `${safeRecipeName}-${uniqueSuffix}`
-    const filePath = `recipes/${safeRecipeName}/${fileName}`
-
     setFormError(null)
-    setIsUploading(true)
-    const { data, error } = await supabase.storage
-      .from("photos")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type || undefined,
-      })
+    addRecipeImageFiles([file], { replace: true })
 
-    if (error) {
-      setFormError(error.message)
-    } else if (data) {
-      const normalizedPath = data.path.startsWith("/")
-        ? data.path
-        : `/${data.path}`
-      setImgURL(normalizedPath)
-      setFormError(null)
+    const results = await uploadRecipeImage()
+
+    if (!results || results.length === 0) {
+      setFormError("We couldn’t upload the image. Please try again.")
+      resetRecipeImageUpload()
+      return
     }
 
-    setIsUploading(false)
+    const errorResult = results.find((result) => result.status === "error")
+
+    if (errorResult?.status === "error") {
+      setFormError(errorResult.message)
+      resetRecipeImageUpload()
+      return
+    }
+
+    const successResult = results.find((result) => result.status === "success")
+
+    if (successResult?.status === "success") {
+      const normalizedPath = successResult.path
+      setImgURL(normalizedPath)
+      setIsConfirmed(false)
+      resetRecipeImageUpload()
+    }
   }
 
   const normalizedUnits = useMemo(
@@ -289,8 +331,9 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
             <TagsSection form={form} suggestedTags={suggestedTags} />
             <FeatureImageSection
               form={form}
-              isUploading={isUploading}
+              isUploading={isUploadingImage}
               onFileChange={handleImageUpload}
+              imagePath={imgURL}
             />
           </div>
         </div>

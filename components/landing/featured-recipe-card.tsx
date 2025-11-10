@@ -14,7 +14,6 @@ import {
 import { AnimatePresence, motion } from "motion/react"
 
 import { cn, resolveStorageImageUrl } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
@@ -32,6 +31,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
+import { UserAvatar } from "@/components/user-avatar"
 
 import type { Recipe } from "@/lib/types"
 import type { ReactNode } from "react"
@@ -55,6 +55,23 @@ export function FeaturedRecipeCard({
   const imageUrl =
     resolvedImageUrl ||
     `https://placehold.co/900x600?text=${encodeURIComponent(recipe_name)}`
+
+  const authorSafe = author?.trim() ?? "Unknown cook"
+  const authorInitial = authorSafe.charAt(0).toUpperCase() || "?"
+  const authorSegments = authorSafe.includes("@")
+    ? []
+    : authorSafe
+        .split(/\s+/)
+        .map((segment) => segment.trim())
+        .filter((segment) => segment.length > 0)
+
+  const authorFirstName = authorSegments[0]
+  const authorLastName =
+    authorSegments.length > 1 ? authorSegments.slice(1).join(" ") : undefined
+
+  const authorPlaceholderUrl = `https://placehold.co/100?text=${encodeURIComponent(
+    authorInitial
+  )}`
 
   const srTags = tags.length
     ? `Tags: ${tags.map((tag) => tag.tag).join(", ")}.`
@@ -96,12 +113,13 @@ export function FeaturedRecipeCard({
       <CardHeader className="flex flex-row items-center justify-between gap-2 py-2.5">
         <Item className="w-full gap-2.5 p-0">
           <ItemMedia>
-            <Avatar>
-              <AvatarImage
-                src={`https://placehold.co/100?text=${author.slice(0, 1)}`}
-              />
-              <AvatarFallback>{author.slice(0, 1)}</AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              size="sm"
+              firstName={authorFirstName}
+              lastName={authorLastName}
+              src={authorPlaceholderUrl}
+              alt={`${authorSafe}'s avatar placeholder`}
+            />
           </ItemMedia>
           <ItemContent className="gap-0">
             <ItemTitle className="text-foreground text-sm font-semibold">

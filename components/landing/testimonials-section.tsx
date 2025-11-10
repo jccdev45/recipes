@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tagline } from "@/components/landing/tagline"
+import { UserAvatar } from "@/components/user-avatar"
 
 type Testimonial = {
   id: string
@@ -66,46 +66,52 @@ export function TestimonialsSection() {
         </div>
 
         <div role="list" className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {TESTIMONIALS.map((testimonial) => (
-            <article
-              key={testimonial.id}
-              role="listitem"
-              className="bg-background/60 border-border/60 hover:border-border focus-within:border-border flex h-full flex-col gap-6 rounded-2xl border p-6 shadow-sm transition duration-200 focus-within:shadow-lg hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12 rounded-xl">
-                  {testimonial.avatarSrc ? (
-                    <AvatarImage
-                      src={testimonial.avatarSrc}
-                      alt={testimonial.name}
-                    />
-                  ) : null}
-                  <AvatarFallback>{testimonial.initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <p className="text-foreground text-sm font-semibold">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {testimonial.role}
-                  </p>
-                </div>
-              </div>
+          {TESTIMONIALS.map((testimonial) => {
+            const nameParts = testimonial.name.trim().split(/\s+/)
+            const firstName = nameParts[0] ?? undefined
+            const lastName =
+              nameParts.length > 1 ? nameParts.slice(1).join(" ") : undefined
 
-              <blockquote className="text-muted-foreground relative text-base leading-relaxed">
-                <span
-                  aria-hidden="true"
-                  className="text-primary absolute top-0 -left-3 text-3xl"
-                >
-                  “
-                </span>
-                {testimonial.quote}
-                <span aria-hidden="true" className="text-primary text-3xl">
-                  ”
-                </span>
-              </blockquote>
-            </article>
-          ))}
+            return (
+              <article
+                key={testimonial.id}
+                role="listitem"
+                className="bg-background/60 border-border/60 hover:border-border focus-within:border-border flex h-full flex-col gap-6 rounded-2xl border p-6 shadow-sm transition duration-200 focus-within:shadow-lg hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-4">
+                  <UserAvatar
+                    size="md"
+                    className="rounded-xl"
+                    firstName={firstName}
+                    lastName={lastName}
+                    src={testimonial.avatarSrc}
+                    alt={`${testimonial.name}'s avatar`}
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-foreground text-sm font-semibold">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {testimonial.role}
+                    </p>
+                  </div>
+                </div>
+
+                <blockquote className="text-muted-foreground relative text-base leading-relaxed">
+                  <span
+                    aria-hidden="true"
+                    className="text-primary absolute top-0 -left-3 text-3xl"
+                  >
+                    “
+                  </span>
+                  {testimonial.quote}
+                  <span aria-hidden="true" className="text-primary text-3xl">
+                    ”
+                  </span>
+                </blockquote>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

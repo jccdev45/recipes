@@ -12,7 +12,7 @@ import {
 import { useForm } from "@tanstack/react-form"
 import { UserCircle2 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { CommentSchema } from "@/lib/zod/schema"
 import {
   AlertDialog,
@@ -25,7 +25,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -38,6 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
+import { UserAvatar } from "@/components/user-avatar"
 
 import type {
   CommentInsert,
@@ -289,6 +289,21 @@ type CommentProps = {
 
 function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
   const { author, avatar_url, created_at, message, user_id } = comment
+  const resolvedAvatarUrl = resolveStorageImageUrl(avatar_url)
+  const trimmedAuthor = author?.trim() ?? ""
+  const isAuthorEmail = trimmedAuthor.includes("@")
+  const nameSegments = isAuthorEmail
+    ? []
+    : trimmedAuthor
+        .split(/\s+/)
+        .map((segment) => segment.trim())
+        .filter((segment) => segment.length > 0)
+
+  const derivedFirstName = nameSegments[0]
+  const derivedLastName =
+    nameSegments.length > 1 ? nameSegments.slice(1).join(" ") : undefined
+
+  const avatarEmail = isAuthorEmail ? trimmedAuthor : undefined
 
   const createdDate = new Date(created_at)
   const isoCreatedAt = Number.isNaN(createdDate.getTime())
@@ -308,10 +323,14 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
   return (
     <li>
       <article className="border-border/60 bg-card text-card-foreground flex gap-4 rounded-xl border p-4 shadow-sm transition-colors">
-        <Avatar className="mt-1">
-          <AvatarImage src={avatar_url ?? undefined} alt="" />
-          <AvatarFallback>{author.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          className="mt-1"
+          size="md"
+          firstName={derivedFirstName}
+          lastName={derivedLastName}
+          email={avatarEmail}
+          src={resolvedAvatarUrl}
+        />
 
         <div className="flex flex-1 flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">

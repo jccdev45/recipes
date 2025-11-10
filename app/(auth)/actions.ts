@@ -85,12 +85,22 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
+  const normalizeOptional = (value: FormDataEntryValue | null) => {
+    if (typeof value !== "string") {
+      return undefined
+    }
+
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : undefined
+  }
+
   const values = {
-    email: formData.get("email") as string,
+    email: (formData.get("email") as string).trim(),
     password: formData.get("password") as string,
     confirm_password: formData.get("confirm_password") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
+    first_name: (formData.get("first_name") as string).trim(),
+    last_name: normalizeOptional(formData.get("last_name")),
+    avatar_url: normalizeOptional(formData.get("avatar_url")),
   }
 
   if (containsProfanity(formData)) {
@@ -117,7 +127,8 @@ export async function signup(formData: FormData) {
     options: {
       data: {
         first_name: values.first_name,
-        last_name: values.last_name,
+        ...(values.last_name ? { last_name: values.last_name } : {}),
+        ...(values.avatar_url ? { avatar_url: values.avatar_url } : {}),
       },
       emailRedirectTo: getURL(),
     },

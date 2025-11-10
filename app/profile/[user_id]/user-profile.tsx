@@ -14,13 +14,13 @@ import {
   UserCircle,
 } from "lucide-react"
 
-import { resolveStorageImageUrl } from "@/lib/utils"
+import { useCurrentUserName } from "@/hooks/use-current-user-name"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Typography } from "@/components/ui/typography"
-import { UserAvatar } from "@/components/user-avatar"
+import { CurrentUserAvatar } from "@/components/current-user-avatar"
 import { RecipeCard } from "@/app/recipes/recipe-card"
 
 import type { UserWithRecipes } from "@/lib/types"
@@ -66,8 +66,9 @@ const ProfileSummary = ({
   currentUserEmail?: string | null
 }) => {
   const displayName = createDisplayName(profileUser)
-  const resolvedAvatar = resolveStorageImageUrl(profileUser.avatar_url)
   const avatarEmail = isOwnProfile ? currentUserEmail : undefined
+  const liveDisplayName = useCurrentUserName(displayName, avatarEmail)
+  const headingName = liveDisplayName ?? displayName
 
   return (
     <section
@@ -76,13 +77,13 @@ const ProfileSummary = ({
     >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-4 sm:gap-6">
-          <UserAvatar
+          <CurrentUserAvatar
             size="xl"
-            firstName={profileUser.first_name}
-            lastName={profileUser.last_name}
-            email={avatarEmail ?? undefined}
-            src={resolvedAvatar}
             className="border-background ring-primary/10 size-20 border-2 shadow-lg ring-4 sm:size-24"
+            initialFirstName={profileUser.first_name}
+            initialLastName={profileUser.last_name}
+            initialEmail={avatarEmail ?? null}
+            initialAvatarPath={profileUser.avatar_url}
           />
           <div className="space-y-3">
             <Typography
@@ -90,7 +91,7 @@ const ProfileSummary = ({
               id="profile-summary-heading"
               className="text-3xl leading-tight font-semibold text-balance sm:text-4xl"
             >
-              {displayName}
+              {headingName}
             </Typography>
             <Typography variant="muted" className="max-w-xl text-base">
               {recipeCount > 0

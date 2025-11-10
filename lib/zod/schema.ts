@@ -33,6 +33,13 @@ const sharedFields = {
   },
 }
 
+const avatarPathSchema = z
+  .string()
+  .min(1, { message: "Avatar path must include at least one character" })
+  .max(2048, {
+    message: "Avatar path must be less than 2048 characters",
+  })
+
 export const IngredientSchema = z.array(
   z.object({
     id: z.string(),
@@ -97,6 +104,7 @@ export const RegisterSchema = z
     ...sharedFields.auth,
     ...sharedFields.user,
     confirm_password: z.string(),
+    avatar_url: avatarPathSchema.optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",
@@ -108,12 +116,7 @@ export const EditProfileSchema = z
     ...sharedFields.auth,
     ...sharedFields.user,
     confirm_password: z.string(),
-    avatar_url: z
-      .string()
-      .min(1, { message: "Avatar path must include at least one character" })
-      .max(2048, {
-        message: "Avatar path must be less than 2048 characters",
-      }),
+    avatar_url: avatarPathSchema,
   })
   .partial()
   .refine(

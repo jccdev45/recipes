@@ -1,19 +1,11 @@
 "use client"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { LogIn, LogOut, Menu, UserIcon, UserPen } from "lucide-react"
 import { useFormStatus } from "react-dom"
-import type { User } from "@supabase/supabase-js"
-import {
-  LogIn,
-  LogOut,
-  Menu,
-  UserCircle2,
-  UserIcon,
-  UserPen,
-} from "lucide-react"
 
-import { Searchbar } from "@/app/recipes/search"
-import { logout } from "@/app/(auth)/actions"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,14 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
   SheetContent,
@@ -38,8 +29,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { CurrentUserAvatar } from "@/components/current-user-avatar"
+import { logout } from "@/app/(auth)/actions"
+import { Searchbar } from "@/app/recipes/search"
+
+import type { User } from "@supabase/supabase-js"
 
 const secondaryLinks = [
   { href: "/terms", label: "Terms of Service" },
@@ -60,7 +55,7 @@ export function NavClient({ navLinks, user }: NavClientProps) {
   return (
     <div className="flex flex-1 items-center justify-end gap-3 lg:gap-4">
       <DesktopNav links={navLinks} />
-      <div className="hidden md:w-64 xl:w-80 lg:block">
+      <div className="hidden md:w-64 lg:block xl:w-80">
         <Searchbar />
       </div>
       <div className="hidden items-center gap-3 lg:flex">
@@ -96,7 +91,7 @@ function DesktopNav({ links }: { links: NavLink[] }) {
               <Link
                 href={href}
                 data-active={isActive(href)}
-                className="rounded-md px-4 py-2 text-sm font-medium text-foreground/80 transition-colors duration-200 ease-in-out hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[active=true]:text-primary"
+                className="text-foreground/80 hover:text-primary focus-visible:ring-ring data-[active=true]:text-primary rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 {label}
               </Link>
@@ -129,30 +124,26 @@ function AccountMenu({ user }: { user: User | null }) {
           className="rounded-full"
           aria-label="Open account menu"
         >
-          <Avatar>
-            <AvatarImage
-              src={user.user_metadata?.avatar_url}
-              alt="Account avatar"
-              className="object-cover"
-            />
-            <AvatarFallback>
-              <UserCircle2 className="size-5" aria-hidden="true" />
-            </AvatarFallback>
-          </Avatar>
+          <CurrentUserAvatar
+            size="md"
+            className="border-border/60 border"
+            initialFirstName={user.user_metadata?.first_name}
+            initialLastName={user.user_metadata?.last_name}
+            initialEmail={user.email}
+            initialAvatarPath={user.user_metadata?.avatar_url}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-56" forceMount>
         <div className="flex items-center gap-3 px-2 py-1.5">
-          <Avatar className="size-10">
-            <AvatarImage
-              src={user.user_metadata?.avatar_url}
-              alt="Account avatar"
-              className="object-cover"
-            />
-            <AvatarFallback>
-              <UserCircle2 className="size-6" aria-hidden="true" />
-            </AvatarFallback>
-          </Avatar>
+          <CurrentUserAvatar
+            size="xl"
+            className="border-border/60 border"
+            initialFirstName={user.user_metadata?.first_name}
+            initialLastName={user.user_metadata?.last_name}
+            initialEmail={user.email}
+            initialAvatarPath={user.user_metadata?.avatar_url}
+          />
           <div className="text-sm">
             {user.user_metadata?.first_name && user.user_metadata?.last_name ? (
               <p className="font-medium">{`${user.user_metadata.first_name} ${user.user_metadata.last_name}`}</p>
@@ -170,10 +161,7 @@ function AccountMenu({ user }: { user: User | null }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link
-            href={`/profile/${user.id}/edit`}
-            className="flex items-center"
-          >
+          <Link href={`/profile/${user.id}/edit`} className="flex items-center">
             <UserPen className="mr-2 size-4" aria-hidden="true" />
             <span>Edit profile</span>
           </Link>
@@ -201,7 +189,7 @@ function LogoutButton() {
       <button
         type="submit"
         className={cn(
-          "flex w-full items-center text-destructive",
+          "text-destructive flex w-full items-center",
           pending && "opacity-70"
         )}
       >
@@ -239,7 +227,7 @@ function MobileMenu({ navLinks, user }: NavClientProps) {
             <Link
               key={href}
               href={href}
-              className="text-left text-base font-medium text-foreground/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-foreground/80 hover:text-primary focus-visible:ring-ring text-left text-base font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {label}
             </Link>
