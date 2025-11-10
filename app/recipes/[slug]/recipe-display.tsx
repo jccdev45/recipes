@@ -1,8 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
@@ -10,6 +11,18 @@ import { User } from "@supabase/supabase-js"
 
 import { Recipe } from "@/lib/types"
 import { resolveStorageImageUrl, shimmer, toBase64 } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -54,10 +67,59 @@ const formatDisplayDate = (input?: string | null) => {
 
 const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const recipeLabel = recipe.recipe_name?.trim() || "this recipe"
   const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
   const imageUrl =
     resolvedImageUrl ||
-    `https://placehold.co/640x480.png?text=${encodeURIComponent(recipe.recipe_name)}`
+    `https://placehold.co/640x480.png?text=${encodeURIComponent(recipeLabel)}`
+
+  const handleDelete = async () => {
+    if (!recipe.id) {
+      toast({
+        title: "Unable to delete recipe",
+        description: "The recipe is missing an identifier needed for deletion.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from("recipes")
+        .delete()
+        .eq("id", recipe.id)
+
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: "Recipe deleted",
+        description: `"${recipeLabel}" has been removed.`,
+      })
+
+      router.push("/recipes")
+      router.refresh()
+    } catch (error) {
+      console.error("Error deleting recipe:", error)
+      toast({
+        title: "Unable to delete recipe",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred while deleting the recipe.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const createdAt = formatDisplayDate(recipe.created_at)
   const updatedAt = formatDisplayDate(recipe.last_updated)
@@ -179,6 +241,44 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
                   Edit recipe
                 </Link>
               </Button>
+            ) : null}
+            {isAuthor ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="rounded-full"
+                    disabled={isDeleting}
+                  >
+                    Delete recipe
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this recipe?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove {recipeLabel} and any related
+                      activity. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={isDeleting}
+                      onClick={() => {
+                        void handleDelete()
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/40"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : null}
           </div>
         </div>
