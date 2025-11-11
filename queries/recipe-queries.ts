@@ -1,6 +1,6 @@
 import { TypedSupabaseClient } from "@/supabase/client"
 
-import { Recipe, Tag } from "@/lib/types"
+import { Recipe } from "@/lib/types"
 
 export type RecipeSearchResult = Pick<
   Recipe,
@@ -99,15 +99,12 @@ export interface LandingStats {
   tagCount: number
 }
 
-type RecipeMetadata = Pick<Recipe, "author" | "tags">
-
 export const getLandingHighlights = async (client: TypedSupabaseClient) => {
-  const [featuredResponse, totalResponse, metadataResponse] = await Promise.all(
-    [
-      client
-        .from("recipes")
-        .select(
-          `
+  const [featuredResponse, statsResponse] = await Promise.all([
+    client
+      .from("recipes")
+      .select(
+        `
         author,
         id,
         img,
@@ -116,34 +113,36 @@ export const getLandingHighlights = async (client: TypedSupabaseClient) => {
         slug,
         tags
       `
-        )
-        .order("created_at", { ascending: false })
-        .limit(3)
-        .returns<Recipe[]>(),
-      client.from("recipes").select("id", { head: true, count: "exact" }),
-      client.from("recipes").select("author, tags").returns<RecipeMetadata[]>(),
-    ]
-  )
+      )
+      .order("created_at", { ascending: false })
+      .limit(3)
+      .returns<Recipe[]>(),
+    client.rpc("get_recipes_landing_stats"),
+  ])
 
-  if (featuredResponse.error) throw featuredResponse.error
-  if (totalResponse.error) throw totalResponse.error
-  if (metadataResponse.error) throw metadataResponse.error
+  if (featuredResponse.error) {
+    throw featuredResponse.error
+  }
+
+  if (statsResponse.error) {
+    throw statsResponse.error
+  }
 
   const recipes = featuredResponse.data ?? []
-  const totalRecipes = totalResponse.count ?? recipes.length
 
-  const contributorCount = new Set(
-    (metadataResponse.data ?? [])
-      .map((entry) => entry.author?.trim())
-      .filter((author): author is string => Boolean(author))
-  ).size
+  const statsDataArray = statsResponse.data as
+    | {
+        total_recipes: number | null
+        contributor_count: number | null
+        tag_count: number | null
+      }[]
+    | null
 
-  const tagCount = new Set(
-    (metadataResponse.data ?? [])
-      .flatMap((entry) => entry.tags ?? [])
-      .map((tag: Tag) => tag.tag?.toLowerCase())
-      .filter((tag): tag is string => Boolean(tag))
-  ).size
+  const statsData = statsDataArray?.[0]
+
+  const totalRecipes = statsData?.total_recipes ?? recipes.length
+  const contributorCount = statsData?.contributor_count ?? 0
+  const tagCount = statsData?.tag_count ?? 0
 
   const stats: LandingStats = {
     totalRecipes,

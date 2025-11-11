@@ -157,6 +157,14 @@ export type Database = {
         }
         Returns: Record<string, unknown>
       }
+      get_recipes_landing_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_recipes: number | null
+          contributor_count: number | null
+          tag_count: number | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
