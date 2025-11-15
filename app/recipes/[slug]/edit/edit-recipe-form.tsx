@@ -32,6 +32,7 @@ type EditRecipeFormProps = {
   slug: string
   className?: string
   user: User
+  initialRecipe?: Recipe
 }
 
 type EditRecipeFormInnerProps = {
@@ -143,13 +144,21 @@ const mapRecipeToFormValues = (recipe: Recipe): AddRecipeFormValues => {
   }
 }
 
-export function EditRecipeForm({ slug, className, user }: EditRecipeFormProps) {
+export function EditRecipeForm({
+  slug,
+  className,
+  user,
+  initialRecipe,
+}: EditRecipeFormProps) {
   const supabase = createClient()
+  const shouldFetch = !initialRecipe
   const {
     data: recipeData,
     isLoading: isRecipeLoading,
     error: recipeError,
-  } = useQuery(getRecipeBySlug(supabase, slug))
+  } = useQuery(getRecipeBySlug(supabase, slug), {
+    enabled: shouldFetch,
+  })
 
   const {
     tags,
@@ -170,7 +179,7 @@ export function EditRecipeForm({ slug, className, user }: EditRecipeFormProps) {
 
   const isLoading = isRecipeLoading || isCatalogLoading
 
-  if (isLoading) {
+  if (isLoading && !initialRecipe) {
     return (
       <div
         className={cn(
@@ -201,7 +210,7 @@ export function EditRecipeForm({ slug, className, user }: EditRecipeFormProps) {
     )
   }
 
-  const recipe = recipeData as Recipe
+  const recipe = (initialRecipe ?? recipeData) as Recipe
 
   if (recipe.user_id && recipe.user_id !== user.id) {
     return (

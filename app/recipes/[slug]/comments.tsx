@@ -55,6 +55,9 @@ type CommentsSectionProps = {
   slug: string
 }
 
+const COMMENT_SELECTION =
+  "id, recipe_id, user_id, author, avatar_url, message, likes, liked_by, created_at"
+
 const getFeedbackMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message
@@ -94,13 +97,13 @@ export function CommentsSection({
   const { mutateAsync: insertCommentMutation } = useInsertMutation(
     supabase.from("comments"),
     ["id"],
-    "*"
+    COMMENT_SELECTION
   )
 
   const { mutateAsync: deleteCommentMutation } = useDeleteMutation(
     supabase.from("comments"),
     ["id"],
-    "*"
+    COMMENT_SELECTION
   )
 
   const form = useForm({

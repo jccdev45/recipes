@@ -4,14 +4,7 @@ import { Recipe } from "@/lib/types"
 
 export type RecipeSearchResult = Pick<
   Recipe,
-  | "id"
-  | "slug"
-  | "recipe_name"
-  | "author"
-  | "quote"
-  | "img"
-  | "tags"
-  | "created_at"
+  "id" | "slug" | "recipe_name" | "author" | "quote" | "tags"
 >
 
 export const getRecipes = (client: TypedSupabaseClient) => {
@@ -25,9 +18,7 @@ export const getRecipes = (client: TypedSupabaseClient) => {
       slug,
       steps,
       ingredients,
-      user_id,
-      created_at,
-      last_updated
+      user_id
     `)
 }
 
@@ -37,7 +28,6 @@ export const getRecipeBySlug = (client: TypedSupabaseClient, slug: string) => {
     .select(
       `
       author,
-      created_at,
       id,
       img,
       ingredients,
@@ -50,6 +40,15 @@ export const getRecipeBySlug = (client: TypedSupabaseClient, slug: string) => {
       user_id
     `
     )
+    .eq("slug", slug)
+    .limit(1)
+    .maybeSingle()
+}
+
+export const getRecipeMeta = (client: TypedSupabaseClient, slug: string) => {
+  return client
+    .from("recipes")
+    .select("recipe_name")
     .eq("slug", slug)
     .limit(1)
     .maybeSingle()
@@ -68,8 +67,10 @@ export const getRecipeWithComments = (
       id,
       img,
       ingredients,
+      last_updated,
       quote,
       recipe_name,
+      slug,
       steps,
       tags,
       user_id,
@@ -204,9 +205,7 @@ export const searchRecipes = async (
       recipe_name,
       author,
       quote,
-      img,
-      tags,
-      created_at
+      tags
     `
 
   const results: RecipeSearchResult[] = []

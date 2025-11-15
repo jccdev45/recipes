@@ -1,12 +1,6 @@
 import { notFound, redirect } from "next/navigation"
-import { getRecipeBySlug } from "@/queries/recipe-queries"
+import { getRecipeBySlug, getRecipeMeta } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
-import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query"
 import { CheckCircle2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +9,7 @@ import { Typography } from "@/components/ui/typography"
 import { getUser } from "@/app/(auth)/actions"
 import { EditRecipeForm } from "@/app/recipes/[slug]/edit/edit-recipe-form"
 
+import type { Recipe } from "@/lib/types"
 import type { Metadata } from "next"
 
 type EditRecipePageProps = {
@@ -30,7 +25,7 @@ export async function generateMetadata({
 
   try {
     const supabase = await createClient()
-    const { data: recipe } = await getRecipeBySlug(supabase, slug)
+    const { data: recipe } = await getRecipeMeta(supabase, slug)
 
     if (!recipe) {
       notFound()
@@ -66,7 +61,6 @@ export default async function EditRecipePage(props: EditRecipePageProps) {
   }
 
   const supabase = await createClient()
-  const queryClient = new QueryClient()
 
   const { data: recipe } = await getRecipeBySlug(supabase, slug)
 
@@ -77,8 +71,6 @@ export default async function EditRecipePage(props: EditRecipePageProps) {
   if (recipe.user_id && recipe.user_id !== user.id) {
     redirect(`/recipes/${slug}`)
   }
-
-  await prefetchQuery(queryClient, getRecipeBySlug(supabase, slug))
 
   const updatedAtLabel = recipe.last_updated
     ? new Date(recipe.last_updated).toLocaleDateString(undefined, {
@@ -172,9 +164,12 @@ export default async function EditRecipePage(props: EditRecipePageProps) {
           </div>
         </section>
 
-        <HydrationBoundary state={dehydrate(queryClient)}>
-          <EditRecipeForm className="mx-auto w-full" slug={slug} user={user} />
-        </HydrationBoundary>
+        <EditRecipeForm
+          className="mx-auto w-full"
+          slug={slug}
+          user={user}
+          initialRecipe={recipe as Recipe}
+        />
       </main>
     </>
   )

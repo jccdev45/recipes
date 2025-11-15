@@ -1,13 +1,6 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { getUserWithRecipes } from "@/queries/user-queries"
 import { createClient } from "@/supabase/server"
-import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query"
 
 import { getUser } from "@/app/(auth)/actions"
 import { UserProfile } from "@/app/profile/[user_id]/user-profile"
@@ -51,21 +44,15 @@ export default async function ProfilePage(props: Props) {
 
   const { user_id } = params
 
-  const queryClient = new QueryClient()
-  const supabase = await createClient()
   const { user } = await getUser()
 
   if (!user) {
     redirect("/login")
   }
 
-  await prefetchQuery(queryClient, getUserWithRecipes(supabase, user_id))
-
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 sm:px-6 lg:px-8">
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <UserProfile user_id={user_id} currentUser={user} />
-      </HydrationBoundary>
+      <UserProfile user_id={user_id} currentUser={user} />
     </main>
   )
 }

@@ -1,12 +1,6 @@
 import { notFound } from "next/navigation"
-import { getRecipeWithComments } from "@/queries/recipe-queries"
+import { getRecipeMeta, getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
-import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query"
 
 import { getUser } from "@/app/(auth)/actions"
 import { CommentsSection } from "@/app/recipes/[slug]/comments"
@@ -27,7 +21,7 @@ export async function generateMetadata({
 
   try {
     const supabase = await createClient()
-    const { data: recipe } = await getRecipeWithComments(supabase, slug)
+    const { data: recipe } = await getRecipeMeta(supabase, slug)
 
     if (!recipe) {
       notFound()
@@ -50,11 +44,7 @@ export default async function RecipePage(props: RecipePageProps) {
   const params = await props.params
   const { slug } = params
 
-  const queryClient = new QueryClient()
-  const supabase = await createClient()
   const { user } = await getUser()
-
-  await prefetchQuery(queryClient, getRecipeWithComments(supabase, slug))
 
   return (
     <>
@@ -65,19 +55,17 @@ export default async function RecipePage(props: RecipePageProps) {
         Skip to recipe details
       </a>
       <main id="recipe-main" className="space-y-12 px-4 pb-16">
-        <HydrationBoundary state={dehydrate(queryClient)}>
-          <RecipeDisplay slug={slug} user={user} />
-          <section
-            id="recipe-comments"
-            className="mx-auto flex w-full max-w-6xl flex-col gap-4"
-          >
-            <CommentsSection
-              currentUser={user}
-              slug={slug}
-              className="flex w-full max-w-full flex-col"
-            />
-          </section>
-        </HydrationBoundary>
+        <RecipeDisplay slug={slug} user={user} />
+        <section
+          id="recipe-comments"
+          className="mx-auto flex w-full max-w-6xl flex-col gap-4"
+        >
+          <CommentsSection
+            currentUser={user}
+            slug={slug}
+            className="flex w-full max-w-full flex-col"
+          />
+        </section>
       </main>
     </>
   )

@@ -1,13 +1,5 @@
 import Image from "next/image"
 import { redirect } from "next/navigation"
-import { getRecipes } from "@/queries/recipe-queries"
-import { createClient } from "@/supabase/server"
-import { prefetchQuery } from "@supabase-cache-helpers/postgrest-react-query"
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query"
 import { CheckCircle2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -25,14 +17,10 @@ export const metadata: Metadata = {
 
 export default async function AddRecipePage() {
   const { user } = await getUser()
-  const queryClient = new QueryClient()
-  const supabase = await createClient()
 
   if (!user) {
     redirect("/login")
   }
-
-  await prefetchQuery(queryClient, getRecipes(supabase))
 
   return (
     <section
@@ -112,9 +100,7 @@ export default async function AddRecipePage() {
         </div>
       </div>
 
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <AddRecipeForm className="mx-auto w-full" user={user} />
-      </HydrationBoundary>
+      <AddRecipeForm className="mx-auto w-full" user={user} />
     </section>
   )
 }

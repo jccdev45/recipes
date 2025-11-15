@@ -80,8 +80,7 @@ export const TagsSection = withAddRecipeForm({
             <CardTitle className="text-xl font-semibold">Tags</CardTitle>
           </div>
           <CardDescription>
-            Help people discover your recipe by choosing up to five relevant
-            tags.
+            Help people discover your recipe by choosing relevant tags.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -93,7 +92,6 @@ export const TagsSection = withAddRecipeForm({
 
           <FormField name="tags">
             {(tagsField) => {
-              const fieldId = getNameFromPath(tagsField.name)
               const errorId = getErrorId(tagsField.name)
 
               const addTagFromValue = (tagText: string) => {

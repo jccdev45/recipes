@@ -35,41 +35,20 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
   } = useRecipeFilters()
   const { toggleSidebar } = useSidebar()
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <Alert variant="destructive">
-          <AlertTitle>We hit a snag</AlertTitle>
-          <AlertDescription>
-            Something went wrong while loading recipes. Please try refreshing
-            the page or come back later.
-          </AlertDescription>
-        </Alert>
-      </div>
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex w-full justify-center px-4 py-16">
-        <Spinner size="2xl" />
-      </div>
-    )
-  }
-
   const normalizedSearchTerm = searchTerm?.trim().toLowerCase() ?? ""
   const hasSearchTerm = normalizedSearchTerm.length > 0
+  const baseRecipes = Array.isArray(recipes) ? recipes : []
 
   const searchScopedRecipes = useMemo(() => {
     if (!hasSearchTerm) {
-      return recipes
+      return baseRecipes
     }
 
     const matchesSearch = (value?: string | null) =>
       typeof value === "string" &&
       value.toLowerCase().includes(normalizedSearchTerm)
 
-    return recipes.filter((recipe) => {
+    return baseRecipes.filter((recipe) => {
       if (matchesSearch(recipe.recipe_name)) return true
       if (matchesSearch(recipe.author)) return true
       if (matchesSearch(recipe.quote ?? "")) return true
@@ -88,7 +67,7 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
 
       return recipe.steps?.some((step) => matchesSearch(step.step)) ?? false
     })
-  }, [recipes, hasSearchTerm, normalizedSearchTerm])
+  }, [baseRecipes, hasSearchTerm, normalizedSearchTerm])
 
   const filteredRecipes = useMemo(() => {
     const hasAuthorFilters = selectedAuthors.length > 0
@@ -162,6 +141,28 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
 
     return `Showing all ${visibleRecipes} recipes`
   })()
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12">
+        <Alert variant="destructive">
+          <AlertTitle>We hit a snag</AlertTitle>
+          <AlertDescription>
+            Something went wrong while loading recipes. Please try refreshing
+            the page or come back later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex w-full justify-center px-4 py-16">
+        <Spinner size="2xl" />
+      </div>
+    )
+  }
 
   return (
     <section

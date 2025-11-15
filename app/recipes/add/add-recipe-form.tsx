@@ -144,7 +144,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         const { data, error } = await supabase
           .from("recipes")
           .insert(updatedValues)
-          .select()
+          .select("slug")
 
         if (error) throw error
 

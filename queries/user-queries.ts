@@ -10,6 +10,9 @@ export function getUserWithRecipes(
     .from("profiles")
     .select(
       `
+        id,
+        created_at,
+        last_updated,
         first_name,
         last_name,
         avatar_url,
@@ -21,7 +24,8 @@ export function getUserWithRecipes(
           quote,
           recipe_name,
           slug,
-          tags
+          tags,
+          user_id
         )
       `
     )
