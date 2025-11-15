@@ -4,11 +4,15 @@ import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 
 import { Ingredient, Recipe, Tag, UnitMeasurement } from "@/lib/types"
 
+type RecipeRow = Recipe & {
+  comment_meta?: { count: number }[]
+}
+
 export function useRecipes() {
   const supabase = createClient()
   const { data, isLoading, error } = useQuery(getRecipes(supabase))
 
-  const recipes = Array.isArray(data) ? (data as Recipe[]) : []
+  const recipes = Array.isArray(data) ? (data as unknown as RecipeRow[]) : []
   const ingredientMap = new Map<string, Ingredient>()
   const tagMap = new Map<string, Tag>()
   const unitSet = new Set<string>()
@@ -33,6 +37,11 @@ export function useRecipes() {
       if (ingredient.unitMeasurement) unitSet.add(ingredient.unitMeasurement)
     })
 
+    const commentCount = Array.isArray(recipe.comment_meta)
+      ? (recipe.comment_meta[0]?.count ?? 0)
+      : 0
+    recipe.commentCount = commentCount
+
     const tags = Array.isArray(recipe.tags) ? recipe.tags : []
     recipe.tags = tags
 
@@ -48,6 +57,10 @@ export function useRecipes() {
     recipe.steps = Array.from(new Set(steps.map((step) => step.step))).map(
       (step, index) => ({ id: `${recipeIndex}-${index}`, step })
     )
+
+    if (recipe.comment_meta) {
+      delete recipe.comment_meta
+    }
   })
 
   const additionalUnits: UnitMeasurement[] = [

@@ -10,15 +10,19 @@ export type RecipeSearchResult = Pick<
 export const getRecipes = (client: TypedSupabaseClient) => {
   return client.from("recipes").select(`
       author,
+      created_at,
       id,
       img,
+      last_updated,
       recipe_name,
       quote,
+      search_vector,
       tags,
       slug,
       steps,
       ingredients,
-      user_id
+      user_id,
+      comment_meta:comments(count)
     `)
 }
 

@@ -5,17 +5,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { User } from "@supabase/supabase-js"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Heart, MoreHorizontal, Pencil } from "lucide-react"
+import { Heart, MessageSquare, Pencil } from "lucide-react"
 
 import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Typography } from "@/components/ui/typography"
 
 import type { Recipe } from "@/lib/types"
@@ -40,9 +34,19 @@ export function RecipeCard({
   })
 
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.96, 1, 0.96])
-  const { img, recipe_name, slug, tags, quote, author, user_id } = recipe
+  const {
+    img,
+    recipe_name,
+    slug,
+    tags,
+    quote,
+    author,
+    user_id,
+    commentCount: rawCommentCount,
+  } = recipe
   const canEdit = user?.id === user_id
   const isCompact = display === "compact"
+  const commentCount = rawCommentCount ?? 0
 
   return (
     <motion.article
@@ -63,6 +67,7 @@ export function RecipeCard({
         author={author}
         canEdit={canEdit}
         isCompact={isCompact}
+        commentCount={commentCount}
       />
     </motion.article>
   )
@@ -116,6 +121,7 @@ function RecipeContent({
   author,
   canEdit,
   isCompact,
+  commentCount,
 }: {
   recipe_name: Recipe["recipe_name"]
   slug: Recipe["slug"]
@@ -124,11 +130,14 @@ function RecipeContent({
   author: Recipe["author"]
   canEdit: boolean
   isCompact: boolean
+  commentCount: number
 }) {
+  const commentLabel = commentCount === 1 ? "comment" : "comments"
+
   return (
     <motion.div
       className={cn(
-        "flex flex-1 flex-col justify-between",
+        "flex flex-1 flex-col gap-6",
         isCompact ? "gap-4 p-5" : "bg-muted/60 gap-6 p-6"
       )}
       initial={{ opacity: 0, y: 16 }}
@@ -147,7 +156,22 @@ function RecipeContent({
                 {recipe_name}
               </Link>
             </Typography>
-            <RecipeActionsMenu slug={slug} canEdit={canEdit} />
+            {canEdit ? (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5"
+              >
+                <Link
+                  href={`/recipes/${slug}/edit`}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <Pencil className="h-4 w-4" aria-hidden="true" />
+                  Edit
+                </Link>
+              </Button>
+            ) : null}
           </div>
           <Typography variant="small" className="text-muted-foreground">
             By {author}
@@ -196,51 +220,26 @@ function RecipeContent({
           ))}
         </motion.ul>
       ) : null}
-    </motion.div>
-  )
-}
-
-function RecipeActionsMenu({
-  slug,
-  canEdit,
-}: {
-  slug: Recipe["slug"]
-  canEdit: boolean
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <div className="mt-auto flex items-center justify-end gap-4">
+        <div
+          className="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
+          aria-label={`${commentCount} ${commentLabel}`}
+        >
+          <MessageSquare className="h-4 w-4" aria-hidden="true" />
+          <span aria-hidden="true">{commentCount}</span>
+          <span className="sr-only">{commentLabel}</span>
+        </div>
         <Button
+          type="button"
           variant="ghost"
           size="icon"
-          className="text-muted-foreground hover:text-foreground rounded-full"
+          aria-label="Toggle favorite"
+          aria-pressed="false"
+          className="text-muted-foreground hover:text-foreground border-border/60 rounded-full border"
         >
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">More actions</span>
+          <Heart className="h-4 w-4" aria-hidden="true" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem className="gap-2">
-          <Heart className="h-4 w-4" />
-          Favorite
-        </DropdownMenuItem>
-        {canEdit ? (
-          <DropdownMenuItem asChild className="gap-2">
-            <Link
-              href={`/recipes/${slug}/edit`}
-              className="flex w-full items-center gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </Link>
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem disabled className="gap-2 opacity-70">
-            <Pencil className="h-4 w-4" />
-            Edit
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </motion.div>
   )
 }

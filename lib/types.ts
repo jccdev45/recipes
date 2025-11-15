@@ -41,6 +41,7 @@ export type Recipe = WithFields<
     tags: Tag[]
     steps: Step[]
     ingredients: Ingredient[]
+    commentCount?: number
   }
 >
 
