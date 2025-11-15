@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { getRecipeWithComments } from "@/queries/recipe-queries"
@@ -10,10 +11,10 @@ import {
   useQuery,
 } from "@supabase-cache-helpers/postgrest-react-query"
 import { useForm } from "@tanstack/react-form"
-import { UserCircle2 } from "lucide-react"
 
 import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { CommentSchema } from "@/lib/zod/schema"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,23 @@ type CommentsSectionProps = {
   slug: string
 }
 
+const getFeedbackMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message
+  }
+
+  return "Something went wrong. Please try again."
+}
+
 export function CommentsSection({
   className,
   currentUser,
@@ -59,6 +77,11 @@ export function CommentsSection({
 }: CommentsSectionProps) {
   const supabase = createClient()
   const router = useRouter()
+  const [commentsFeedback, setCommentsFeedback] = useState<{
+    type: "info" | "success" | "error"
+    message: string
+  } | null>(null)
+  const feedbackRegionRef = useRef<HTMLDivElement | null>(null)
 
   const { data, isLoading, error } = useQuery(
     getRecipeWithComments(supabase, slug)
@@ -119,24 +142,38 @@ export function CommentsSection({
   const { mutateAsync: insertCommentMutation } = useInsertMutation(
     supabase.from("comments"),
     ["id"],
-    "*",
-    {
-      onSuccess: () => {
-        router.refresh()
-      },
-    }
+    "*"
   )
 
-  const { mutate: deleteCommentMutation } = useDeleteMutation(
+  const { mutateAsync: deleteCommentMutation } = useDeleteMutation(
     supabase.from("comments"),
     ["id"],
-    "*",
-    {
-      onSuccess: () => {
-        router.refresh()
-      },
-    }
+    "*"
   )
+
+  const handleDeleteComment = async (commentId: CommentType["id"]) => {
+    if (!commentId) {
+      setCommentsFeedback({
+        type: "error",
+        message:
+          "Unable to delete this comment because it is missing the required identifier.",
+      })
+      return
+    }
+
+    try {
+      setCommentsFeedback({ type: "info", message: "Deleting comment..." })
+      await deleteCommentMutation({ id: commentId })
+      router.refresh()
+      setCommentsFeedback({ type: "success", message: "Comment removed." })
+    } catch (mutationError) {
+      console.error("Error deleting comment:", mutationError)
+      setCommentsFeedback({
+        type: "error",
+        message: getFeedbackMessage(mutationError),
+      })
+    }
+  }
 
   const form = useForm({
     defaultValues: {
@@ -148,7 +185,10 @@ export function CommentsSection({
     },
     onSubmit: async ({ value }) => {
       if (!currentUser) {
-        console.error("No user logged in")
+        setCommentsFeedback({
+          type: "error",
+          message: "Please sign in before leaving a comment.",
+        })
         return
       }
 
@@ -163,8 +203,19 @@ export function CommentsSection({
         user_id: currentUser.id,
       }
 
-      await insertCommentMutation([newComment])
-      form.reset()
+      try {
+        setCommentsFeedback({ type: "info", message: "Posting comment..." })
+        await insertCommentMutation([newComment])
+        router.refresh()
+        setCommentsFeedback({ type: "success", message: "Comment posted." })
+        form.reset()
+      } catch (mutationError) {
+        console.error("Error posting comment:", mutationError)
+        setCommentsFeedback({
+          type: "error",
+          message: getFeedbackMessage(mutationError),
+        })
+      }
     },
   })
 
@@ -184,6 +235,32 @@ export function CommentsSection({
           {commentCountLabel}
         </span>
       </header>
+
+      {commentsFeedback ? (
+        <Alert
+          ref={feedbackRegionRef}
+          variant={
+            commentsFeedback.type === "error" ? "destructive" : "default"
+          }
+          role={commentsFeedback.type === "error" ? "alert" : "status"}
+          aria-live={commentsFeedback.type === "error" ? "assertive" : "polite"}
+          aria-atomic="true"
+          className="flex items-start justify-between gap-4"
+        >
+          <AlertDescription className="text-sm">
+            {commentsFeedback.message}
+          </AlertDescription>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="shrink-0"
+            onClick={() => setCommentsFeedback(null)}
+          >
+            Dismiss
+          </Button>
+        </Alert>
+      ) : null}
 
       {currentUser ? (
         <form
@@ -266,7 +343,7 @@ export function CommentsSection({
                   key={comment.id}
                   comment={comment}
                   currentUser={currentUser}
-                  onDelete={() => deleteCommentMutation({ id: comment.id })}
+                  onDelete={() => handleDeleteComment(comment.id)}
                 />
               ))}
             </ul>

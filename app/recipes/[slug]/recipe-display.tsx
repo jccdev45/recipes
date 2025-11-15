@@ -11,7 +11,7 @@ import { User } from "@supabase/supabase-js"
 
 import { Recipe } from "@/lib/types"
 import { resolveStorageImageUrl, shimmer, toBase64 } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,28 +68,50 @@ const formatDisplayDate = (input?: string | null) => {
 const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
   const router = useRouter()
-  const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteFeedback, setDeleteFeedback] = useState<{
+    kind: "info" | "error"
+    message: string
+  } | null>(null)
   const recipeLabel = recipe.recipe_name?.trim() || "this recipe"
   const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
   const imageUrl =
     resolvedImageUrl ||
     `https://placehold.co/640x480.png?text=${encodeURIComponent(recipeLabel)}`
 
+  const getFeedbackMessage = (error: unknown) => {
+    if (error instanceof Error) {
+      return error.message
+    }
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message?: unknown }).message === "string"
+    ) {
+      return (error as { message: string }).message
+    }
+
+    return "We could not delete the recipe. Please try again."
+  }
+
   const handleDelete = async () => {
     if (!recipe.id) {
-      toast({
-        title: "Unable to delete recipe",
-        description: "The recipe is missing an identifier needed for deletion.",
-        variant: "destructive",
+      setDeleteFeedback({
+        kind: "error",
+        message:
+          "Unable to delete this recipe because it is missing the required identifier.",
       })
       return
     }
 
     setIsDeleting(true)
+    setDeleteFeedback({ kind: "info", message: "Deleting recipe..." })
 
     try {
       const supabase = createClient()
+
       const { error } = await supabase
         .from("recipes")
         .delete()
@@ -99,22 +121,13 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
         throw error
       }
 
-      toast({
-        title: "Recipe deleted",
-        description: `"${recipeLabel}" has been removed.`,
-      })
-
       router.push("/recipes")
       router.refresh()
     } catch (error) {
       console.error("Error deleting recipe:", error)
-      toast({
-        title: "Unable to delete recipe",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred while deleting the recipe.",
-        variant: "destructive",
+      setDeleteFeedback({
+        kind: "error",
+        message: getFeedbackMessage(error),
       })
     } finally {
       setIsDeleting(false)
@@ -215,7 +228,7 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
               asChild
               variant="outline"
               size="sm"
-              className="rounded-full"
+              className="rounded-full md:hidden"
             >
               <a href="#recipe-ingredients">Jump to ingredients</a>
             </Button>
@@ -223,7 +236,7 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
               asChild
               variant="outline"
               size="sm"
-              className="rounded-full"
+              className="rounded-full md:hidden"
             >
               <a href="#recipe-steps">Jump to steps</a>
             </Button>
@@ -281,6 +294,21 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
               </AlertDialog>
             ) : null}
           </div>
+          {deleteFeedback ? (
+            <Alert
+              variant={
+                deleteFeedback.kind === "error" ? "destructive" : "default"
+              }
+              role={deleteFeedback.kind === "error" ? "alert" : "status"}
+              aria-live={
+                deleteFeedback.kind === "error" ? "assertive" : "polite"
+              }
+              aria-atomic="true"
+              className="mt-3"
+            >
+              <AlertDescription>{deleteFeedback.message}</AlertDescription>
+            </Alert>
+          ) : null}
         </div>
 
         <div className="order-1 lg:order-2">

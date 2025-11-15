@@ -4,7 +4,6 @@ import { Metadata } from "next"
 import { Lexend_Deca, Manrope } from "next/font/google"
 import { AppProviders } from "@/context/root-providers"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { Toaster } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { Footer } from "@/components/footer"
@@ -76,7 +75,6 @@ export default async function RootLayout({
               {children}
             </main>
             <Footer />
-            <Toaster />
           </div>
           <ReactQueryDevtools />
         </AppProviders>
