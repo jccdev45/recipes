@@ -10,7 +10,13 @@ import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
 
 import { Recipe } from "@/lib/types"
-import { resolveStorageImageUrl, shimmer, toBase64 } from "@/lib/utils"
+import {
+  extractErrorMessage,
+  getDisplayDate,
+  resolveStorageImageUrl,
+  shimmer,
+  toBase64,
+} from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -48,24 +54,6 @@ interface RecipeDisplayProps {
   user: User | null
 }
 
-const formatDisplayDate = (input?: string | null) => {
-  if (!input) return null
-
-  const parsed = new Date(input)
-  if (Number.isNaN(parsed.getTime())) {
-    return null
-  }
-
-  return {
-    dateTime: parsed.toISOString(),
-    label: parsed.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-  }
-}
-
 const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
   const router = useRouter()
@@ -79,23 +67,6 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const imageUrl =
     resolvedImageUrl ||
     `https://placehold.co/640x480.png?text=${encodeURIComponent(recipeLabel)}`
-
-  const getFeedbackMessage = (error: unknown) => {
-    if (error instanceof Error) {
-      return error.message
-    }
-
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "message" in error &&
-      typeof (error as { message?: unknown }).message === "string"
-    ) {
-      return (error as { message: string }).message
-    }
-
-    return "We could not delete the recipe. Please try again."
-  }
 
   const handleDelete = async () => {
     if (!recipe.id) {
@@ -128,15 +99,18 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
       console.error("Error deleting recipe:", error)
       setDeleteFeedback({
         kind: "error",
-        message: getFeedbackMessage(error),
+        message: extractErrorMessage(
+          error,
+          "We could not delete the recipe. Please try again."
+        ),
       })
     } finally {
       setIsDeleting(false)
     }
   }
 
-  const createdAt = formatDisplayDate(recipe.created_at)
-  const updatedAt = formatDisplayDate(recipe.last_updated)
+  const createdAt = getDisplayDate(recipe.created_at)
+  const updatedAt = getDisplayDate(recipe.last_updated)
   const authorDisplayName = recipe.author || "Unknown author"
   const authorHref = isAuthor
     ? "/profile"

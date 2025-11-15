@@ -11,7 +11,7 @@ import { createClient } from "@/supabase/client"
 import { useQuery } from "@tanstack/react-query"
 import { useDebounceValue, useOnClickOutside } from "usehooks-ts"
 
-import { cn } from "@/lib/utils"
+import { cn, extractErrorMessage } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import {
   Command,
@@ -139,9 +139,10 @@ export function Searchbar({ className }: SearchbarProps) {
     if (isError) {
       return (
         <SearchMessage tone="error">
-          {error instanceof Error
-            ? error.message
-            : "Something went wrong while searching. Please try again."}
+          {extractErrorMessage(
+            error,
+            "Something went wrong while searching. Please try again."
+          )}
         </SearchMessage>
       )
     }

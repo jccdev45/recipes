@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 
-import { cn, toSlug } from "@/lib/utils"
+import { cn, extractErrorMessage, toSlug } from "@/lib/utils"
 import { RecipeFormSchema } from "@/lib/zod/schema"
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { useRecipes } from "@/hooks/useRecipes"
@@ -114,9 +114,10 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
         uniqueSlug = await ensureUniqueSlug(baseSlug)
       } catch (slugError) {
         setFormError(
-          slugError instanceof Error
-            ? slugError.message
-            : "We could not generate a URL for this recipe."
+          extractErrorMessage(
+            slugError,
+            "We could not generate a URL for this recipe."
+          )
         )
         return
       }
@@ -157,9 +158,10 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       } catch (error) {
         console.error("Error submitting recipe:", error)
         setFormError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while submitting the recipe."
+          extractErrorMessage(
+            error,
+            "An error occurred while submitting the recipe."
+          )
         )
       }
     },

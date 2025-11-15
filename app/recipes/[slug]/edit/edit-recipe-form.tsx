@@ -6,7 +6,7 @@ import { getRecipeBySlug } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 
-import { cn, genId, toSlug } from "@/lib/utils"
+import { cn, extractErrorMessage, genId, toSlug } from "@/lib/utils"
 import { RecipeFormSchema } from "@/lib/zod/schema"
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { useRecipes } from "@/hooks/useRecipes"
@@ -339,9 +339,10 @@ function EditRecipeFormInner({
         nextSlug = await ensureUniqueSlug(baseSlug)
       } catch (slugError) {
         setFormError(
-          slugError instanceof Error
-            ? slugError.message
-            : "We could not generate a URL for this recipe."
+          extractErrorMessage(
+            slugError,
+            "We could not generate a URL for this recipe."
+          )
         )
         return
       }
@@ -383,9 +384,10 @@ function EditRecipeFormInner({
       } catch (error) {
         console.error("Error updating recipe:", error)
         setFormError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while saving the recipe."
+          extractErrorMessage(
+            error,
+            "An error occurred while saving the recipe."
+          )
         )
       }
     },

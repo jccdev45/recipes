@@ -14,6 +14,7 @@ import {
   UserCircle,
 } from "lucide-react"
 
+import { formatDateLabel } from "@/lib/utils"
 import { useCurrentUserName } from "@/hooks/use-current-user-name"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,23 +27,6 @@ import { RecipeCard } from "@/app/recipes/recipe-card"
 import type { UserWithRecipes } from "@/lib/types"
 import type { User } from "@supabase/supabase-js"
 import type { LucideIcon } from "lucide-react"
-
-const formatDate = (value?: string | null) => {
-  if (!value) {
-    return "Not available"
-  }
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return "Not available"
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
 
 const createDisplayName = (
   profileUser: Pick<UserWithRecipes, "first_name" | "last_name">
@@ -153,12 +137,12 @@ const ProfileStats = ({
     <ProfileStat
       icon={CalendarDays}
       label="Member since"
-      value={formatDate(createdAt)}
+      value={formatDateLabel(createdAt) ?? "Not available"}
     />
     <ProfileStat
       icon={Clock}
       label="Last updated"
-      value={formatDate(lastUpdated)}
+      value={formatDateLabel(lastUpdated) ?? "Not available"}
     />
   </dl>
 )
@@ -193,8 +177,14 @@ const ProfileStat = ({
 const AccountDetailsCard = ({ user }: { user: User }) => {
   const accountDetails = [
     { term: "Email", description: user.email ?? "Not available" },
-    { term: "Joined", description: formatDate(user.created_at) },
-    { term: "Last login", description: formatDate(user.last_sign_in_at) },
+    {
+      term: "Joined",
+      description: formatDateLabel(user.created_at) ?? "Not available",
+    },
+    {
+      term: "Last login",
+      description: formatDateLabel(user.last_sign_in_at) ?? "Not available",
+    },
   ]
 
   return (

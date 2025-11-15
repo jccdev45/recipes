@@ -194,3 +194,66 @@ export function resolveStorageImageUrl(
 
   return `${SUPABASE_URL}${STORAGE_URL}${normalized}`
 }
+
+const READABLE_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+}
+
+export type DisplayDate = {
+  dateTime: string
+  label: string
+}
+
+export function getDisplayDate(
+  input?: string | null,
+  options: Intl.DateTimeFormatOptions = READABLE_DATE_FORMAT
+): DisplayDate | null {
+  if (!input) {
+    return null
+  }
+
+  const parsed = new Date(input)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return {
+    dateTime: parsed.toISOString(),
+    label: parsed.toLocaleDateString(undefined, options),
+  }
+}
+
+export function formatDateLabel(
+  input?: string | null,
+  fallback: string | null = "Not available",
+  options: Intl.DateTimeFormatOptions = READABLE_DATE_FORMAT
+): string | null {
+  const displayDate = getDisplayDate(input, options)
+  return displayDate?.label ?? fallback
+}
+
+export function extractErrorMessage(
+  error: unknown,
+  fallbackMessage = "An unexpected error occurred."
+): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    const derived = (error as { message: string }).message.trim()
+    if (derived) {
+      return derived
+    }
+  }
+
+  return fallbackMessage
+}

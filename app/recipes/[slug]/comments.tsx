@@ -13,7 +13,12 @@ import {
 import { useForm } from "@tanstack/react-form"
 import { MessageCircle } from "lucide-react"
 
-import { cn, resolveStorageImageUrl } from "@/lib/utils"
+import {
+  cn,
+  extractErrorMessage,
+  getDisplayDate,
+  resolveStorageImageUrl,
+} from "@/lib/utils"
 import { CommentSchema } from "@/lib/zod/schema"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -58,23 +63,6 @@ type CommentsSectionProps = {
 
 const COMMENT_SELECTION =
   "id, recipe_id, user_id, author, avatar_url, message, likes, liked_by, created_at"
-
-const getFeedbackMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
-  ) {
-    return (error as { message: string }).message
-  }
-
-  return "Something went wrong. Please try again."
-}
 
 export function CommentsSection({
   className,
@@ -153,7 +141,10 @@ export function CommentsSection({
         console.error("Error posting comment:", mutationError)
         setCommentsFeedback({
           type: "error",
-          message: getFeedbackMessage(mutationError),
+          message: extractErrorMessage(
+            mutationError,
+            "Something went wrong. Please try again."
+          ),
         })
       }
     },
@@ -232,7 +223,10 @@ export function CommentsSection({
       console.error("Error deleting comment:", mutationError)
       setCommentsFeedback({
         type: "error",
-        message: getFeedbackMessage(mutationError),
+        message: extractErrorMessage(
+          mutationError,
+          "Something went wrong. Please try again."
+        ),
       })
     }
   }
@@ -427,17 +421,7 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
 
   const avatarEmail = isAuthorEmail ? trimmedAuthor : undefined
 
-  const createdDate = new Date(created_at)
-  const isoCreatedAt = Number.isNaN(createdDate.getTime())
-    ? undefined
-    : createdDate.toISOString()
-  const formattedDate = isoCreatedAt
-    ? createdDate.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "Date unavailable"
+  const displayDate = getDisplayDate(created_at)
 
   const authorHref = user_id ? `/profile/${user_id}` : undefined
   const canDelete = currentUser?.id === user_id
@@ -466,12 +450,12 @@ function CommentItem({ comment, currentUser, onDelete }: CommentProps) {
             ) : (
               <span className="text-foreground font-semibold">{author}</span>
             )}
-            {isoCreatedAt ? (
+            {displayDate ? (
               <time
-                dateTime={isoCreatedAt}
+                dateTime={displayDate.dateTime}
                 className="text-muted-foreground text-xs"
               >
-                {formattedDate}
+                {displayDate.label}
               </time>
             ) : null}
           </div>

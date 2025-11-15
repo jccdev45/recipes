@@ -3,6 +3,7 @@ import { getRecipeBySlug, getRecipeMeta } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 import { CheckCircle2 } from "lucide-react"
 
+import { formatDateLabel } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
@@ -72,13 +73,7 @@ export default async function EditRecipePage(props: EditRecipePageProps) {
     redirect(`/recipes/${slug}`)
   }
 
-  const updatedAtLabel = recipe.last_updated
-    ? new Date(recipe.last_updated).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null
+  const updatedAtLabel = formatDateLabel(recipe.last_updated, null)
 
   return (
     <>
