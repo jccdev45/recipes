@@ -11,6 +11,7 @@ import {
   useQuery,
 } from "@supabase-cache-helpers/postgrest-react-query"
 import { useForm } from "@tanstack/react-form"
+import { MessageCircle } from "lucide-react"
 
 import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { CommentSchema } from "@/lib/zod/schema"
@@ -38,6 +39,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
+import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { UserAvatar } from "@/components/user-avatar"
 
 import type {
@@ -87,57 +89,7 @@ export function CommentsSection({
     getRecipeWithComments(supabase, slug)
   )
 
-  if (isLoading) {
-    return (
-      <section
-        className={cn(
-          "border-border/60 bg-background/80 flex min-h-[200px] items-center justify-center rounded-xl border",
-          className
-        )}
-        aria-label="Comments loading"
-      >
-        <Spinner size="lg" icon="pinwheel" />
-        <span className="sr-only">Loading comments</span>
-      </section>
-    )
-  }
-
-  if (error) {
-    return (
-      <section
-        className={cn(
-          "border-destructive/40 bg-destructive/10 rounded-xl border p-6",
-          className
-        )}
-      >
-        <Typography variant="error">
-          There was an error displaying comments: {error.message}
-        </Typography>
-      </section>
-    )
-  }
-
   const recipe = (data ?? null) as RecipeWithComments | null
-
-  if (!recipe) {
-    return (
-      <section
-        className={cn(
-          "border-border/60 bg-muted/20 rounded-xl border p-6",
-          className
-        )}
-      >
-        <Typography variant="error">
-          An unexpected error has occurred, try refreshing the page.
-        </Typography>
-      </section>
-    )
-  }
-
-  const comments = (recipe.comments ?? []) as CommentType[]
-  const commentCount = comments.length
-  const commentCountLabel =
-    commentCount === 1 ? "1 comment" : `${commentCount} comments`
 
   const { mutateAsync: insertCommentMutation } = useInsertMutation(
     supabase.from("comments"),
@@ -150,30 +102,6 @@ export function CommentsSection({
     ["id"],
     "*"
   )
-
-  const handleDeleteComment = async (commentId: CommentType["id"]) => {
-    if (!commentId) {
-      setCommentsFeedback({
-        type: "error",
-        message:
-          "Unable to delete this comment because it is missing the required identifier.",
-      })
-      return
-    }
-
-    try {
-      setCommentsFeedback({ type: "info", message: "Deleting comment..." })
-      await deleteCommentMutation({ id: commentId })
-      router.refresh()
-      setCommentsFeedback({ type: "success", message: "Comment removed." })
-    } catch (mutationError) {
-      console.error("Error deleting comment:", mutationError)
-      setCommentsFeedback({
-        type: "error",
-        message: getFeedbackMessage(mutationError),
-      })
-    }
-  }
 
   const form = useForm({
     defaultValues: {
@@ -188,6 +116,14 @@ export function CommentsSection({
         setCommentsFeedback({
           type: "error",
           message: "Please sign in before leaving a comment.",
+        })
+        return
+      }
+
+      if (!recipe?.id) {
+        setCommentsFeedback({
+          type: "error",
+          message: "Recipe context is missing. Refresh and try again.",
         })
         return
       }
@@ -218,6 +154,80 @@ export function CommentsSection({
       }
     },
   })
+
+  if (isLoading) {
+    return (
+      <section
+        className={cn(
+          "border-border/60 bg-background/80 flex min-h-[200px] items-center justify-center rounded-xl border",
+          className
+        )}
+        aria-label="Comments loading"
+      >
+        <Spinner size="lg" icon="pinwheel" />
+        <span className="sr-only">Loading comments</span>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section
+        className={cn(
+          "border-destructive/40 bg-destructive/10 rounded-xl border p-6",
+          className
+        )}
+      >
+        <Typography variant="error">
+          There was an error displaying comments: {error.message}
+        </Typography>
+      </section>
+    )
+  }
+
+  if (!recipe) {
+    return (
+      <section
+        className={cn(
+          "border-border/60 bg-muted/20 rounded-xl border p-6",
+          className
+        )}
+      >
+        <Typography variant="error">
+          An unexpected error has occurred, try refreshing the page.
+        </Typography>
+      </section>
+    )
+  }
+
+  const comments = (recipe.comments ?? []) as CommentType[]
+  const commentCount = comments.length
+  const commentCountLabel =
+    commentCount === 1 ? "1 comment" : `${commentCount} comments`
+
+  const handleDeleteComment = async (commentId: CommentType["id"]) => {
+    if (!commentId) {
+      setCommentsFeedback({
+        type: "error",
+        message:
+          "Unable to delete this comment because it is missing the required identifier.",
+      })
+      return
+    }
+
+    try {
+      setCommentsFeedback({ type: "info", message: "Deleting comment..." })
+      await deleteCommentMutation({ id: commentId })
+      router.refresh()
+      setCommentsFeedback({ type: "success", message: "Comment removed." })
+    } catch (mutationError) {
+      console.error("Error deleting comment:", mutationError)
+      setCommentsFeedback({
+        type: "error",
+        message: getFeedbackMessage(mutationError),
+      })
+    }
+  }
 
   return (
     <section
@@ -348,9 +358,16 @@ export function CommentsSection({
               ))}
             </ul>
           ) : (
-            <div className="border-border/70 bg-muted/20 text-muted-foreground rounded-lg border border-dashed px-6 py-12 text-center text-sm">
-              No comments yet. Be the first to share your thoughts.
-            </div>
+            <EmptyStateDisplay
+              className="border-border/70 bg-muted/20 text-muted-foreground rounded-lg border border-dashed px-6 py-12 text-center"
+              icon={<MessageCircle className="h-6 w-6" aria-hidden="true" />}
+              title="No comments yet"
+              description={
+                currentUser
+                  ? "Be the first to share your thoughts."
+                  : "Sign in to leave a comment and start the conversation."
+              }
+            />
           )}
         </ScrollArea>
       </div>

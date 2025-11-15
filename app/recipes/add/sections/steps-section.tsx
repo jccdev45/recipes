@@ -11,20 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import {
   FieldDescription,
   FieldError,
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { FormInfoAlert } from "@/components/form-info-alert"
 
 import {
@@ -163,27 +156,20 @@ export const StepsSection = withAddRecipeForm({
                   ) : null}
 
                   {stepsField.state.value.length === 0 ? (
-                    <Empty
+                    <EmptyStateDisplay
                       aria-live="polite"
                       className="border-border/50 bg-muted/30 border"
+                      icon={
+                        <ListOrdered aria-hidden="true" className="h-5 w-5" />
+                      }
+                      title="No steps yet"
+                      description='Add each instruction using the field above, then choose "Add step" to build your recipe.'
                     >
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <ListOrdered aria-hidden="true" className="h-5 w-5" />
-                        </EmptyMedia>
-                        <EmptyTitle>No steps yet</EmptyTitle>
-                        <EmptyDescription>
-                          Add each instruction using the field above, then
-                          choose "Add step" to build your recipe.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                      <EmptyContent>
-                        <span className="text-muted-foreground text-sm">
-                          Your steps appear below once saved so you can edit or
-                          remove them with the inline controls.
-                        </span>
-                      </EmptyContent>
-                    </Empty>
+                      <span className="text-muted-foreground text-sm">
+                        Your steps appear below once saved so you can edit or
+                        remove them with the inline controls.
+                      </span>
+                    </EmptyStateDisplay>
                   ) : (
                     <ol
                       className="list-decimal space-y-3 pl-6"

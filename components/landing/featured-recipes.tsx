@@ -1,12 +1,7 @@
 import { Fragment, ReactNode } from "react"
 import { Bean, Drumstick, LucideIcon, Sprout } from "lucide-react"
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
+import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { FeaturedRecipeCard } from "@/components/landing/featured-recipe-card"
 import { getUser } from "@/app/(auth)/actions"
 
@@ -21,14 +16,11 @@ export async function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
 
   if (!recipes.length) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No featured recipes yet</EmptyTitle>
-          <EmptyDescription>
-            Add a new recipe to highlight it on the home page.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <EmptyStateDisplay
+        icon={<Sprout className="h-6 w-6" aria-hidden="true" />}
+        title="No featured recipes yet"
+        description="Add a new recipe to highlight it on the home page."
+      />
     )
   }
 

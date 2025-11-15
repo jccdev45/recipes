@@ -18,14 +18,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import {
   FieldDescription,
   FieldError,
   FieldLegend,
@@ -38,6 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { FormInfoAlert } from "@/components/form-info-alert"
 import {
   Tags,
@@ -264,27 +257,18 @@ export const TagsSection = withAddRecipeForm({
                   ) : null}
 
                   {tagsField.state.value.length === 0 ? (
-                    <Empty
+                    <EmptyStateDisplay
                       aria-live="polite"
                       className="border-border/50 bg-muted/30 border"
+                      icon={<TagIcon aria-hidden="true" className="h-5 w-5" />}
+                      title="No tags yet"
+                      description={`Add tags using the field above, then choose "Add tag" so cooks can find your recipe faster.`}
                     >
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <TagIcon aria-hidden="true" className="h-5 w-5" />
-                        </EmptyMedia>
-                        <EmptyTitle>No tags yet</EmptyTitle>
-                        <EmptyDescription>
-                          Add tags using the field above, then choose "Add tag"
-                          so cooks can find your recipe faster.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                      <EmptyContent>
-                        <span className="text-muted-foreground text-sm">
-                          Suggested tags stay available, and saved tags appear
-                          here for quick inline editing or removal.
-                        </span>
-                      </EmptyContent>
-                    </Empty>
+                      <span className="text-muted-foreground text-sm">
+                        Suggested tags stay available, and saved tags appear
+                        here for quick inline editing or removal.
+                      </span>
+                    </EmptyStateDisplay>
                   ) : (
                     <div
                       className="flex flex-wrap gap-3"

@@ -12,14 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import {
   FieldDescription,
   FieldError,
   FieldLegend,
@@ -27,6 +19,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { FormInfoAlert } from "@/components/form-info-alert"
 import {
   Tags,
@@ -368,27 +361,18 @@ export const IngredientsSection = withAddRecipeForm({
                   ) : null}
 
                   {ingredientsField.state.value.length === 0 ? (
-                    <Empty
+                    <EmptyStateDisplay
                       aria-live="polite"
                       className="border-border/50 bg-muted/30 border"
+                      icon={<Beef aria-hidden="true" className="h-5 w-5" />}
+                      title="No ingredients yet"
+                      description="Add the amount, unit, and ingredient name, then choose “Add ingredient” to build your list."
                     >
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <Beef aria-hidden="true" className="h-5 w-5" />
-                        </EmptyMedia>
-                        <EmptyTitle>No ingredients yet</EmptyTitle>
-                        <EmptyDescription>
-                          Add the amount, unit, and ingredient name, then choose
-                          “Add ingredient” to build your list.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                      <EmptyContent>
-                        <span className="text-muted-foreground text-sm">
-                          The form fields above stay focused so you can quickly
-                          add each ingredient.
-                        </span>
-                      </EmptyContent>
-                    </Empty>
+                      <span className="text-muted-foreground text-sm">
+                        The form fields above stay focused so you can quickly
+                        add each ingredient.
+                      </span>
+                    </EmptyStateDisplay>
                   ) : (
                     <ul className="space-y-3" aria-live="polite">
                       {ingredientsField.state.value.map((ingredient, index) => {
