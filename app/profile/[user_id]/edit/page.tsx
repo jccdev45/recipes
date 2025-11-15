@@ -17,11 +17,54 @@ import { getUser } from "@/app/(auth)/actions"
 
 import type { Metadata } from "next"
 
-// TODO: Convert to generateMetadata for dynamic data
-export const metadata: Metadata = {
-  title: "Edit Profile",
-  description:
-    "Update your Family Recipes profile information and preferences.",
+export async function generateMetadata({
+  params,
+}: {
+  params: { user_id: string }
+}): Promise<Metadata> {
+  const { user_id } = params
+
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", user_id)
+      .single()
+
+    const fullName = [data?.first_name, data?.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim()
+    const readableName = fullName.length > 0 ? fullName : null
+    const title = readableName
+      ? `Edit ${readableName}'s profile`
+      : "Edit Profile"
+    const description = readableName
+      ? `Update ${readableName}'s Family Recipes profile information and preferences.`
+      : "Update your Family Recipes profile information and preferences."
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+      },
+      twitter: {
+        title,
+        description,
+        card: "summary",
+      },
+    }
+  } catch (error) {
+    console.error("Error generating profile edit metadata", error)
+    return {
+      title: "Edit Profile",
+      description:
+        "Update your Family Recipes profile information and preferences.",
+    }
+  }
 }
 
 const profileChecklist = [

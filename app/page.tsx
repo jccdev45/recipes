@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { getLandingHighlights } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/server"
 
@@ -8,6 +9,44 @@ import { FeatureSection } from "@/components/landing/feature-section"
 import { FeaturedRecipes } from "@/components/landing/featured-recipes"
 import { StatsSection } from "@/components/landing/stats-section"
 import { TestimonialsSection } from "@/components/landing/testimonials-section"
+
+export const metadata: Metadata = {
+  title: "Family Recipes | Cook Together",
+  description:
+    "Discover and share beloved family recipes, spotlight featured dishes, and keep treasured flavors alive.",
+  keywords: [
+    "family recipes",
+    "puerto rican cooking",
+    "community cookbook",
+    "share recipes",
+    "home cooking",
+  ],
+  openGraph: {
+    title: "Family Recipes",
+    description:
+      "Cook, collect, and celebrate the meals that tell your story. Explore featured dishes and community stats.",
+    url: "https://family-recipes-v2.vercel.app",
+    type: "website",
+    images: [
+      {
+        url: "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/export-7lFgmfoeSrP3pTNiP1GZVo0nf7S0ov.png",
+        width: 1200,
+        height: 630,
+        alt: "Family Recipes hero preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Family Recipes",
+    description:
+      "Discover and share beloved recipes passed down through generations.",
+    creator: "@jccdev",
+    images: [
+      "https://nbwdildsbmoetwhe.public.blob.vercel-storage.com/export-7lFgmfoeSrP3pTNiP1GZVo0nf7S0ov.png",
+    ],
+  },
+}
 
 const numberFormatter = new Intl.NumberFormat()
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import Link from "next/link"
 import { User } from "@supabase/supabase-js"
 import { SlidersHorizontal } from "lucide-react"
 
@@ -56,16 +57,49 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
     )
   }
 
+  const normalizedSearchTerm = searchTerm?.trim().toLowerCase() ?? ""
+  const hasSearchTerm = normalizedSearchTerm.length > 0
+
+  const searchScopedRecipes = useMemo(() => {
+    if (!hasSearchTerm) {
+      return recipes
+    }
+
+    const matchesSearch = (value?: string | null) =>
+      typeof value === "string" &&
+      value.toLowerCase().includes(normalizedSearchTerm)
+
+    return recipes.filter((recipe) => {
+      if (matchesSearch(recipe.recipe_name)) return true
+      if (matchesSearch(recipe.author)) return true
+      if (matchesSearch(recipe.quote ?? "")) return true
+
+      const tagMatch = recipe.tags.some((recipeTag) =>
+        matchesSearch(recipeTag.tag)
+      )
+
+      if (tagMatch) return true
+
+      const ingredientMatch = recipe.ingredients.some((recipeIngredient) =>
+        matchesSearch(recipeIngredient.ingredient)
+      )
+
+      if (ingredientMatch) return true
+
+      return recipe.steps?.some((step) => matchesSearch(step.step)) ?? false
+    })
+  }, [recipes, hasSearchTerm, normalizedSearchTerm])
+
   const filteredRecipes = useMemo(() => {
     const hasAuthorFilters = selectedAuthors.length > 0
     const hasTagFilters = selectedTags.length > 0
     const hasIngredientFilters = selectedIngredients.length > 0
 
     if (!hasAuthorFilters && !hasTagFilters && !hasIngredientFilters) {
-      return recipes
+      return searchScopedRecipes
     }
 
-    return recipes.filter((recipe) => {
+    return searchScopedRecipes.filter((recipe) => {
       const matchesAuthor =
         hasAuthorFilters &&
         recipe.author !== undefined &&
@@ -87,21 +121,39 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
 
       return matchesAuthor || matchesTag || matchesIngredient
     })
-  }, [recipes, selectedAuthors, selectedTags, selectedIngredients])
+  }, [searchScopedRecipes, selectedAuthors, selectedTags, selectedIngredients])
 
   const hasActiveFilters = appliedFilterCount > 0
-  const displayRecipes = hasActiveFilters ? filteredRecipes : recipes
-  const totalRecipes = recipes.length
+  const displayRecipes = hasActiveFilters
+    ? filteredRecipes
+    : searchScopedRecipes
+  const totalRecipes = searchScopedRecipes.length
   const visibleRecipes = displayRecipes.length
-  const noResults = hasActiveFilters && filteredRecipes.length === 0
+  const searchReturnsEmpty = hasSearchTerm && totalRecipes === 0
+  const filterReturnsEmpty =
+    !searchReturnsEmpty && hasActiveFilters && visibleRecipes === 0
   const isCompactLayout = displayMode === "compact"
   const summaryMessage = (() => {
+    if (searchReturnsEmpty) {
+      return searchTerm
+        ? `No recipes matched “${searchTerm}”.`
+        : "No recipes matched your search."
+    }
+
     if (totalRecipes === 0) {
       return "No recipes to show yet. Check back soon or add your first recipe."
     }
 
-    if (noResults) {
+    if (filterReturnsEmpty) {
       return "No recipes match your current filters."
+    }
+
+    if (hasSearchTerm && hasActiveFilters) {
+      return `Showing ${visibleRecipes} of ${totalRecipes} recipes matching “${searchTerm}”.`
+    }
+
+    if (hasSearchTerm) {
+      return `Showing ${visibleRecipes} recipes matching “${searchTerm}”.`
     }
 
     if (hasActiveFilters) {
@@ -155,7 +207,22 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
           </div>
         </header>
 
-        {noResults ? (
+        {searchReturnsEmpty ? (
+          <Alert>
+            <AlertTitle>No recipes found</AlertTitle>
+            <AlertDescription>
+              {searchTerm
+                ? `No recipes matched “${searchTerm}”. Try another keyword or explore all dishes.`
+                : "No recipes matched your search. Try different keywords."}
+            </AlertDescription>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button asChild variant="outline" size="sm">
+                <Link href="/recipes">Clear search</Link>
+              </Button>
+              <FilterSidebarTrigger />
+            </div>
+          </Alert>
+        ) : filterReturnsEmpty ? (
           <Alert>
             <AlertTitle>No matches found</AlertTitle>
             <AlertDescription>

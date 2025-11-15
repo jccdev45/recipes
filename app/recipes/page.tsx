@@ -21,18 +21,56 @@ import { RecipeList } from "@/app/recipes/recipe-list"
 
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Recipes",
-  description:
-    "Browse our collection of delicious family recipes, from appetizers to drinks to desserts.",
+type SearchParamValue = string | string[] | undefined
+type RecipesSearchParams =
+  | Promise<{ [key: string]: SearchParamValue }>
+  | { [key: string]: SearchParamValue }
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: RecipesSearchParams
+}): Promise<Metadata> {
+  const resolvedParams =
+    (searchParams instanceof Promise ? await searchParams : searchParams) ?? {}
+  const rawSearch = resolvedParams.search
+  const searchValue = Array.isArray(rawSearch) ? rawSearch[0] : rawSearch
+  const search = searchValue?.trim()
+  const hasSearch = Boolean(search)
+  const baseTitle = "Recipes"
+  const title = hasSearch ? `Results for “${search}”` : baseTitle
+  const description = hasSearch
+    ? `Browse family recipes, tags, and ingredients that mention “${search}”.`
+    : "Browse our collection of delicious family recipes, from appetizers to drinks to desserts."
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+    twitter: {
+      title,
+      description,
+      card: "summary_large_image",
+    },
+  }
 }
 
-export default async function RecipesPage(props: {
-  searchParams?: Promise<{ [key: string]: string | undefined }>
-}) {
+type RecipesPageProps = {
+  searchParams?: RecipesSearchParams
+}
+
+export default async function RecipesPage(props: RecipesPageProps) {
   const { user } = await getUser()
-  const searchParams = await props.searchParams
-  const search = searchParams?.search
+  const resolvedSearchParams =
+    (props.searchParams instanceof Promise
+      ? await props.searchParams
+      : props.searchParams) ?? {}
+  const rawSearch = resolvedSearchParams?.search
+  const searchValue = Array.isArray(rawSearch) ? rawSearch[0] : rawSearch
+  const search = searchValue?.trim() ? searchValue.trim() : undefined
 
   const queryClient = new QueryClient()
   const supabase = await createClient()
