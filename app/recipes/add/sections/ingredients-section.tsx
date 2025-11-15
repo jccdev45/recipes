@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useId, useRef, useState } from "react"
 import { Beef, Check, PencilLine, Plus, X as XIcon } from "lucide-react"
 
 import { maxAmount, minAmount } from "@/lib/constants"
@@ -26,6 +26,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { FormInfoAlert } from "@/components/form-info-alert"
 import {
   Tags,
@@ -69,6 +70,10 @@ export const IngredientsSection = withAddRecipeForm({
       ingredient: string
     } | null>(null)
     const [unitSuggestionsOpen, setUnitSuggestionsOpen] = useState(false)
+
+    const amountInputId = useId()
+    const unitSelectId = useId()
+    const ingredientInputId = useId()
 
     const amountInputRef = useRef<HTMLInputElement>(null)
     const unitInputRef = useRef<HTMLInputElement>(null)
@@ -229,107 +234,117 @@ export const IngredientsSection = withAddRecipeForm({
                   </FieldDescription>
 
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,2fr)_auto]">
-                    <Input
-                      ref={amountInputRef}
-                      type="number"
-                      inputMode="decimal"
-                      min={minAmount}
-                      max={maxAmount}
-                      step="0.1"
-                      value={pendingIngredient.amount}
-                      onChange={(event) =>
-                        setPendingIngredient((previous) => ({
-                          ...previous,
-                          amount: event.target.value,
-                        }))
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault()
-                          unitInputRef.current?.focus()
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={amountInputId}>Amount</Label>
+                      <Input
+                        id={amountInputId}
+                        ref={amountInputRef}
+                        type="number"
+                        inputMode="decimal"
+                        min={minAmount}
+                        max={maxAmount}
+                        step="0.1"
+                        value={pendingIngredient.amount}
+                        onChange={(event) =>
+                          setPendingIngredient((previous) => ({
+                            ...previous,
+                            amount: event.target.value,
+                          }))
                         }
-                      }}
-                      placeholder="Amount"
-                      aria-label="Ingredient amount"
-                    />
-                    <Tags
-                      className="sm:max-w-xs"
-                      open={unitSuggestionsOpen}
-                      onOpenChange={setUnitSuggestionsOpen}
-                    >
-                      <TagsTrigger
-                        placeholder="Browse units"
-                        aria-label="Browse units"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault()
+                            unitInputRef.current?.focus()
+                          }
+                        }}
+                        placeholder="Amount"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={unitSelectId}>Unit</Label>
+                      <Tags
+                        className="sm:max-w-xs"
+                        open={unitSuggestionsOpen}
+                        onOpenChange={setUnitSuggestionsOpen}
                       >
-                        {pendingIngredient.unitMeasurement ? (
-                          <TagsValue
-                            onRemove={() =>
-                              setPendingIngredient((previous) => ({
-                                ...previous,
-                                unitMeasurement: "",
-                              }))
-                            }
-                            aria-label={`Clear selected unit ${pendingIngredient.unitMeasurement}`}
-                          >
-                            {pendingIngredient.unitMeasurement}
-                          </TagsValue>
-                        ) : null}
-                      </TagsTrigger>
-                      <TagsContent align="start">
-                        <TagsInput placeholder="Search units..." />
-                        <TagsList>
-                          <TagsEmpty>No units found.</TagsEmpty>
-                          <TagsGroup>
-                            {normalizedUnits?.length &&
-                              normalizedUnits.map((unit) => {
-                                const displayUnit = unit.trim()
-                                const isSelected =
-                                  pendingIngredient.unitMeasurement.toLowerCase() ===
-                                  displayUnit.toLowerCase()
+                        <TagsTrigger
+                          id={unitSelectId}
+                          placeholder="Browse units"
+                          aria-label="Browse units"
+                        >
+                          {pendingIngredient.unitMeasurement ? (
+                            <TagsValue
+                              onRemove={() =>
+                                setPendingIngredient((previous) => ({
+                                  ...previous,
+                                  unitMeasurement: "",
+                                }))
+                              }
+                              aria-label={`Clear selected unit ${pendingIngredient.unitMeasurement}`}
+                            >
+                              {pendingIngredient.unitMeasurement}
+                            </TagsValue>
+                          ) : null}
+                        </TagsTrigger>
+                        <TagsContent align="start">
+                          <TagsInput placeholder="Search units..." />
+                          <TagsList>
+                            <TagsEmpty>No units found.</TagsEmpty>
+                            <TagsGroup>
+                              {normalizedUnits?.length &&
+                                normalizedUnits.map((unit) => {
+                                  const displayUnit = unit.trim()
+                                  const isSelected =
+                                    pendingIngredient.unitMeasurement.toLowerCase() ===
+                                    displayUnit.toLowerCase()
 
-                                return (
-                                  <TagsItem
-                                    key={displayUnit}
-                                    value={displayUnit}
-                                    onSelect={() => {
-                                      setPendingIngredient((previous) => ({
-                                        ...previous,
-                                        unitMeasurement: displayUnit,
-                                      }))
-                                      setIngredientHelper(null)
-                                      setUnitSuggestionsOpen(false)
-                                      ingredientInputRef.current?.focus()
-                                    }}
-                                    aria-selected={isSelected}
-                                    aria-checked={isSelected}
-                                  >
-                                    <span>{displayUnit}</span>
-                                    {isSelected ? (
-                                      <Check
-                                        aria-hidden="true"
-                                        className="text-primary ml-2 h-4 w-4"
-                                      />
-                                    ) : null}
-                                  </TagsItem>
-                                )
-                              })}
-                          </TagsGroup>
-                        </TagsList>
-                      </TagsContent>
-                    </Tags>
-                    <Input
-                      ref={ingredientInputRef}
-                      value={pendingIngredient.ingredient}
-                      onChange={(event) =>
-                        setPendingIngredient((previous) => ({
-                          ...previous,
-                          ingredient: event.target.value,
-                        }))
-                      }
-                      onKeyDown={handleIngredientKeyDown}
-                      placeholder="Ingredient name"
-                      aria-label="Ingredient name"
-                    />
+                                  return (
+                                    <TagsItem
+                                      key={displayUnit}
+                                      value={displayUnit}
+                                      onSelect={() => {
+                                        setPendingIngredient((previous) => ({
+                                          ...previous,
+                                          unitMeasurement: displayUnit,
+                                        }))
+                                        setIngredientHelper(null)
+                                        setUnitSuggestionsOpen(false)
+                                        ingredientInputRef.current?.focus()
+                                      }}
+                                      aria-selected={isSelected}
+                                      aria-checked={isSelected}
+                                    >
+                                      <span>{displayUnit}</span>
+                                      {isSelected ? (
+                                        <Check
+                                          aria-hidden="true"
+                                          className="text-primary ml-2 h-4 w-4"
+                                        />
+                                      ) : null}
+                                    </TagsItem>
+                                  )
+                                })}
+                            </TagsGroup>
+                          </TagsList>
+                        </TagsContent>
+                      </Tags>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor={ingredientInputId}>Ingredient</Label>
+                      <Input
+                        id={ingredientInputId}
+                        ref={ingredientInputRef}
+                        value={pendingIngredient.ingredient}
+                        onChange={(event) =>
+                          setPendingIngredient((previous) => ({
+                            ...previous,
+                            ingredient: event.target.value,
+                          }))
+                        }
+                        onKeyDown={handleIngredientKeyDown}
+                        placeholder="Ingredient name"
+                      />
+                    </div>
                     <Button
                       type="button"
                       onClick={handleAddIngredient}

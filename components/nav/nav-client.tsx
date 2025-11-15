@@ -91,6 +91,7 @@ function DesktopNav({ links }: { links: NavLink[] }) {
               <Link
                 href={href}
                 data-active={isActive(href)}
+                aria-current={isActive(href) ? "page" : undefined}
                 className="text-foreground/80 hover:text-primary focus-visible:ring-ring data-[active=true]:text-primary rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 {label}
@@ -201,6 +202,16 @@ function LogoutButton() {
 }
 
 function MobileMenu({ navLinks, user }: NavClientProps) {
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === href
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -229,6 +240,7 @@ function MobileMenu({ navLinks, user }: NavClientProps) {
               key={href}
               href={href}
               className="text-foreground/80 hover:text-primary focus-visible:ring-ring text-left text-base font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              aria-current={isActive(href) ? "page" : undefined}
             >
               {label}
             </Link>

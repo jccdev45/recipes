@@ -30,6 +30,7 @@ type SearchbarProps = {
 
 const SEARCH_RESULTS_LIMIT = 8
 const SEARCH_INPUT_ID = "recipe-search-input"
+const SEARCH_INPUT_LABEL_ID = `${SEARCH_INPUT_ID}-label`
 const SEARCH_RESULTS_ID = "recipe-search-results"
 
 const getTagPreview = (tags: RecipeSearchResult["tags"]) =>
@@ -224,6 +225,13 @@ export function Searchbar({ className }: SearchbarProps) {
       className={cn("relative w-full", className)}
       role="search"
     >
+      <label
+        htmlFor={SEARCH_INPUT_ID}
+        id={SEARCH_INPUT_LABEL_ID}
+        className="sr-only"
+      >
+        Search recipes
+      </label>
       <Command
         shouldFilter={false}
         className="bg-background overflow-visible rounded-lg md:border-0"
@@ -245,6 +253,7 @@ export function Searchbar({ className }: SearchbarProps) {
           placeholder="Search recipes, ingredients, or authors"
           aria-expanded={open}
           aria-controls={SEARCH_RESULTS_ID}
+          aria-labelledby={SEARCH_INPUT_LABEL_ID}
           aria-autocomplete="list"
           autoComplete="off"
         />

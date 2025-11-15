@@ -68,10 +68,19 @@ export default async function RootLayout({
           manrope.variable
         )}
       >
+        <a
+          href="#main-content"
+          className="focus-visible:bg-primary focus-visible:text-primary-foreground sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:px-4 focus-visible:py-2"
+        >
+          Skip to main content
+        </a>
         <AppProviders>
           <div className="mx-auto flex min-h-screen max-w-(--breakpoint-lg) flex-col items-center justify-between gap-y-4 xl:max-w-(--breakpoint-xl)">
             <Nav />
-            <main className="w-full max-w-6xl flex-1 grow gap-4">
+            <main
+              id="main-content"
+              className="w-full max-w-6xl flex-1 grow gap-4"
+            >
               {children}
             </main>
             <Footer />

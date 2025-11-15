@@ -208,9 +208,11 @@ export function FilterSidebar() {
             variant="destructive"
             size="icon-sm"
             className="self-end"
+            type="button"
             onClick={toggleSidebar}
+            aria-label="Close filters"
           >
-            <XIcon />
+            <XIcon aria-hidden="true" />
           </Button>
         </div>
         <Typography variant="muted" className="text-xs">
