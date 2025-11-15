@@ -15,12 +15,12 @@ import {
 } from "lucide-react"
 
 import { useCurrentUserName } from "@/hooks/use-current-user-name"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Typography } from "@/components/ui/typography"
 import { CurrentUserAvatar } from "@/components/current-user-avatar"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { RecipeCard } from "@/app/recipes/recipe-card"
 
 import type { UserWithRecipes } from "@/lib/types"
@@ -338,12 +338,12 @@ export function UserProfile({
 
   if (error || !profileUser) {
     return (
-      <Alert variant="destructive" className="max-w-2xl" role="alert">
-        <AlertTitle>We couldn’t load this profile</AlertTitle>
-        <AlertDescription>
-          {error?.message || "Please refresh the page or try again later."}
-        </AlertDescription>
-      </Alert>
+      <ErrorDisplay
+        error={error?.message ?? "Please refresh the page or try again later."}
+        title="We couldn't load this profile"
+        className="max-w-2xl"
+        role="alert"
+      />
     )
   }
 

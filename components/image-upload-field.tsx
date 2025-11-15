@@ -5,10 +5,10 @@ import { Upload } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 
 import { cn } from "@/lib/utils"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
 
 import type {
   ComponentProps,
@@ -357,16 +357,20 @@ export function ImageUploadField({
               {previewDescription}
             </div>
           ) : null}
-          {dropzoneError ? (
-            <Alert id={dropzoneErrorId} variant="destructive">
-              <AlertDescription>{dropzoneError}</AlertDescription>
-            </Alert>
-          ) : null}
-          {error ? (
-            <Alert id={serverErrorId} variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
+          <ErrorDisplay
+            error={dropzoneError}
+            title="Upload blocked"
+            id={dropzoneErrorId}
+            className="mt-2"
+            role="alert"
+          />
+          <ErrorDisplay
+            error={error}
+            title="Upload failed"
+            id={serverErrorId}
+            className="mt-2"
+            role="alert"
+          />
         </div>
       </div>
 

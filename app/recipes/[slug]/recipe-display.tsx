@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
@@ -295,19 +296,26 @@ const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
             ) : null}
           </div>
           {deleteFeedback ? (
-            <Alert
-              variant={
-                deleteFeedback.kind === "error" ? "destructive" : "default"
-              }
-              role={deleteFeedback.kind === "error" ? "alert" : "status"}
-              aria-live={
-                deleteFeedback.kind === "error" ? "assertive" : "polite"
-              }
-              aria-atomic="true"
-              className="mt-3"
-            >
-              <AlertDescription>{deleteFeedback.message}</AlertDescription>
-            </Alert>
+            deleteFeedback.kind === "error" ? (
+              <ErrorDisplay
+                error={deleteFeedback.message}
+                title="We couldn't delete this recipe"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+                className="mt-3"
+              />
+            ) : (
+              <Alert
+                variant="default"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="mt-3"
+              >
+                <AlertDescription>{deleteFeedback.message}</AlertDescription>
+              </Alert>
+            )
           ) : null}
         </div>
 
@@ -357,10 +365,12 @@ export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
 
   if (error) {
     return (
-      <div className="border-destructive/50 bg-destructive/10 mx-auto w-full max-w-4xl rounded-3xl border p-10 text-center shadow">
-        <Typography variant="error" className="text-lg">
-          We couldn't load this recipe: {error.message}
-        </Typography>
+      <div className="mx-auto w-full max-w-4xl px-4">
+        <ErrorDisplay
+          error={error.message}
+          title="We couldn't load this recipe"
+          role="alert"
+        />
       </div>
     )
   }

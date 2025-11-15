@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form"
 import { loginFormItems } from "@/lib/constants"
 import { cn, isRedirectError } from "@/lib/utils"
 import { LoginSchema } from "@/lib/zod/schema"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   FieldContent,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { login } from "@/app/(auth)/actions"
 
 import type { LoginFormValues } from "@/lib/zod/schema"
@@ -131,11 +131,11 @@ export function LoginForm({ className }: LoginFormProps) {
           Login
         </FieldLegend>
 
-        {formError ? (
-          <Alert variant="destructive" role="alert">
-            <AlertDescription>{formError}</AlertDescription>
-          </Alert>
-        ) : null}
+        <ErrorDisplay
+          error={formError}
+          title="We couldn't log you in"
+          role="alert"
+        />
 
         {loginFormItems.map(({ type, fieldName, placeholder, label }) => {
           const inputId = `login-${fieldName}`

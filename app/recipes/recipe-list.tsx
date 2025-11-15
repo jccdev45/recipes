@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { FilterSidebarTrigger } from "@/components/filter-sidebar-trigger"
 import { useRecipeFilters } from "@/app/recipes/filter-sidebar"
 import { RecipeCard } from "@/app/recipes/recipe-card"
@@ -145,13 +146,11 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-12">
-        <Alert variant="destructive">
-          <AlertTitle>We hit a snag</AlertTitle>
-          <AlertDescription>
-            Something went wrong while loading recipes. Please try refreshing
-            the page or come back later.
-          </AlertDescription>
-        </Alert>
+        <ErrorDisplay
+          error="Something went wrong while loading recipes. Please try refreshing the page or come back later."
+          title="We hit a snag"
+          role="alert"
+        />
       </div>
     )
   }

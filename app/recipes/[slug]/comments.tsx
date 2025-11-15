@@ -40,6 +40,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { Typography } from "@/components/ui/typography"
 import { EmptyStateDisplay } from "@/components/empty-state-display"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { UserAvatar } from "@/components/user-avatar"
 
 import type {
@@ -181,9 +182,11 @@ export function CommentsSection({
           className
         )}
       >
-        <Typography variant="error">
-          There was an error displaying comments: {error.message}
-        </Typography>
+        <ErrorDisplay
+          error={`There was an error displaying comments: ${error.message}`}
+          title="We couldn't load comments"
+          role="alert"
+        />
       </section>
     )
   }
@@ -196,9 +199,11 @@ export function CommentsSection({
           className
         )}
       >
-        <Typography variant="error">
-          An unexpected error has occurred, try refreshing the page.
-        </Typography>
+        <ErrorDisplay
+          error="An unexpected error has occurred, try refreshing the page."
+          title="We couldn't load comments"
+          role="alert"
+        />
       </section>
     )
   }
@@ -250,29 +255,49 @@ export function CommentsSection({
       </header>
 
       {commentsFeedback ? (
-        <Alert
-          ref={feedbackRegionRef}
-          variant={
-            commentsFeedback.type === "error" ? "destructive" : "default"
-          }
-          role={commentsFeedback.type === "error" ? "alert" : "status"}
-          aria-live={commentsFeedback.type === "error" ? "assertive" : "polite"}
-          aria-atomic="true"
-          className="flex items-start justify-between gap-4"
-        >
-          <AlertDescription className="text-sm">
-            {commentsFeedback.message}
-          </AlertDescription>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="shrink-0"
-            onClick={() => setCommentsFeedback(null)}
+        commentsFeedback.type === "error" ? (
+          <ErrorDisplay
+            ref={feedbackRegionRef}
+            error={commentsFeedback.message}
+            title="We couldn't update comments"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            className="flex items-start justify-between gap-4"
           >
-            Dismiss
-          </Button>
-        </Alert>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setCommentsFeedback(null)}
+            >
+              Dismiss
+            </Button>
+          </ErrorDisplay>
+        ) : (
+          <Alert
+            ref={feedbackRegionRef}
+            variant="default"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="flex items-start justify-between gap-4"
+          >
+            <AlertDescription className="text-sm">
+              {commentsFeedback.message}
+            </AlertDescription>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setCommentsFeedback(null)}
+            >
+              Dismiss
+            </Button>
+          </Alert>
+        )
       ) : null}
 
       {currentUser ? (

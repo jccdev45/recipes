@@ -33,6 +33,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { ImageUploadField } from "@/components/image-upload-field"
 import { UserAvatar } from "@/components/user-avatar"
 import { signup, updateProfile } from "@/app/(auth)/actions"
@@ -238,11 +239,12 @@ function RegisterProfileForm({
           {title}
         </FieldLegend>
 
-        {formError ? (
-          <Alert variant="destructive" className="md:col-span-2">
-            <AlertDescription>{formError}</AlertDescription>
-          </Alert>
-        ) : null}
+        <ErrorDisplay
+          error={formError}
+          title="We couldn't complete your signup"
+          className="md:col-span-2"
+          role="alert"
+        />
 
         {registerFormItems.map(
           ({ fieldName, label, placeholder, type, required }) => {
@@ -607,11 +609,12 @@ function EditProfileForm({
         value={form.state.values.avatar_url ?? ""}
       />
 
-      {formError ? (
-        <Alert variant="destructive" className="mt-6">
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      ) : null}
+      <ErrorDisplay
+        error={formError}
+        title="We couldn't update your profile"
+        className="mt-6"
+        role="alert"
+      />
 
       <FieldSet
         className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2"
