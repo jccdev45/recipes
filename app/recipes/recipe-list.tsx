@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import Link from "next/link"
 import { User } from "@supabase/supabase-js"
-import { SlidersHorizontal } from "lucide-react"
+import { LayoutGrid, PanelLeft, SlidersHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -11,11 +11,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Typography } from "@/components/ui/typography"
 import { ErrorDisplay } from "@/components/error/error-display"
 import { FilterSidebarTrigger } from "@/components/filter-sidebar-trigger"
 import { useRecipeFilters } from "@/app/recipes/filter-sidebar"
 import { RecipeCard } from "@/app/recipes/recipe-card"
+
+import type { DisplayMode } from "@/app/recipes/filter-sidebar"
 
 interface RecipeListProps {
   user: User | null
@@ -32,6 +35,7 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
     selectedIngredients,
     appliedFilterCount,
     displayMode,
+    setDisplayMode,
     clearAllFilters,
   } = useRecipeFilters()
   const { toggleSidebar } = useSidebar()
@@ -170,7 +174,7 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
     >
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2 text-center lg:text-left">
+          <div className="w-full space-y-2 text-center lg:text-left">
             <Typography
               id="recipe-results-heading"
               variant="h2"
@@ -180,10 +184,21 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
                 ? `Recipes matching “${searchTerm}”`
                 : "Browse recipes"}
             </Typography>
-            <FilterSidebarTrigger />
-            <Typography variant="muted" className="text-sm">
-              {summaryMessage}
-            </Typography>
+            <div className="flex items-center justify-between">
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-2">
+                  <FilterSidebarTrigger />
+                  <Typography variant="muted" className="text-sm">
+                    {summaryMessage}
+                  </Typography>
+                </div>
+                <LayoutToggle
+                  value={displayMode}
+                  onChange={setDisplayMode}
+                  className="mt-4 hidden w-full sm:mt-0 sm:block sm:max-w-xs"
+                />
+              </div>
+            </div>
           </div>
           <div className="flex justify-center lg:hidden">
             <Button
@@ -256,5 +271,52 @@ export function RecipeList({ user, searchTerm }: RecipeListProps) {
         )}
       </div>
     </section>
+  )
+}
+
+interface LayoutToggleProps {
+  value: DisplayMode
+  onChange: (value: DisplayMode) => void
+  className?: string
+}
+
+function LayoutToggle({ value, onChange, className }: LayoutToggleProps) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      <Typography
+        variant="small"
+        className="text-muted-foreground text-xs font-medium tracking-wide uppercase"
+      >
+        Card layout
+      </Typography>
+      <ToggleGroup
+        type="single"
+        value={value}
+        onValueChange={(layout) => {
+          if (layout === "wide" || layout === "compact") {
+            onChange(layout)
+          }
+        }}
+        className="flex w-full justify-start gap-2 sm:justify-end"
+        aria-label="Card layout"
+      >
+        <ToggleGroupItem
+          value="wide"
+          aria-label="Use wide card layout"
+          className="flex-1 gap-2"
+        >
+          <PanelLeft className="h-4 w-4" aria-hidden="true" />
+          Wide
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="compact"
+          aria-label="Use compact card layout"
+          className="flex-1 gap-2"
+        >
+          <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+          Compact
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   )
 }

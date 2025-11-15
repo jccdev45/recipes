@@ -8,28 +8,24 @@ import {
   useState,
 } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { LayoutGrid, PanelLeft, XIcon } from "lucide-react"
+import { XIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { useRecipes } from "@/hooks/useRecipes"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarHeader,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Typography } from "@/components/ui/typography"
 import { RecipeFilter } from "@/app/recipes/recipe-filter"
 
 import type { Ingredient, Recipe, Tag } from "@/lib/types"
 import type { ReactNode } from "react"
 
-type DisplayMode = "wide" | "compact"
+export type DisplayMode = "wide" | "compact"
 type FilterKey = "author" | "tag" | "ingredient"
 
 interface RecipeFiltersContextValue {
@@ -221,7 +217,6 @@ export function FilterSidebar() {
       </SidebarHeader>
       <SidebarContent className="px-6 py-6">
         <SidebarGroup className="border-border/60 bg-card/70 space-y-6 rounded-2xl border p-6 shadow-sm backdrop-blur">
-          <LayoutToggle value={displayMode} onChange={setDisplayMode} />
           <RecipeFilter
             appliedFilterCount={appliedFilterCount}
             authors={authors}
@@ -238,52 +233,5 @@ export function FilterSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
-}
-
-interface LayoutToggleProps {
-  value: DisplayMode
-  onChange: (value: DisplayMode) => void
-  className?: string
-}
-
-function LayoutToggle({ value, onChange, className }: LayoutToggleProps) {
-  return (
-    <div className="space-y-2">
-      <Typography
-        variant="small"
-        className="text-muted-foreground text-xs font-medium tracking-wide uppercase"
-      >
-        Card layout
-      </Typography>
-      <ToggleGroup
-        type="single"
-        value={value}
-        onValueChange={(layout) => {
-          if (layout === "wide" || layout === "compact") {
-            onChange(layout)
-          }
-        }}
-        className={cn("w-full justify-start", className)}
-        aria-label="Card layout"
-      >
-        <ToggleGroupItem
-          value="wide"
-          aria-label="Use wide card layout"
-          className="flex-1 gap-2"
-        >
-          <PanelLeft className="h-4 w-4" aria-hidden="true" />
-          Wide
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="compact"
-          aria-label="Use compact card layout"
-          className="flex-1 gap-2"
-        >
-          <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-          Compact
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </div>
   )
 }

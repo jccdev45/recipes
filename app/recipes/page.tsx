@@ -1,9 +1,9 @@
+import { cookies } from "next/headers"
 import { ChefHat } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Typography } from "@/components/ui/typography"
-import { FilterSidebarTrigger } from "@/components/filter-sidebar-trigger"
 import { getUser } from "@/app/(auth)/actions"
 import {
   FilterSidebar,
@@ -55,6 +55,8 @@ type RecipesPageProps = {
 }
 
 export default async function RecipesPage(props: RecipesPageProps) {
+  const cookieStore = await cookies()
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
   const { user } = await getUser()
   const resolvedSearchParams =
     (props.searchParams instanceof Promise
@@ -66,6 +68,7 @@ export default async function RecipesPage(props: RecipesPageProps) {
 
   return (
     <SidebarProvider
+      defaultOpen={defaultOpen}
       style={
         {
           "--sidebar-width": "350px",
