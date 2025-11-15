@@ -42,6 +42,7 @@ export type Recipe = WithFields<
     steps: Step[]
     ingredients: Ingredient[]
     commentCount?: number
+    isFavorite?: boolean
   }
 >
 

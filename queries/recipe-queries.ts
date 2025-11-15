@@ -7,8 +7,11 @@ export type RecipeSearchResult = Pick<
   "id" | "slug" | "recipe_name" | "author" | "quote" | "tags"
 >
 
-export const getRecipes = (client: TypedSupabaseClient) => {
-  return client.from("recipes").select(`
+export const getRecipes = (
+  client: TypedSupabaseClient,
+  options?: { favoriteUserId?: string }
+) => {
+  const baseSelect = `
       author,
       created_at,
       id,
@@ -23,7 +26,15 @@ export const getRecipes = (client: TypedSupabaseClient) => {
       ingredients,
       user_id,
       comment_meta:comments(count)
-    `)
+    `
+
+  const favoritesSelect = options?.favoriteUserId
+    ? `,
+      favorite_meta:favorites ( user_id )
+    `
+    : ""
+
+  return client.from("recipes").select(`${baseSelect}${favoritesSelect}`)
 }
 
 export const getRecipeBySlug = (client: TypedSupabaseClient, slug: string) => {

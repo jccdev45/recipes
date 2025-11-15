@@ -1,9 +1,10 @@
 "use client"
 
-import { useRef } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { User } from "@supabase/supabase-js"
+import { useQueryClient } from "@tanstack/react-query"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Heart, MessageSquare, Pencil } from "lucide-react"
 
@@ -11,6 +12,7 @@ import { cn, resolveStorageImageUrl } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Typography } from "@/components/ui/typography"
+import { toggleFavorite } from "@/app/recipes/actions"
 
 import type { Recipe } from "@/lib/types"
 
@@ -42,11 +44,48 @@ export function RecipeCard({
     quote,
     author,
     user_id,
+    id,
     commentCount: rawCommentCount,
+    isFavorite: rawIsFavorite,
   } = recipe
   const canEdit = user?.id === user_id
   const isCompact = display === "compact"
   const commentCount = rawCommentCount ?? 0
+  const [isFavorite, setIsFavorite] = useState(Boolean(rawIsFavorite))
+  const [favoriteError, setFavoriteError] = useState<string | null>(null)
+  const [isFavoritePending, startTransition] = useTransition()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    setIsFavorite(Boolean(rawIsFavorite))
+  }, [rawIsFavorite])
+
+  const handleToggleFavorite = () => {
+    if (!user) {
+      setFavoriteError("Sign in to favorite recipes.")
+      return
+    }
+
+    setFavoriteError(null)
+    startTransition(() => {
+      toggleFavorite(id)
+        .then((result) => {
+          if (result?.error) {
+            setFavoriteError(result.error)
+            return
+          }
+
+          if (result?.data) {
+            setIsFavorite(result.data.isFavorite)
+            queryClient.invalidateQueries({ queryKey: ["recipes"] })
+          }
+        })
+        .catch((error) => {
+          console.error("favorites:toggle", error)
+          setFavoriteError("Unable to update favorite. Please try again.")
+        })
+    })
+  }
 
   return (
     <motion.article
@@ -68,6 +107,11 @@ export function RecipeCard({
         canEdit={canEdit}
         isCompact={isCompact}
         commentCount={commentCount}
+        onToggleFavorite={handleToggleFavorite}
+        isFavorite={isFavorite}
+        isFavoritePending={isFavoritePending}
+        favoriteError={favoriteError}
+        canFavorite={Boolean(user)}
       />
     </motion.article>
   )
@@ -122,6 +166,11 @@ function RecipeContent({
   canEdit,
   isCompact,
   commentCount,
+  onToggleFavorite,
+  isFavorite,
+  isFavoritePending,
+  favoriteError,
+  canFavorite,
 }: {
   recipe_name: Recipe["recipe_name"]
   slug: Recipe["slug"]
@@ -131,8 +180,16 @@ function RecipeContent({
   canEdit: boolean
   isCompact: boolean
   commentCount: number
+  onToggleFavorite: () => void
+  isFavorite: boolean
+  isFavoritePending: boolean
+  favoriteError: string | null
+  canFavorite: boolean
 }) {
   const commentLabel = commentCount === 1 ? "comment" : "comments"
+  const favoriteLabel = isFavorite
+    ? "Remove from favorites"
+    : "Save to favorites"
 
   return (
     <motion.div
@@ -220,25 +277,47 @@ function RecipeContent({
           ))}
         </motion.ul>
       ) : null}
-      <div className="mt-auto flex items-center justify-end gap-4">
-        <div
-          className="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
-          aria-label={`${commentCount} ${commentLabel}`}
-        >
-          <MessageSquare className="h-4 w-4" aria-hidden="true" />
-          <span aria-hidden="true">{commentCount}</span>
-          <span className="sr-only">{commentLabel}</span>
+      <div className="mt-auto space-y-2">
+        <div className="flex items-center justify-end gap-4">
+          <div
+            className="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
+            aria-label={`${commentCount} ${commentLabel}`}
+          >
+            <MessageSquare className="h-4 w-4" aria-hidden="true" />
+            <span aria-hidden="true">{commentCount}</span>
+            <span className="sr-only">{commentLabel}</span>
+          </div>
+          <Button
+            type="button"
+            variant={isFavorite ? "secondary" : "ghost"}
+            size="icon"
+            aria-label={favoriteLabel}
+            aria-pressed={isFavorite}
+            aria-live="off"
+            onClick={onToggleFavorite}
+            disabled={isFavoritePending}
+            title={!canFavorite ? "Sign in to save favorites" : undefined}
+            className={cn(
+              "text-muted-foreground hover:text-foreground border-border/60 rounded-full border transition-colors",
+              isFavorite && "bg-primary/10 text-primary hover:text-primary",
+              isFavoritePending && "opacity-70"
+            )}
+          >
+            <Heart
+              className={cn("h-4 w-4", isFavorite ? "fill-current" : undefined)}
+              aria-hidden="true"
+            />
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="Toggle favorite"
-          aria-pressed="false"
-          className="text-muted-foreground hover:text-foreground border-border/60 rounded-full border"
-        >
-          <Heart className="h-4 w-4" aria-hidden="true" />
-        </Button>
+        {favoriteError ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-destructive text-right text-xs font-medium"
+          >
+            {favoriteError}
+          </p>
+        ) : null}
       </div>
     </motion.div>
   )

@@ -51,7 +51,13 @@ const RecipeFiltersContext = createContext<RecipeFiltersContextValue | null>(
   null
 )
 
-export function RecipeFiltersProvider({ children }: { children: ReactNode }) {
+interface RecipeFiltersProviderProps {
+  children: ReactNode
+}
+
+export function RecipeFiltersProvider({
+  children,
+}: RecipeFiltersProviderProps) {
   const { recipes, isLoading, error, authors, tags, ingredients } = useRecipes()
   const router = useRouter()
   const pathname = usePathname()
