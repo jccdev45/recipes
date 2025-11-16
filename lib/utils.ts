@@ -83,17 +83,116 @@ export function scaleIngredients(
   }
 
   return ingredients.map((ingredient) => {
-    if (!ingredient.hasOwnProperty("amount") || ingredient.amount < 0) {
+    if (!ingredient.hasOwnProperty("amount")) {
+      throw new Error(
+        `Invalid quantity for ingredient: ${ingredient.ingredient}`
+      )
+    }
+    const quantity = ingredient.amount
+
+    if (!Number.isFinite(quantity)) {
+      return ingredient
+    }
+
+    if (quantity < 0) {
       throw new Error(
         `Invalid quantity for ingredient: ${ingredient.ingredient}`
       )
     }
 
+    if (quantity === 0) {
+      return ingredient
+    }
+
+    const scaledAmount = Number((quantity * servings).toFixed(4))
+
     return {
       ...ingredient,
-      amount: ingredient.amount * servings,
+      amount: scaledAmount,
     }
   })
+}
+
+const COMMON_FRACTION_DENOMINATORS = [2, 3, 4, 5, 6, 8, 10, 12, 16]
+const FRACTION_TOLERANCE = 1e-3
+const DECIMAL_FALLBACK_FORMATTER = new Intl.NumberFormat(undefined, {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+  useGrouping: false,
+})
+
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b)
+}
+
+function approximateFraction(remainder: number) {
+  if (remainder <= FRACTION_TOLERANCE) {
+    return null
+  }
+
+  let bestMatch: {
+    numerator: number
+    denominator: number
+    error: number
+  } | null = null
+
+  for (const denominator of COMMON_FRACTION_DENOMINATORS) {
+    const numerator = Math.round(remainder * denominator)
+
+    if (numerator === 0) {
+      continue
+    }
+
+    const reduced = gcd(numerator, denominator)
+    const normalizedNumerator = numerator / reduced
+    const normalizedDenominator = denominator / reduced
+    const approximation = normalizedNumerator / normalizedDenominator
+    const error = Math.abs(remainder - approximation)
+
+    if (error <= FRACTION_TOLERANCE) {
+      if (!bestMatch || error < bestMatch.error) {
+        bestMatch = {
+          numerator: normalizedNumerator,
+          denominator: normalizedDenominator,
+          error,
+        }
+      }
+    }
+  }
+
+  return bestMatch
+}
+
+export function formatFractionalQuantity(value: number): string {
+  if (!Number.isFinite(value)) {
+    return ""
+  }
+
+  const sign = value < 0 ? "-" : ""
+  const absoluteValue = Math.abs(value)
+  const whole = Math.floor(absoluteValue)
+  const remainder = absoluteValue - whole
+
+  const fractionalPart = approximateFraction(remainder)
+
+  if (!fractionalPart) {
+    if (remainder <= FRACTION_TOLERANCE) {
+      return `${sign}${whole}`
+    }
+
+    const decimalValue = DECIMAL_FALLBACK_FORMATTER.format(absoluteValue)
+    return `${sign}${decimalValue}`
+  }
+
+  if (fractionalPart.numerator === fractionalPart.denominator) {
+    return `${sign}${whole + 1}`
+  }
+
+  if (whole === 0) {
+    return `${sign}${fractionalPart.numerator}/${fractionalPart.denominator}`
+  }
+
+  return `${sign}${whole} ${fractionalPart.numerator}/${fractionalPart.denominator}`
 }
 
 // Also borrowed (and modified) from @hero-page/hero-recipe-utils
