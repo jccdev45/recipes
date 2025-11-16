@@ -1,61 +1,53 @@
-import * as React from "react"
-import { cva } from "class-variance-authority"
-import { Ellipsis, Loader, Loader2, LoaderPinwheel } from "lucide-react"
+import type { ComponentType, SVGProps } from "react"
+
+import {
+  Loader2Icon,
+  LoaderIcon,
+  LoaderPinwheelIcon,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-import type { VariantProps } from "class-variance-authority"
+type SpinnerSize = "sm" | "md" | "lg" | "xl" | "2xl"
+type SpinnerIcon = "default" | "minimal" | "pinwheel"
 
-const spinnerVariants = cva("animate-spin text-primary", {
-  variants: {
-    variant: {
-      default: "text-primary",
-      secondary: "text-secondary",
-      accent: "text-accent",
-      muted: "text-muted-foreground",
-    },
-    size: {
-      default: "size-8",
-      sm: "size-6",
-      lg: "size-10",
-      xl: "size-14",
-      "2xl": "size-20",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-    size: "default",
-  },
-})
-
-export interface SpinnerProps
-  extends React.HTMLAttributes<SVGElement>,
-    VariantProps<typeof spinnerVariants> {
-  icon?: "default" | "ellipsis" | "pinwheel" | "loader"
+const sizeClasses: Record<SpinnerSize, string> = {
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
+  xl: "size-10",
+  "2xl": "size-12",
 }
 
-const iconMap = {
-  default: Loader2,
-  ellipsis: Ellipsis,
-  pinwheel: LoaderPinwheel,
-  loader: Loader,
+const iconMap: Record<SpinnerIcon, ComponentType<SVGProps<SVGSVGElement>>> = {
+  default: Loader2Icon,
+  minimal: LoaderIcon,
+  pinwheel: LoaderPinwheelIcon,
 }
+
+type SpinnerProps = {
+  size?: SpinnerSize
+  icon?: SpinnerIcon
+} & SVGProps<SVGSVGElement>
 
 function Spinner({
   className,
-  variant,
-  size,
+  size = "md",
   icon = "default",
+  role = "status",
+  "aria-label": ariaLabel = "Loading",
   ...props
 }: SpinnerProps) {
-  const SpinnerIcon = iconMap[icon]
+  const IconComponent = iconMap[icon] ?? iconMap.default
 
   return (
-    <SpinnerIcon
-      className={cn(spinnerVariants({ variant, size, className }))}
+    <IconComponent
+      role={role}
+      aria-label={ariaLabel}
+      className={cn("animate-spin", sizeClasses[size], className)}
       {...props}
     />
   )
 }
 
-export { Spinner, spinnerVariants }
+export { Spinner }

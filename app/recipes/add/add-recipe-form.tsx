@@ -1,39 +1,47 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { User } from "@supabase/supabase-js"
-import { Beef, ListOrdered } from "lucide-react"
-import {
-  Controller,
-  SubmitHandler,
-  useFieldArray,
-  useForm,
-} from "react-hook-form"
-import * as z from "zod"
 
-import { maxAmount, minAmount } from "@/lib/constants"
-import { cn, genId, toSlug } from "@/lib/utils"
-import { AddRecipeFormValues, RecipeFormSchema } from "@/lib/zod/schema"
+import { cn, extractErrorMessage, toSlug } from "@/lib/utils"
+import { RecipeFormSchema } from "@/lib/zod/schema"
+import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { useRecipes } from "@/hooks/useRecipes"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
-import { FormCombobox } from "@/app/recipes/add/form-combobox"
-import { FileInput } from "@/app/recipes/add/image-upload"
+import { ErrorDisplay } from "@/components/error/error-display"
+
+import {
+  createAddRecipeDefaultValues,
+  useAddRecipeForm,
+} from "./add-recipe-form.hook"
+import { FeatureImageSection } from "./sections/feature-image-section"
+import { IngredientsSection } from "./sections/ingredients-section"
+import { RecipeBasicsSection } from "./sections/recipe-basics-section"
+import { StepsSection } from "./sections/steps-section"
+import { SubmissionChecklist } from "./sections/submission-checklist"
+import { SubmitActions } from "./sections/submit-actions"
+import { TagsSection } from "./sections/tags-section"
+import type { User } from "@supabase/supabase-js"
+import type { SuggestedTag } from "./sections/tags-section"
+
+const IMAGE_BUCKET = "photos"
+
+const normalizeStoragePath = (path?: string | null): string | null => {
+  if (!path) {
+    return null
+  }
+
+  const trimmed = path.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`
+}
 
 type AddRecipeFormProps = {
   className: string
@@ -41,397 +49,375 @@ type AddRecipeFormProps = {
 }
 
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
-  // NOTE: React Query hooks
   const { tags, units, error: recipeError, isLoading } = useRecipes()
 
-  // Form state
   const [imgURL, setImgURL] = useState("")
+  const [uploadedImagePath, setUploadedImagePath] = useState<string | null>(
+    null
+  )
   const [formError, setFormError] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
 
-  // Form setup
-  const form = useForm<z.infer<typeof RecipeFormSchema>>({
-    resolver: zodResolver(RecipeFormSchema),
-    defaultValues: {
-      recipe_name: "",
-      quote: "",
-      ingredients: [
-        { id: genId(), amount: 0, unitMeasurement: "", ingredient: "" },
-      ],
-      steps: [{ id: genId(), step: "" }],
-      tags: [{ id: genId(), tag: "" }],
+  const ensureUniqueSlug = async (baseSlug: string) => {
+    let attempt = 0
+    let candidate = baseSlug
+
+    while (attempt < 20) {
+      const { count, error } = await supabase
+        .from("recipes")
+        .select("slug", { count: "exact", head: true })
+        .eq("slug", candidate)
+
+      if (error && error.code !== "PGRST116") {
+        throw error
+      }
+
+      if (!count || count === 0) {
+        return candidate
+      }
+
+      attempt += 1
+      candidate = `${baseSlug}-${attempt}`
+    }
+
+    throw new Error(
+      "We could not generate a unique URL for this recipe. Try a different name."
+    )
+  }
+
+  const form = useAddRecipeForm({
+    defaultValues: createAddRecipeDefaultValues(),
+    validators: {
+      onChange: RecipeFormSchema,
+      onSubmit: RecipeFormSchema,
     },
-    mode: "onChange",
+    onSubmit: async ({ value, formApi }) => {
+      setFormError(null)
+
+      if (!imgURL && !isConfirmed) {
+        setFormError(
+          "You have not selected an image. Continue to submit without one or upload a photo now."
+        )
+        return
+      }
+
+      if (value.ingredients.length === 0 || value.steps.length === 0) {
+        setFormError(
+          "Add at least one ingredient and one step before publishing your recipe."
+        )
+        return
+      }
+
+      const recipeName = value.recipe_name.trim()
+
+      if (!recipeName) {
+        setFormError("Add a recipe name before publishing your recipe.")
+        return
+      }
+
+      const baseSlug = toSlug(recipeName)
+
+      if (!baseSlug) {
+        setFormError(
+          "Recipe name must include letters or numbers before publishing."
+        )
+        return
+      }
+
+      let uniqueSlug = baseSlug
+
+      try {
+        uniqueSlug = await ensureUniqueSlug(baseSlug)
+      } catch (slugError) {
+        setFormError(
+          extractErrorMessage(
+            slugError,
+            "We could not generate a URL for this recipe."
+          )
+        )
+        return
+      }
+
+      const normalizedQuote = value.quote?.trim() ?? ""
+
+      const storageImagePath = normalizeStoragePath(imgURL)
+
+      const updatedValues = {
+        ...value,
+        recipe_name: recipeName,
+        author: user?.user_metadata.first_name || "Anonymous User",
+        user_id: user?.id,
+        slug: uniqueSlug,
+        quote: normalizedQuote.length > 0 ? normalizedQuote : null,
+        img: storageImagePath,
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("recipes")
+          .insert(updatedValues)
+          .select("slug")
+
+        if (error) throw error
+
+        formApi.reset(createAddRecipeDefaultValues())
+        setImgURL("")
+        setUploadedImagePath(null)
+        setIsConfirmed(false)
+        const nextSlug = data?.[0]?.slug ?? uniqueSlug
+        router.push(`/recipes/${nextSlug}`)
+        router.refresh()
+      } catch (error) {
+        console.error("Error submitting recipe:", error)
+        setFormError(
+          extractErrorMessage(
+            error,
+            "An error occurred while submitting the recipe."
+          )
+        )
+      }
+    },
   })
 
   const {
-    register,
-    control,
-    formState: { isValid, errors, isDirty },
-    reset,
-    getValues,
-  } = form
+    addFiles: addRecipeImageFiles,
+    reset: resetRecipeImageUpload,
+    onUpload: uploadRecipeImage,
+    loading: isUploadingImage,
+  } = useSupabaseUpload({
+    bucketName: IMAGE_BUCKET,
+    maxFiles: 1,
+    allowedMimeTypes: ["image/*"],
+    maxFileSize: 10 * 1024 * 1024,
+    cacheControl: 3600,
+    upsert: false,
+    createFilePath: ({ file, defaultPath }) => {
+      const recipeNameValue = form.state.values.recipe_name?.trim() ?? ""
+      const safeRecipeName = toSlug(recipeNameValue)
+      const baseName = safeRecipeName || "recipe"
 
-  // Field arrays
-  const {
-    fields: ingredientFields,
-    append: appendIngredient,
-    remove: removeIngredient,
-  } = useFieldArray({ name: "ingredients", control })
-  const {
-    fields: stepFields,
-    append: appendStep,
-    remove: removeStep,
-  } = useFieldArray({ name: "steps", control })
-  const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-  } = useFieldArray({ name: "tags", control })
+      const extension = file.name.split(".").pop()?.toLowerCase()
+      const normalizedExtension = extension?.replace(/[^a-z0-9]/gi, "")
+      const uniqueSuffix =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}`
 
-  // Helper functions
-  const updateUnits = (
-    index: number,
-    ingredient: AddRecipeFormValues["ingredients"][number]
-  ) => {
-    form.setValue(`ingredients.${index}`, ingredient, { shouldValidate: true })
-  }
+      const fileName = normalizedExtension
+        ? `${baseName}-${uniqueSuffix}.${normalizedExtension}`
+        : `${baseName}-${uniqueSuffix}`
+      return `recipes/${baseName}/${fileName}`
+    },
+  })
 
-  const updateTags = (index: number, tag: { id?: string; tag: string }) => {
-    form.setValue(
-      `tags.${index}`,
-      { id: tag.id || genId(), tag: tag.tag },
-      { shouldValidate: true }
-    )
-  }
+  const deleteSupabaseFile = useCallback(
+    async (path?: string | null) => {
+      const normalizedPath = normalizeStoragePath(path)
+
+      if (!normalizedPath) {
+        return
+      }
+
+      const storagePath = normalizedPath.replace(/^\/+/, "")
+
+      if (!storagePath) {
+        return
+      }
+
+      try {
+        const { error } = await supabase.storage
+          .from(IMAGE_BUCKET)
+          .remove([storagePath])
+
+        if (error) {
+          console.error("Failed to delete unused recipe image", error)
+        }
+      } catch (error) {
+        console.error("Unexpected error deleting recipe image", error)
+      }
+    },
+    [supabase]
+  )
 
   const handleImageUpload = async (file: File | null) => {
-    const fileExt = file?.name.split(".").pop()
-    const filePath = `recipes/${form.getValues("recipe_name")}/${Math.random()}.${fileExt}`
-
-    if (file) {
-      setIsUploading(true)
-      const { data, error } = await supabase.storage
-        .from("photos")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        })
-
-      if (error) {
-        setFormError(error.message)
-      } else {
-        setImgURL(data.path)
-        setFormError(null)
-      }
-      setIsUploading(false)
-    } else {
+    if (!file) {
       setFormError("No file selected")
-    }
-  }
-
-  const isSubmittable = !!isDirty && !!isValid
-
-  const onSubmit: SubmitHandler<AddRecipeFormValues> = async (values, e) => {
-    e?.preventDefault()
-    setFormError(null) // Clear any previous errors
-
-    if (!imgURL && !isConfirmed) {
-      setFormError(
-        "You haven't selected an image, are you sure you want to continue? (you can still upload one later)"
-      )
+      if (uploadedImagePath) {
+        await deleteSupabaseFile(uploadedImagePath)
+        setUploadedImagePath(null)
+        setImgURL("")
+      }
+      resetRecipeImageUpload()
       return
     }
 
-    const updatedValues = {
-      ...values,
-      author: user?.user_metadata.first_name || "Anonymous User",
-      user_id: user?.id,
-      slug: toSlug(values.recipe_name),
-      img: imgURL
-        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${imgURL}`
-        : "http://loremflickr.com/g/500/500/food",
+    const recipeName = form.state.values.recipe_name?.trim()
+
+    if (!recipeName) {
+      setFormError("Add a recipe name before uploading an image.")
+      resetRecipeImageUpload()
+      return
     }
 
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .insert(updatedValues)
-        .select()
+    const safeRecipeName = toSlug(recipeName)
 
-      if (error) throw error
-
-      reset()
-      router.push(`/recipes/${data[0].slug}`)
-      router.refresh()
-    } catch (error) {
-      console.error("Error submitting recipe:", error)
+    if (!safeRecipeName) {
       setFormError(
-        error instanceof Error
-          ? error.message
-          : "An error occurred while submitting the recipe"
+        "Recipe name must include letters or numbers before uploading an image."
       )
+      resetRecipeImageUpload()
+      return
+    }
+
+    setFormError(null)
+    addRecipeImageFiles([file], { replace: true })
+
+    const results = await uploadRecipeImage()
+
+    if (!results || results.length === 0) {
+      setFormError("We couldn’t upload the image. Please try again.")
+      resetRecipeImageUpload()
+      return
+    }
+
+    const errorResult = results.find((result) => result.status === "error")
+
+    if (errorResult?.status === "error") {
+      setFormError(errorResult.message)
+      resetRecipeImageUpload()
+      return
+    }
+
+    const successResult = results.find((result) => result.status === "success")
+
+    if (successResult?.status === "success") {
+      const normalizedPath = normalizeStoragePath(successResult.path)
+
+      if (uploadedImagePath && uploadedImagePath !== normalizedPath) {
+        await deleteSupabaseFile(uploadedImagePath)
+      }
+
+      setUploadedImagePath(normalizedPath)
+      setImgURL(normalizedPath ?? "")
+      setFormError(null)
+      setIsConfirmed(false)
+      resetRecipeImageUpload()
     }
   }
 
-  const nameForImage =
-    !errors.recipe_name && getValues("recipe_name").length > 0
+  const normalizedUnits = useMemo(
+    () => units?.filter((unit) => unit && unit.trim().length > 0) ?? [],
+    [units]
+  )
 
-  // Render logic
-  if (isLoading) return <Spinner size="xl" />
-  if (recipeError)
+  const suggestedTags = useMemo<SuggestedTag[]>(
+    () => (tags?.slice(0, 8) ?? []) as SuggestedTag[],
+    [tags]
+  )
+
+  if (isLoading) {
     return (
-      <Typography variant="error">
-        An error occurred: {recipeError.message}
-      </Typography>
+      <div
+        className={cn(
+          "border-border/60 bg-card/80 flex min-h-80 w-full items-center justify-center rounded-3xl border p-10 shadow-lg",
+          className
+        )}
+      >
+        <Spinner size="xl" aria-label="Loading recipe form" />
+      </div>
     )
+  }
+
+  if (recipeError) {
+    return (
+      <ErrorDisplay
+        title="We could not load the form"
+        error={recipeError.message}
+      />
+    )
+  }
 
   return (
-    <Form {...form}>
+    <form.AppForm>
       <form
+        id="add-recipe-form"
         noValidate
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={cn(`rounded-lg bg-muted md:p-6`, className)}
-      >
-        <div className="col-span-1 grid grid-cols-1 gap-2 lg:grid-cols-2">
-          {/* Recipe Name */}
-          <FormField
-            control={control}
-            name="recipe_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Recipe Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter recipe name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Quote */}
-          <FormField
-            control={control}
-            name="quote"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quote</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter a quote" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
-
-        <Alert>
-          <Beef />
-          <AlertTitle className="text-lg font-bold">Ingredient</AlertTitle>
-          <AlertDescription>
-            Adjust your numerical amount, select your unit type and add the name
-            of the ingredient.
-          </AlertDescription>
-        </Alert>
-
-        {/* Ingredients */}
-        <div>
-          <FormLabel>Ingredients</FormLabel>
-          {ingredientFields.map((field, index) => (
-            <div key={field.id} className="flex items-center space-x-2">
-              <Input
-                type="number"
-                placeholder="Amount"
-                {...register(`ingredients.${index}.amount` as const, {
-                  valueAsNumber: true,
-                  min: minAmount,
-                  max: maxAmount,
-                })}
-              />
-              <Controller
-                name={`ingredients.${index}.unitMeasurement`}
-                control={control}
-                render={({ field }) => (
-                  <FormCombobox<
-                    AddRecipeFormValues,
-                    `ingredients.${number}.unitMeasurement`
-                  >
-                    className="w-[180px]"
-                    field={field}
-                    index={index}
-                    update={(index, value) => {
-                      if (typeof value === "string") {
-                        updateUnits(index, {
-                          ...form.getValues(`ingredients.${index}`),
-                          unitMeasurement: value,
-                        })
-                      }
-                    }}
-                    items={units || []}
-                    placeholder="Select unit"
-                  />
-                )}
-              />
-              <Input
-                placeholder="Ingredient"
-                {...register(`ingredients.${index}.ingredient` as const)}
-              />
-              <Button
-                type="button"
-                onClick={() => removeIngredient(index)}
-                disabled={ingredientFields.length === 1}
-              >
-                Delete
-              </Button>
-            </div>
-          ))}
-          <Button
-            type="button"
-            onClick={() =>
-              appendIngredient({
-                id: genId(),
-                amount: 0,
-                unitMeasurement: "",
-                ingredient: "",
-              })
-            }
-          >
-            Add Ingredient
-          </Button>
-        </div>
-
-        <Separator className="my-2 h-1 rounded-lg bg-muted-foreground" />
-
-        <Alert>
-          <ListOrdered />
-          <AlertTitle className="text-lg font-bold">Steps</AlertTitle>
-          <AlertDescription>
-            Add your recipe's instructions here. Try to break your steps up into
-            clear, concise parts - line by line.
-          </AlertDescription>
-        </Alert>
-
-        {/* Steps */}
-        <div>
-          <FormLabel>Steps</FormLabel>
-          <p className="text-sm text-muted-foreground">
-            Add your recipe's instructions here. Try to break your steps up into
-            clear, concise parts - line by line.
-          </p>
-          {stepFields.map((field, index) => (
-            <div key={field.id} className="mt-2 flex items-center space-x-2">
-              <Input
-                placeholder="Step"
-                {...register(`steps.${index}.step` as const)}
-              />
-              <Button
-                type="button"
-                onClick={() => removeStep(index)}
-                disabled={stepFields.length === 1}
-              >
-                Delete
-              </Button>
-            </div>
-          ))}
-          <Button
-            type="button"
-            onClick={() => appendStep({ id: genId(), step: "" })}
-            className="mt-2"
-          >
-            Add Step
-          </Button>
-        </div>
-
-        {/* Tags */}
-        <div>
-          <FormLabel>Tags</FormLabel>
-          <p className="text-sm text-muted-foreground">
-            Select from existing tags or add your own. This will help with
-            searching and organizing recipes. Nobody likes a messy kitchen.
-          </p>
-          {tagFields.map((field, index) => (
-            <div key={field.id} className="mt-2 flex items-center space-x-2">
-              <Controller
-                name={`tags.${index}.tag`}
-                control={control}
-                render={({ field }) => (
-                  <FormCombobox<AddRecipeFormValues, `tags.${number}.tag`>
-                    className="w-[180px]"
-                    field={field}
-                    index={index}
-                    update={(index, value) => {
-                      if (typeof value === "object" && "tag" in value) {
-                        updateTags(index, value)
-                      }
-                    }}
-                    items={tags || []}
-                    placeholder="Select tag"
-                  />
-                )}
-              />
-              <Button
-                type="button"
-                onClick={() => removeTag(index)}
-                disabled={tagFields.length === 1}
-              >
-                Delete
-              </Button>
-            </div>
-          ))}
-          <Button
-            type="button"
-            onClick={() => appendTag({ id: genId(), tag: "" })}
-            className={cn(
-              "mt-2",
-              tagFields.length >= 5 && "hover:cursor-not-allowed"
-            )}
-            disabled={tagFields.length >= 5}
-          >
-            Add Tag
-          </Button>
-        </div>
-
-        {/* Image Upload */}
-        {nameForImage && (
-          <FileInput
-            onFileChange={handleImageUpload}
-            className={cn(
-              `rounded-md border border-border px-2 py-4`,
-              recipeError && `border-destructive`
-            )}
-            type="recipe"
-          />
+        onSubmit={(event) => {
+          event.preventDefault()
+          void form.handleSubmit()
+        }}
+        className={cn(
+          "border-border/60 bg-card/85 space-y-10 rounded-3xl border p-6 shadow-xl backdrop-blur-sm md:p-10",
+          className
         )}
+      >
+        <div className="space-y-3">
+          <Typography
+            variant="h3"
+            className="text-foreground text-2xl font-semibold"
+          >
+            Craft your recipe
+          </Typography>
+          <Typography
+            variant="muted"
+            className="text-muted-foreground text-base"
+          >
+            Build each section with the guidance below. You can update anything
+            after publishing.
+          </Typography>
+        </div>
 
-        {/* Submit Button */}
-        <Button type="submit" disabled={!isSubmittable}>
-          Submit
-        </Button>
+        <div className="grid gap-8">
+          <div className="space-y-6">
+            <SubmissionChecklist />
+            <RecipeBasicsSection form={form} />
+            <IngredientsSection form={form} normalizedUnits={normalizedUnits} />
+            <StepsSection form={form} />
+            <TagsSection form={form} suggestedTags={suggestedTags} />
+            <FeatureImageSection
+              form={form}
+              isUploading={isUploadingImage}
+              onFileChange={handleImageUpload}
+              imagePath={imgURL}
+            />
+          </div>
+        </div>
 
-        {/* Error Messages */}
+        <SubmitActions
+          form={form}
+          submitLabel="Publish Recipe"
+          helperText="Make sure all fields are filled out correctly before submitting."
+          submittingLabel="Publishing..."
+        />
+
         {formError && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{formError}</AlertDescription>
+          <ErrorDisplay error={formError} title="Heads up">
             {!imgURL && (
-              <Button
-                onClick={() => {
-                  setFormError(null)
-                  setIsConfirmed(true)
-                }}
-              >
-                Continue
-              </Button>
+              <div className="flex flex-wrap gap-3 pt-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setFormError(null)
+                    setIsConfirmed(true)
+                  }}
+                >
+                  Continue without image
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setFormError(null)}
+                >
+                  Cancel
+                </Button>
+              </div>
             )}
-          </Alert>
+          </ErrorDisplay>
         )}
       </form>
-    </Form>
+    </form.AppForm>
   )
 }

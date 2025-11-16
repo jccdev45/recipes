@@ -36,7 +36,7 @@ const matcher = new RegExpMatcher({
 // Helper function to check for profanity
 const containsProfanity = (formData: FormData) => {
   for (const pair of formData.entries()) {
-    if (matcher.hasMatch(pair[1] as string)) {
+    if (typeof pair[1] === "string" && matcher.hasMatch(pair[1])) {
       return true
     }
   }
@@ -74,7 +74,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -85,12 +85,22 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
+  const normalizeOptional = (value: FormDataEntryValue | null) => {
+    if (typeof value !== "string") {
+      return undefined
+    }
+
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : undefined
+  }
+
   const values = {
-    email: formData.get("email") as string,
+    email: (formData.get("email") as string).trim(),
     password: formData.get("password") as string,
     confirm_password: formData.get("confirm_password") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
+    first_name: (formData.get("first_name") as string).trim(),
+    last_name: normalizeOptional(formData.get("last_name")),
+    avatar_url: normalizeOptional(formData.get("avatar_url")),
   }
 
   if (containsProfanity(formData)) {
@@ -117,7 +127,8 @@ export async function signup(formData: FormData) {
     options: {
       data: {
         first_name: values.first_name,
-        last_name: values.last_name,
+        ...(values.last_name ? { last_name: values.last_name } : {}),
+        ...(values.avatar_url ? { avatar_url: values.avatar_url } : {}),
       },
       emailRedirectTo: getURL(),
     },
@@ -125,7 +136,7 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -138,7 +149,7 @@ export async function logout() {
 
   if (error) {
     console.error("Error: ", error.message)
-    redirect(`/auth-error?message=${error.message}`)
+    redirect(`/auth-error?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath("/", "layout")
@@ -158,18 +169,32 @@ export async function getUser() {
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient()
 
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser()
+
   if (containsProfanity(formData)) {
     return {
       message: "Watch your profamity 🤬",
     }
   }
 
+  const normalizeOptional = (value: FormDataEntryValue | null) => {
+    if (typeof value !== "string") {
+      return undefined
+    }
+
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : undefined
+  }
+
   const values = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    confirm_password: formData.get("confirm_password") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
+    email: normalizeOptional(formData.get("email")),
+    password: normalizeOptional(formData.get("password")),
+    confirm_password: normalizeOptional(formData.get("confirm_password")),
+    first_name: normalizeOptional(formData.get("first_name")),
+    last_name: normalizeOptional(formData.get("last_name")),
+    avatar_url: normalizeOptional(formData.get("avatar_url")),
   }
 
   const validatedFields = EditProfileSchema.safeParse(values)
@@ -186,6 +211,7 @@ export async function updateProfile(formData: FormData) {
     data?: {
       first_name?: string
       last_name?: string
+      avatar_url?: string
     }
   } = {}
 
@@ -195,14 +221,40 @@ export async function updateProfile(formData: FormData) {
     updateData.data = { ...updateData.data, first_name: values.first_name }
   if (values.last_name)
     updateData.data = { ...updateData.data, last_name: values.last_name }
+  if (values.avatar_url)
+    updateData.data = { ...updateData.data, avatar_url: values.avatar_url }
 
-  const { data, error } = await supabase.auth.updateUser(updateData)
+  const { error } = await supabase.auth.updateUser(updateData)
 
   if (error) {
     console.error("Error: ", error.message)
     redirect(`/auth-error?message=${error.message}`)
   }
 
+  const profileUpdate: {
+    first_name?: string
+    last_name?: string
+    avatar_url?: string | null
+  } = {}
+
+  if (values.first_name) profileUpdate.first_name = values.first_name
+  if (values.last_name) profileUpdate.last_name = values.last_name
+  if (values.avatar_url) profileUpdate.avatar_url = values.avatar_url
+
+  if (currentUser?.id && Object.keys(profileUpdate).length > 0) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(profileUpdate)
+      .eq("id", currentUser.id)
+
+    if (profileError) {
+      console.error("Error updating profile record:", profileError.message)
+    }
+  }
+
   revalidatePath("/", "layout")
+  if (currentUser?.id) {
+    revalidatePath(`/profile/${currentUser.id}`)
+  }
   redirect("/")
 }

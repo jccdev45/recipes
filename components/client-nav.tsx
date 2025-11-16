@@ -2,17 +2,9 @@
 
 import Link from "next/link"
 import { User } from "@supabase/supabase-js"
-import {
-  LogIn,
-  LogOut,
-  Menu,
-  UserCircle2,
-  UserIcon,
-  UserPen,
-} from "lucide-react"
+import { LogIn, LogOut, Menu, UserIcon, UserPen } from "lucide-react"
 
 import { NAV_LINKS } from "@/lib/constants"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -31,6 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { CurrentUserAvatar } from "@/components/current-user-avatar"
 import { Searchbar } from "@/app/recipes/search"
 
 export function ClientNav({
@@ -80,14 +73,23 @@ function MobileMenu({
           <div className="mt-6 space-y-6">
             <Searchbar />
             <Separator />
-            <nav className="flex flex-col space-y-4 *:w-fit *:text-foreground *:hover:text-primary">
+            <nav className="*:text-foreground flex flex-col space-y-4 *:w-fit">
               {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href}>
+                // TODO: Create NavLink component
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="hover:text-primary"
+                >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/terms">Terms of Service</Link>
-              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-primary">
+                Terms of Service
+              </Link>
+              <Link href="/privacy" className="hover:text-primary">
+                Privacy Policy
+              </Link>
             </nav>
           </div>
         </div>
@@ -111,16 +113,18 @@ function UserDropdown({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Avatar>
-          <AvatarImage
-            src={user?.user_metadata.avatar_url}
-            className="object-cover"
-          />
-          <AvatarFallback>
-            <UserCircle2 />
-          </AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger
+        className="focus-visible:ring-ring focus-visible:ring-offset-background rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+        aria-label={user ? "Open profile menu" : "Open account menu"}
+      >
+        <CurrentUserAvatar
+          className="border-border/60 border"
+          size="md"
+          initialFirstName={user?.user_metadata?.first_name}
+          initialLastName={user?.user_metadata?.last_name}
+          initialEmail={user?.email ?? null}
+          initialAvatarPath={user?.user_metadata?.avatar_url}
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {user ? (

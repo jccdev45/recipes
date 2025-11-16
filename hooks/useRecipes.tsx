@@ -1,14 +1,30 @@
-import { getRecipes } from "@/queries/recipe-queries"
-import { createClient } from "@/supabase/client"
-import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
+import { useQuery } from "@tanstack/react-query"
 
 import { Ingredient, Recipe, Tag, UnitMeasurement } from "@/lib/types"
 
-export function useRecipes() {
-  const supabase = createClient()
-  const { data, isLoading, error } = useQuery(getRecipes(supabase))
+type RecipesResponse = {
+  recipes: Recipe[]
+}
 
-  const recipes = data as Recipe[]
+export function useRecipes() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["recipes"],
+    queryFn: async () => {
+      const response = await fetch("/api/recipes", {
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || "Failed to load recipes")
+      }
+
+      const payload = (await response.json()) as RecipesResponse
+      return payload.recipes ?? []
+    },
+  })
+
+  const recipes = Array.isArray(data) ? [...data] : []
   const ingredientMap = new Map<string, Ingredient>()
   const tagMap = new Map<string, Tag>()
   const unitSet = new Set<string>()
@@ -17,7 +33,15 @@ export function useRecipes() {
   recipes.forEach((recipe, recipeIndex) => {
     if (recipe.author) authorSet.add(recipe.author)
 
-    recipe.ingredients.forEach((ingredient: Ingredient, ingredientIndex) => {
+    recipe.commentCount = recipe.commentCount ?? 0
+    recipe.isFavorite = recipe.isFavorite ?? false
+
+    const ingredients = Array.isArray(recipe.ingredients)
+      ? recipe.ingredients
+      : []
+    recipe.ingredients = ingredients
+
+    ingredients.forEach((ingredient: Ingredient, ingredientIndex) => {
       const uniqueId = `${recipeIndex}-${ingredientIndex}`
       if (ingredient.ingredient) {
         ingredientMap.set(ingredient.ingredient, {
@@ -28,7 +52,10 @@ export function useRecipes() {
       if (ingredient.unitMeasurement) unitSet.add(ingredient.unitMeasurement)
     })
 
-    recipe.tags.forEach((tag: Tag, tagIndex) => {
+    const tags = Array.isArray(recipe.tags) ? recipe.tags : []
+    recipe.tags = tags
+
+    tags.forEach((tag: Tag, tagIndex) => {
       const uniqueId = `${recipeIndex}-${tagIndex}`
       if (tag.tag) {
         tagMap.set(tag.tag, { ...tag, id: uniqueId })
@@ -36,9 +63,10 @@ export function useRecipes() {
     })
 
     // Ensure steps are unique within each recipe
-    recipe.steps = Array.from(
-      new Set(recipe.steps.map((step) => step.step))
-    ).map((step, index) => ({ id: `${recipeIndex}-${index}`, step }))
+    const steps = Array.isArray(recipe.steps) ? recipe.steps : []
+    recipe.steps = Array.from(new Set(steps.map((step) => step.step))).map(
+      (step, index) => ({ id: `${recipeIndex}-${index}`, step })
+    )
   })
 
   const additionalUnits: UnitMeasurement[] = [
@@ -50,8 +78,14 @@ export function useRecipes() {
   ]
   additionalUnits.forEach((unit) => unitSet.add(unit))
 
+  const normalizedError = error
+    ? error instanceof Error
+      ? error
+      : new Error("Failed to load recipes")
+    : null
+
   return {
-    error,
+    error: normalizedError,
     isLoading,
     recipes,
     authors: Array.from(authorSet),

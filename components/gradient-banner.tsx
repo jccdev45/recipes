@@ -15,9 +15,9 @@ interface GradientBannerProps {
 }
 
 const gradientVariants: Record<Exclude<GradientVariant, "custom">, string> = {
-  primary: "bg-gradient-to-r from-blue-500 to-purple-500",
-  secondary: "bg-gradient-to-r from-green-400 to-blue-500",
-  accent: "bg-gradient-to-r from-red-500 to-yellow-500",
+  primary: "bg-linear-to-r from-blue-500 to-purple-500",
+  secondary: "bg-linear-to-r from-green-400 to-blue-500",
+  accent: "bg-linear-to-r from-red-500 to-yellow-500",
 }
 
 const sizeVariants: Record<BannerSize, string> = {
@@ -37,7 +37,7 @@ export function GradientBanner({
 }: GradientBannerProps) {
   const gradientClass =
     variant === "custom" && customStart && customEnd
-      ? `bg-gradient-to-r ${customStart} ${customEnd}`
+      ? `bg-linear-to-r ${customStart} ${customEnd}`
       : gradientVariants[variant as keyof typeof gradientVariants]
 
   return (

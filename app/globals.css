@@ -1,77 +1,174 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+@config "../tailwind.config.ts";
+
+/*
+  Preserve legacy border behavior until the design system refresh lands.
+*/
 @layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --popover: 210 40% 98%;
-    --popover-foreground: 222 47% 11%;
-    --card: 210 40% 98%;
-    --card-foreground: 222 47% 11%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 3 74% 65%;
-    --secondary-foreground: 210 40% 98%;
-    --accent: 36 100% 50%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 221 83% 53%;
+    --background: 0.97 0.01 70;
+    --foreground: 0.19 0.02 45;
+    --muted: 0.86 0.02 60;
+    --muted-foreground: 0.4 0.03 55;
+    --popover: 0.94 0.01 68;
+    --popover-foreground: 0.21 0.02 45;
+    --card: 0.95 0.01 68;
+    --card-foreground: 0.21 0.02 45;
+    --border: 0.82 0.02 70;
+    --input: 0.82 0.02 70;
+    --primary: 0.61 0.14 32;
+    --primary-foreground: 0.98 0.01 70;
+    --secondary: 0.68 0.09 140;
+    --secondary-foreground: 0.18 0.03 150;
+    --accent: 0.74 0.09 95;
+    --accent-foreground: 0.19 0.03 55;
+    --destructive: 0.55 0.21 25;
+    --destructive-foreground: 0.98 0.01 70;
+    --ring: 0.61 0.14 32;
     --radius: 0.75rem;
+    --sidebar: 0.96 0.01 68;
+    --sidebar-foreground: 0.21 0.02 45;
+    --sidebar-primary: 0.61 0.14 32;
+    --sidebar-primary-foreground: 0.98 0.01 70;
+    --sidebar-accent: 0.88 0.02 60;
+    --sidebar-accent-foreground: 0.22 0.02 50;
+    --sidebar-border: 0.82 0.02 70;
+    --sidebar-ring: 0.61 0.14 32;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 3 74% 65%;
-    --secondary-foreground: 222 47% 11%;
-    --accent: 36 100% 50%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 221 83% 53%;
+    --background: 0.24 0.02 48;
+    --foreground: 0.93 0.02 80;
+    --muted: 0.38 0.02 60;
+    --muted-foreground: 0.8 0.02 82;
+    --popover: 0.3 0.03 52;
+    --popover-foreground: 0.93 0.02 80;
+    --card: 0.29 0.03 52;
+    --card-foreground: 0.93 0.02 80;
+    --border: 0.36 0.02 55;
+    --input: 0.36 0.02 55;
+    --primary: 0.72 0.14 32;
+    --primary-foreground: 0.18 0.02 45;
+    --secondary: 0.76 0.09 140;
+    --secondary-foreground: 0.18 0.03 150;
+    --accent: 0.62 0.07 95;
+    --accent-foreground: 0.93 0.02 80;
+    --destructive: 0.6 0.21 25;
+    --destructive-foreground: 0.94 0.02 80;
+    --ring: 0.72 0.14 32;
+    --sidebar: 0.31 0.02 50;
+    --sidebar-foreground: 0.93 0.02 80;
+    --sidebar-primary: 0.72 0.14 32;
+    --sidebar-primary-foreground: 0.18 0.02 45;
+    --sidebar-accent: 0.4 0.02 60;
+    --sidebar-accent-foreground: 0.9 0.02 82;
+    --sidebar-border: 0.4 0.02 55;
+    --sidebar-ring: 0.72 0.14 32;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground scroll-smooth font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .heading-xl {
+    font-family: var(--font-sans);
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .heading-lg {
+    font-family: var(--font-sans);
+    font-size: 2.25rem;
+    line-height: 1.111;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .heading-md {
+    font-family: var(--font-sans);
+    font-size: 1.875rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .heading-sm {
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    line-height: 1.333;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .container-padding-x {
+    padding-inline: 1.5rem;
+  }
+
+  .section-padding-y {
+    padding-block: 6rem;
+  }
+
+  .section-title-gap-xl {
+    gap: 1.5rem;
+  }
+
+  .section-title-gap-lg {
+    gap: 1.25rem;
+  }
+
+  .section-title-gap-md {
+    gap: 1.25rem;
+  }
+
+  .section-title-gap-sm {
+    gap: 1rem;
   }
 }
 
-* {
-  @apply border-border;
-}
-body {
-  @apply bg-background font-sans text-foreground;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @apply font-heading;
-}
-
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  opacity: 1;
-}
-
-.animate-in {
-  animation: animateIn 0.3s ease 0.15s both;
+@layer utilities {
+  .animate-in {
+    animation: animateIn 0.3s ease 0.15s both;
+  }
 }
 
 @keyframes animateIn {
@@ -79,8 +176,88 @@ input[type="number"]::-webkit-outer-spin-button {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@theme inline {
+  --color-sidebar: oklch(var(--sidebar));
+  --color-sidebar-foreground: oklch(var(--sidebar-foreground));
+  --color-sidebar-primary: oklch(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: oklch(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: oklch(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: oklch(var(--sidebar-accent-foreground));
+  --color-sidebar-border: oklch(var(--sidebar-border));
+  --color-sidebar-ring: oklch(var(--sidebar-ring));
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+}
+
+@media (max-width: 64rem) {
+  .heading-xl {
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+
+  .heading-lg {
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+
+  .heading-md {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .heading-sm {
+    font-size: 1.5rem;
+    line-height: 1.333;
+  }
+
+  .container-padding-x {
+    padding-inline: 1.5rem;
+  }
+
+  .section-padding-y {
+    padding-block: 4rem;
+  }
+
+  .section-title-gap-xl {
+    gap: 1rem;
+  }
+
+  .section-title-gap-lg {
+    gap: 1rem;
+  }
+
+  .section-title-gap-md {
+    gap: 1rem;
+  }
+
+  .section-title-gap-sm {
+    gap: 1rem;
   }
 }

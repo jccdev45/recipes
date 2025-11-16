@@ -9,6 +9,11 @@ import { Recipe } from "@/lib/types"
 
 import type { User } from "@supabase/supabase-js"
 
+type RecipePreview = Pick<
+  Recipe,
+  "id" | "slug" | "recipe_name" | "author" | "quote" | "tags"
+>
+
 interface QueryParams {
   filters?: { column: string; value: any }
   order?: {
@@ -22,8 +27,8 @@ interface QueryParams {
 
 export interface GetAllOptions {
   db: string
+  select: string
   params?: QueryParams
-  column?: string
 }
 
 export async function getAuthUser(
@@ -45,10 +50,10 @@ export async function getAll(
   supabase: SupabaseClient
   // TODO: add proper typing
 ): Promise<any[] | null> {
-  const { db, column, params } = options
+  const { db, select, params } = options
 
   try {
-    let query = supabase.from(db).select(column && column)
+    let query = supabase.from(db).select(select)
     if (params) {
       if (params.filters) {
         // supabase.from("recipes").select('user_id').eq('user_id', user_id)
@@ -71,32 +76,17 @@ export async function getAll(
 export async function getOne(
   supabase: SupabaseClient,
   db: string,
+  select: string,
   params?: QueryParams
 ): Promise<any> {
   try {
-    let query = supabase.from(db).select()
+    let query = supabase.from(db).select(select)
     if (params) {
       if (params.filters) {
         query = query.eq(params.filters.column, params.filters.value)
       }
     }
     const { data } = await query.single()
-    return data
-  } catch (error) {
-    console.error("Error: ", error)
-    return null
-  }
-}
-
-export async function searchRecipes(
-  supabase: SupabaseClient,
-  searchTerm: string
-): Promise<Recipe[] | null> {
-  try {
-    const { data } = await supabase
-      .from("recipes")
-      .select()
-      .textSearch("search_vector", searchTerm)
     return data
   } catch (error) {
     console.error("Error: ", error)

@@ -16,7 +16,7 @@ const typographyVariants = cva("", {
       large: "text-lg font-semibold",
       lead: "text-xl text-muted-foreground",
       muted: "text-sm text-muted-foreground",
-      p: "leading-7 [&:not(:first-child)]:mt-6",
+      p: "leading-7 not-first:mt-6",
       blockquote: "pl-6 mt-6 italic border-l-2",
       small: "text-sm font-medium leading-none",
       list: "my-6 md:ml-6 list-disc [&>li]:mt-2",

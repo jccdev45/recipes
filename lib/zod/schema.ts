@@ -4,13 +4,9 @@ import { maxAmount, minAmount } from "../constants"
 
 const sharedFields = {
   auth: {
-    email: z
-      .string({ invalid_type_error: "Invalid email" })
-      .email({ message: "Must be a valid email" }),
+    email: z.string().email({ message: "Must be a valid email" }),
     password: z
-      .string({
-        invalid_type_error: "Invalid password",
-      })
+      .string()
       .min(8, { message: "Password must be at least 8 characters" })
       .max(32, { message: "Password must be less than 32 characters" })
       .regex(/[a-z]/, {
@@ -36,6 +32,13 @@ const sharedFields = {
       .optional(),
   },
 }
+
+const avatarPathSchema = z
+  .string()
+  .min(1, { message: "Avatar path must include at least one character" })
+  .max(2048, {
+    message: "Avatar path must be less than 2048 characters",
+  })
 
 export const IngredientSchema = z.array(
   z.object({
@@ -77,12 +80,16 @@ export const TagSchema = z
 export const RecipeFormSchema = z.object({
   recipe_name: z
     .string()
+    .trim()
     .min(3, { message: "Name must be at least 3 characters" })
     .max(50, { message: "Name must be less than 50 characters" }),
   quote: z
     .string()
-    .min(3, { message: "Quote must be at least 3 characters" })
-    .max(50, { message: "Quote must be less than 50 characters" }),
+    .trim()
+    .max(50, { message: "Quote must be less than 50 characters" })
+    .refine((value) => value.length === 0 || value.length >= 3, {
+      message: "Quote must be at least 3 characters",
+    }),
   ingredients: IngredientSchema,
   steps: StepSchema,
   tags: TagSchema,
@@ -97,6 +104,7 @@ export const RegisterSchema = z
     ...sharedFields.auth,
     ...sharedFields.user,
     confirm_password: z.string(),
+    avatar_url: avatarPathSchema.optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",
@@ -108,6 +116,7 @@ export const EditProfileSchema = z
     ...sharedFields.auth,
     ...sharedFields.user,
     confirm_password: z.string(),
+    avatar_url: avatarPathSchema,
   })
   .partial()
   .refine(

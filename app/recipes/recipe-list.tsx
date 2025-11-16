@@ -1,99 +1,322 @@
 "use client"
 
-import { Suspense, useMemo, useState } from "react"
+import { useMemo } from "react"
+import Link from "next/link"
+import { User } from "@supabase/supabase-js"
+import { LayoutGrid, PanelLeft, SlidersHorizontal } from "lucide-react"
 
-import { FilterState, Recipe } from "@/lib/types"
-import { useRecipes } from "@/hooks/useRecipes"
-import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
+import { FilterSidebarTrigger } from "@/components/filter-sidebar-trigger"
+import { useRecipeFilters } from "@/app/recipes/filter-sidebar"
 import { RecipeCard } from "@/app/recipes/recipe-card"
-import { RecipeFilter } from "@/app/recipes/recipe-filter"
 
-export function RecipeList() {
-  const { recipes: data, isLoading, error } = useRecipes()
-  const [filters, setFilters] = useState<FilterState>({
-    authors: [],
-    tags: [],
-    ingredients: [],
-  })
+import type { DisplayMode } from "@/app/recipes/filter-sidebar"
+
+interface RecipeListProps {
+  user: User | null
+  searchTerm?: string
+}
+
+export function RecipeList({ user, searchTerm }: RecipeListProps) {
+  const {
+    recipes,
+    isLoading,
+    error,
+    selectedAuthors,
+    selectedTags,
+    selectedIngredients,
+    appliedFilterCount,
+    displayMode,
+    setDisplayMode,
+    clearAllFilters,
+  } = useRecipeFilters()
+  const { toggleSidebar } = useSidebar()
+
+  const normalizedSearchTerm = searchTerm?.trim().toLowerCase() ?? ""
+  const hasSearchTerm = normalizedSearchTerm.length > 0
+  const baseRecipes = Array.isArray(recipes) ? recipes : []
+
+  const searchScopedRecipes = useMemo(() => {
+    if (!hasSearchTerm) {
+      return baseRecipes
+    }
+
+    const matchesSearch = (value?: string | null) =>
+      typeof value === "string" &&
+      value.toLowerCase().includes(normalizedSearchTerm)
+
+    return baseRecipes.filter((recipe) => {
+      if (matchesSearch(recipe.recipe_name)) return true
+      if (matchesSearch(recipe.author)) return true
+      if (matchesSearch(recipe.quote ?? "")) return true
+
+      const tagMatch = recipe.tags.some((recipeTag) =>
+        matchesSearch(recipeTag.tag)
+      )
+
+      if (tagMatch) return true
+
+      const ingredientMatch = recipe.ingredients.some((recipeIngredient) =>
+        matchesSearch(recipeIngredient.ingredient)
+      )
+
+      if (ingredientMatch) return true
+
+      return recipe.steps?.some((step) => matchesSearch(step.step)) ?? false
+    })
+  }, [baseRecipes, hasSearchTerm, normalizedSearchTerm])
+
+  const filteredRecipes = useMemo(() => {
+    const hasAuthorFilters = selectedAuthors.length > 0
+    const hasTagFilters = selectedTags.length > 0
+    const hasIngredientFilters = selectedIngredients.length > 0
+
+    if (!hasAuthorFilters && !hasTagFilters && !hasIngredientFilters) {
+      return searchScopedRecipes
+    }
+
+    return searchScopedRecipes.filter((recipe) => {
+      const matchesAuthor =
+        hasAuthorFilters &&
+        recipe.author !== undefined &&
+        recipe.author !== null
+          ? selectedAuthors.includes(recipe.author)
+          : false
+      const matchesTag =
+        hasTagFilters && recipe.tags.length > 0
+          ? recipe.tags.some((recipeTag) =>
+              selectedTags.includes(recipeTag.tag)
+            )
+          : false
+      const matchesIngredient =
+        hasIngredientFilters && recipe.ingredients.length > 0
+          ? recipe.ingredients.some((recipeIngredient) =>
+              selectedIngredients.includes(recipeIngredient.ingredient)
+            )
+          : false
+
+      return matchesAuthor || matchesTag || matchesIngredient
+    })
+  }, [searchScopedRecipes, selectedAuthors, selectedTags, selectedIngredients])
+
+  const hasActiveFilters = appliedFilterCount > 0
+  const displayRecipes = hasActiveFilters
+    ? filteredRecipes
+    : searchScopedRecipes
+  const totalRecipes = searchScopedRecipes.length
+  const visibleRecipes = displayRecipes.length
+  const searchReturnsEmpty = hasSearchTerm && totalRecipes === 0
+  const filterReturnsEmpty =
+    !searchReturnsEmpty && hasActiveFilters && visibleRecipes === 0
+  const isCompactLayout = displayMode === "compact"
+  const summaryMessage = (() => {
+    if (searchReturnsEmpty) {
+      return searchTerm
+        ? `No recipes matched “${searchTerm}”.`
+        : "No recipes matched your search."
+    }
+
+    if (totalRecipes === 0) {
+      return "No recipes to show yet. Check back soon or add your first recipe."
+    }
+
+    if (filterReturnsEmpty) {
+      return "No recipes match your current filters."
+    }
+
+    if (hasSearchTerm && hasActiveFilters) {
+      return `Showing ${visibleRecipes} of ${totalRecipes} recipes matching “${searchTerm}”.`
+    }
+
+    if (hasSearchTerm) {
+      return `Showing ${visibleRecipes} recipes matching “${searchTerm}”.`
+    }
+
+    if (hasActiveFilters) {
+      return `Showing ${visibleRecipes} of ${totalRecipes} recipes`
+    }
+
+    return `Showing all ${visibleRecipes} recipes`
+  })()
 
   if (error) {
-    return <div>Error loading recipes</div>
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12">
+        <ErrorDisplay
+          error="Something went wrong while loading recipes. Please try refreshing the page or come back later."
+          title="We hit a snag"
+          role="alert"
+        />
+      </div>
+    )
   }
 
   if (isLoading) {
-    return <Spinner size="2xl" />
+    return (
+      <div className="flex w-full justify-center px-4 py-16">
+        <Spinner size="2xl" />
+      </div>
+    )
   }
-
-  const recipes = data as Recipe[]
-
-  const filteredRecipes = useMemo(() => {
-    return recipes.filter((recipe) => {
-      const authorMatch =
-        filters.authors.length === 0 || filters.authors.includes(recipe.author)
-      const tagMatch =
-        filters.tags.length === 0 ||
-        filters.tags.some((filterTag) =>
-          recipe.tags.some((recipeTag) => recipeTag.tag === filterTag.tag)
-        )
-      const ingredientMatch =
-        filters.ingredients.length === 0 ||
-        filters.ingredients.some((filterIngredient) =>
-          recipe.ingredients.some(
-            (recipeIngredient) =>
-              recipeIngredient.ingredient === filterIngredient.ingredient
-          )
-        )
-      return authorMatch && tagMatch && ingredientMatch
-    })
-  }, [recipes, filters])
-
-  const handleFilterChange = (
-    newFilters: FilterState | ((prevFilters: FilterState) => FilterState)
-  ) => {
-    setFilters((prevFilters) => {
-      if (typeof newFilters === "function") {
-        return newFilters(prevFilters)
-      }
-      return newFilters
-    })
-  }
-
-  const displayRecipes = filteredRecipes.length > 0 ? filteredRecipes : recipes
 
   return (
-    <section className="mx-auto flex flex-col items-center justify-center p-8">
-      <div className="mb-6 flex w-full max-w-3xl flex-col items-center gap-4 rounded-lg border border-foreground/50 bg-muted p-4 pt-4 text-muted-foreground md:top-8 md:w-full md:p-8">
-        <Typography variant="h3">Filter Results</Typography>
-        <RecipeFilter filters={filters} onFilterChange={handleFilterChange} />
-      </div>
-      <Suspense fallback={<RecipeListFallback />}>
-        {displayRecipes.length > 0 ? (
-          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+    <section
+      aria-labelledby="recipe-results-heading"
+      className="mx-auto w-full max-w-6xl px-4 pb-16 lg:px-6"
+    >
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="w-full space-y-2 text-center lg:text-left">
+            <Typography
+              id="recipe-results-heading"
+              variant="h2"
+              className="text-3xl font-semibold tracking-tight"
+            >
+              {searchTerm
+                ? `Recipes matching “${searchTerm}”`
+                : "Browse recipes"}
+            </Typography>
+            <div className="flex items-center justify-between">
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-2">
+                  <FilterSidebarTrigger />
+                  <Typography variant="muted" className="text-sm">
+                    {summaryMessage}
+                  </Typography>
+                </div>
+                <LayoutToggle
+                  value={displayMode}
+                  onChange={setDisplayMode}
+                  className="mt-4 hidden w-full sm:mt-0 sm:block sm:max-w-xs"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-center lg:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="inline-flex items-center gap-2"
+              onClick={toggleSidebar}
+            >
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              Filters
+              {appliedFilterCount > 0 ? (
+                <Badge
+                  variant="secondary"
+                  className="ml-1 inline-flex min-w-6 justify-center"
+                >
+                  {appliedFilterCount}
+                </Badge>
+              ) : null}
+            </Button>
+          </div>
+        </header>
+
+        {searchReturnsEmpty ? (
+          <Alert>
+            <AlertTitle>No recipes found</AlertTitle>
+            <AlertDescription>
+              {searchTerm
+                ? `No recipes matched “${searchTerm}”. Try another keyword or explore all dishes.`
+                : "No recipes matched your search. Try different keywords."}
+            </AlertDescription>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button asChild variant="outline" size="sm">
+                <Link href="/recipes">Clear search</Link>
+              </Button>
+              <FilterSidebarTrigger />
+            </div>
+          </Alert>
+        ) : filterReturnsEmpty ? (
+          <Alert>
+            <AlertTitle>No matches found</AlertTitle>
+            <AlertDescription>
+              Try removing a filter or adjusting your selections. You can also
+              clear all filters to view every recipe.
+            </AlertDescription>
+            <div className="mt-4">
+              <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                Clear all filters
+              </Button>
+            </div>
+          </Alert>
+        ) : (
+          <div
+            className={cn(
+              "w-full",
+              isCompactLayout
+                ? "grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
+                : "flex flex-col gap-6"
+            )}
+          >
             {displayRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} display="wide" />
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                user={user}
+                display={displayMode}
+              />
             ))}
           </div>
-        ) : (
-          <div className="text-center">
-            <Typography variant="h3">No recipes found</Typography>
-            <Typography variant="p" className="mt-2">
-              Try adjusting your search or filters, or add a new recipe.
-            </Typography>
-          </div>
         )}
-      </Suspense>
+      </div>
     </section>
   )
 }
 
-function RecipeListFallback() {
+interface LayoutToggleProps {
+  value: DisplayMode
+  onChange: (value: DisplayMode) => void
+  className?: string
+}
+
+function LayoutToggle({ value, onChange, className }: LayoutToggleProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 12 }).map((_, index) => (
-        <Skeleton key={index} />
-      ))}
+    <div className={cn("space-y-2", className)}>
+      <Typography
+        variant="small"
+        className="text-muted-foreground text-xs font-medium tracking-wide uppercase"
+      >
+        Card layout
+      </Typography>
+      <ToggleGroup
+        type="single"
+        value={value}
+        onValueChange={(layout) => {
+          if (layout === "wide" || layout === "compact") {
+            onChange(layout)
+          }
+        }}
+        className="flex w-full justify-start gap-2 sm:justify-end"
+        aria-label="Card layout"
+      >
+        <ToggleGroupItem
+          value="wide"
+          aria-label="Use wide card layout"
+          className="flex-1 gap-2"
+        >
+          <PanelLeft className="h-4 w-4" aria-hidden="true" />
+          Wide
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="compact"
+          aria-label="Use compact card layout"
+          className="flex-1 gap-2"
+        >
+          <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+          Compact
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   )
 }

@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { CheckIcon, ChevronsUpDown } from "lucide-react"
-import { ControllerRenderProps, FieldPath, FieldValues } from "react-hook-form"
 
-import { cn, genId } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -11,7 +10,6 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command"
-import { FormControl } from "@/components/ui/form"
 import {
   Popover,
   PopoverContent,
@@ -20,40 +18,47 @@ import {
 
 type ComboboxItem = string | { id?: string; tag: string }
 
-type ComboboxProps<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
-> = {
-  className: string
-  field: ControllerRenderProps<TFieldValues, TName>
-  index: number
-  update: (index: number, value: ComboboxItem) => void
+type ComboboxProps = {
+  className?: string
+  id?: string
+  value?: string
+  onSelect: (value: ComboboxItem) => void
   items: ComboboxItem[]
   placeholder: string
+  disabled?: boolean
+  ariaInvalid?: boolean
+  ariaDescribedBy?: string
 }
 
-export function FormCombobox<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
+export function FormCombobox({
   className,
-  field,
-  index,
-  update,
+  id,
+  value,
+  onSelect,
   items,
   placeholder,
-}: ComboboxProps<TFieldValues, TName>) {
-  const [value, setValue] = useState("")
+  disabled,
+  ariaInvalid,
+  ariaDescribedBy,
+}: ComboboxProps) {
+  const [open, setOpen] = useState(false)
 
   return (
-    <Popover>
-      <PopoverTrigger asChild className={cn(``, className)}>
-        <FormControl>
-          <Button variant="outline" className="justify-between" role="combobox">
-            {field.value || placeholder}
-            <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
-          </Button>
-        </FormControl>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild className={cn(className)} disabled={disabled}>
+        <Button
+          id={id}
+          variant="outline"
+          className="justify-between"
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedBy}
+        >
+          {value || placeholder}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
@@ -66,26 +71,25 @@ export function FormCombobox<
             {items.map((item) => {
               const itemValue = typeof item === "string" ? item : item.tag
               const itemId =
-                typeof item === "string" ? genId() : item.id || genId()
+                typeof item === "string" ? item : item.id || item.tag
               return (
                 <CommandItem
                   key={itemId}
                   value={itemValue}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
-                    update(
-                      index,
+                    onSelect(
                       typeof item === "string"
                         ? currentValue
-                        : { id: itemId, tag: currentValue }
+                        : { ...item, tag: currentValue }
                     )
+                    setOpen(false)
                   }}
                 >
                   {itemValue}
                   <CheckIcon
                     className={cn(
                       "ml-auto h-4 w-4",
-                      itemValue === field.value ? "opacity-100" : "opacity-0"
+                      itemValue === value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

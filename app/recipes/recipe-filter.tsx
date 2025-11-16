@@ -1,182 +1,208 @@
 "use client"
 
-import { X } from "lucide-react"
+import { useMemo } from "react"
+import { Check } from "lucide-react"
 
-import { FilterState, Ingredient, Recipe, Tag } from "@/lib/types"
-import { useRecipes } from "@/hooks/useRecipes"
-import { Badge } from "@/components/ui/badge"
+import { Ingredient, Tag } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { FilterCombobox } from "@/app/recipes/filter-combobox"
+import { Typography } from "@/components/ui/typography"
+import {
+  Tags,
+  TagsContent,
+  TagsEmpty,
+  TagsGroup,
+  TagsInput,
+  TagsItem,
+  TagsList,
+  TagsTrigger,
+  TagsValue,
+} from "@/components/tags"
 
-interface FilterProps {
-  filters: FilterState
-  onFilterChange: (
-    filters: FilterState | ((prevFilters: FilterState) => FilterState)
-  ) => void
+interface RecipeFilterProps {
+  authors: string[]
+  appliedFilterCount: number
+  tags: Tag[]
+  ingredients: Ingredient[]
+  selectedAuthors: string[]
+  selectedTags: string[]
+  selectedIngredients: string[]
+  onToggleAuthor: (author: string) => void
+  onToggleTag: (tag: string) => void
+  onToggleIngredient: (ingredient: string) => void
+  onClearAll: () => void
 }
 
-export function RecipeFilter({ filters, onFilterChange }: FilterProps) {
-  const { authors, ingredients, tags } = useRecipes()
+type FilterOption = {
+  label: string
+  value: string
+}
 
-  const handleAuthorSelect = (author: string | null) => {
-    if (author) {
-      onFilterChange({
-        ...filters,
-        authors: filters.authors.includes(author)
-          ? filters.authors.filter((a) => a !== author)
-          : [...filters.authors, author],
-      })
-    }
-  }
-
-  const handleTagSelect = (tag: Tag | null) => {
-    if (tag) {
-      onFilterChange({
-        ...filters,
-        tags: filters.tags.some((t) => t.tag === tag.tag)
-          ? filters.tags.filter((t) => t.tag !== tag.tag)
-          : [...filters.tags, tag],
-      })
-    }
-  }
-
-  const handleIngredientSelect = (ingredient: Ingredient | null) => {
-    if (ingredient) {
-      onFilterChange({
-        ...filters,
-        ingredients: filters.ingredients.some(
-          (i) => i.ingredient === ingredient.ingredient
-        )
-          ? filters.ingredients.filter(
-              (i) => i.ingredient !== ingredient.ingredient
-            )
-          : [...filters.ingredients, ingredient],
-      })
-    }
-  }
-
+function FilterSection({
+  label,
+  placeholder,
+  options,
+  selected,
+  onToggle,
+  emptyText,
+}: {
+  label: string
+  placeholder: string
+  options: FilterOption[]
+  selected: string[]
+  onToggle: (value: string) => void
+  emptyText: string
+}) {
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
-        <FilterCombobox<string>
-          items={authors}
-          placeholder="Search author..."
-          emptyText="No author found."
-          selectedItems={filters.authors}
-          onSelect={handleAuthorSelect}
-          getLabel={(author) => author}
-          getValue={(author) => author}
-        />
-        <FilterCombobox<Tag>
-          items={tags}
-          placeholder="Search tag..."
-          emptyText="No tag found."
-          selectedItems={filters.tags}
-          onSelect={handleTagSelect}
-          getLabel={(tag) => tag.tag}
-          getValue={(tag) => tag.id || tag.tag}
-        />
-        <FilterCombobox<Ingredient>
-          items={ingredients}
-          placeholder="Search ingredient..."
-          emptyText="No ingredient found."
-          selectedItems={filters.ingredients}
-          onSelect={handleIngredientSelect}
-          getLabel={(ingredient) => ingredient.ingredient}
-          getValue={(ingredient) => ingredient.id || ingredient.ingredient}
-        />
-      </div>
-      <div className="flex flex-col items-center justify-center gap-2">
-        <DisplayCurrentFilters
-          filters={filters}
-          onFilterChange={onFilterChange}
-        />
-      </div>
-    </>
+    <div className="space-y-2">
+      <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+        {label}
+      </p>
+      <Tags className="w-full">
+        <TagsTrigger
+          placeholder={placeholder}
+          aria-label={`Filter recipes by ${label.toLowerCase()}`}
+        >
+          {selected.map((value) => (
+            <TagsValue
+              key={value}
+              onRemove={() => onToggle(value)}
+              aria-label={`Remove ${label} filter ${value}`}
+            >
+              {value}
+            </TagsValue>
+          ))}
+        </TagsTrigger>
+        <TagsContent align="start">
+          <TagsInput placeholder={`Search ${label.toLowerCase()}...`} />
+          <TagsList>
+            <TagsEmpty>{emptyText}</TagsEmpty>
+            <TagsGroup>
+              {options.map((option) => {
+                const isSelected = selected.includes(option.value)
+                return (
+                  <TagsItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={() => onToggle(option.value)}
+                    aria-selected={isSelected}
+                    aria-checked={isSelected}
+                  >
+                    <span>{option.label}</span>
+                    {isSelected ? (
+                      <Check
+                        className="text-primary ml-2 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </TagsItem>
+                )
+              })}
+            </TagsGroup>
+          </TagsList>
+        </TagsContent>
+      </Tags>
+    </div>
   )
 }
 
-function DisplayCurrentFilters({ filters, onFilterChange }: FilterProps) {
-  function handleRemoveTag(tag: Tag) {
-    return () =>
-      onFilterChange({
-        ...filters,
-        tags: filters.tags.filter((item) => item !== tag),
-      })
-  }
+export function RecipeFilter({
+  authors,
+  appliedFilterCount,
+  tags,
+  ingredients,
+  selectedAuthors,
+  selectedTags,
+  selectedIngredients,
+  onToggleAuthor,
+  onToggleTag,
+  onToggleIngredient,
+  onClearAll,
+}: RecipeFilterProps) {
+  const authorOptions = useMemo<FilterOption[]>(
+    () =>
+      [...authors]
+        .sort((a, b) => a.localeCompare(b))
+        .map((author) => ({
+          label: author,
+          value: author,
+        })),
+    [authors]
+  )
 
-  function handleRemoveIngredient(ingredient: Ingredient) {
-    return () =>
-      onFilterChange({
-        ...filters,
-        ingredients: filters.ingredients.filter((item) => item !== ingredient),
-      })
-  }
+  const tagOptions = useMemo<FilterOption[]>(
+    () =>
+      [...tags]
+        .sort((a, b) => a.tag.localeCompare(b.tag))
+        .map((tag) => ({
+          label: tag.tag,
+          value: tag.tag,
+        })),
+    [tags]
+  )
 
-  function handleRemoveAuthor(author: string) {
-    return () =>
-      onFilterChange({
-        ...filters,
-        authors: filters.authors.filter((item) => item !== author),
-      })
-  }
+  const ingredientOptions = useMemo<FilterOption[]>(
+    () =>
+      [...ingredients]
+        .sort((a, b) => a.ingredient.localeCompare(b.ingredient))
+        .map((ingredient) => ({
+          label: ingredient.ingredient,
+          value: ingredient.ingredient,
+        })),
+    [ingredients]
+  )
+
+  const hasFilters =
+    selectedAuthors.length + selectedTags.length + selectedIngredients.length >
+    0
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2">
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {filters.authors.map((author) => (
-          <Badge key={author} variant="default" className="relative">
-            {author}
+    <div className="space-y-6">
+      <FilterSection
+        label="Authors"
+        placeholder="Select authors"
+        options={authorOptions}
+        selected={selectedAuthors}
+        onToggle={onToggleAuthor}
+        emptyText="No authors found."
+      />
+      <FilterSection
+        label="Tags"
+        placeholder="Select tags"
+        options={tagOptions}
+        selected={selectedTags}
+        onToggle={onToggleTag}
+        emptyText="No tags found."
+      />
+      <FilterSection
+        label="Ingredients"
+        placeholder="Select ingredients"
+        options={ingredientOptions}
+        selected={selectedIngredients}
+        onToggle={onToggleIngredient}
+        emptyText="No ingredients found."
+      />
+
+      <div className="flex items-center justify-between">
+        {hasFilters ? (
+          <div className="space-y-2">
+            <Typography variant="p">
+              Applying{" "}
+              <span className="text-secondary">{appliedFilterCount}</span>{" "}
+              filters.
+            </Typography>
             <Button
-              variant="destructive"
-              size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
-              onClick={handleRemoveAuthor(author)}
+              variant="outline"
+              size="sm"
+              onClick={onClearAll}
+              aria-label="Clear all applied filters"
             >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
+              Clear filters
             </Button>
-          </Badge>
-        ))}
-        {filters.tags.map((tag) => (
-          <Badge key={tag.tag} variant="default" className="relative">
-            {tag.tag}
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
-              onClick={handleRemoveTag(tag)}
-            >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
-            </Button>
-          </Badge>
-        ))}
-        {filters.ingredients.map((ingredient) => (
-          <Badge
-            key={ingredient.ingredient}
-            variant="default"
-            className="relative"
-          >
-            {ingredient.ingredient}
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute -right-2 -top-1/2 size-6 scale-50 rounded-full p-0"
-              onClick={handleRemoveIngredient(ingredient)}
-            >
-              <X className="rounded-full border border-destructive-foreground text-foreground" />
-            </Button>
-          </Badge>
-        ))}
+          </div>
+        ) : (
+          <Typography variant="p">No filters applied yet.</Typography>
+        )}
       </div>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() =>
-          onFilterChange({ authors: [], tags: [], ingredients: [] })
-        }
-      >
-        Clear Filters
-      </Button>
     </div>
   )
 }

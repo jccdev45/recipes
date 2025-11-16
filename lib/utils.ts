@@ -1,6 +1,7 @@
 import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
 import { Ingredient } from "@/lib/types"
 
 import type { ClassValue } from "clsx"
@@ -82,17 +83,116 @@ export function scaleIngredients(
   }
 
   return ingredients.map((ingredient) => {
-    if (!ingredient.hasOwnProperty("amount") || ingredient.amount < 0) {
+    if (!ingredient.hasOwnProperty("amount")) {
+      throw new Error(
+        `Invalid quantity for ingredient: ${ingredient.ingredient}`
+      )
+    }
+    const quantity = ingredient.amount
+
+    if (!Number.isFinite(quantity)) {
+      return ingredient
+    }
+
+    if (quantity < 0) {
       throw new Error(
         `Invalid quantity for ingredient: ${ingredient.ingredient}`
       )
     }
 
+    if (quantity === 0) {
+      return ingredient
+    }
+
+    const scaledAmount = Number((quantity * servings).toFixed(4))
+
     return {
       ...ingredient,
-      amount: ingredient.amount * servings,
+      amount: scaledAmount,
     }
   })
+}
+
+const COMMON_FRACTION_DENOMINATORS = [2, 3, 4, 5, 6, 8, 10, 12, 16]
+const FRACTION_TOLERANCE = 1e-3
+const DECIMAL_FALLBACK_FORMATTER = new Intl.NumberFormat(undefined, {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+  useGrouping: false,
+})
+
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b)
+}
+
+function approximateFraction(remainder: number) {
+  if (remainder <= FRACTION_TOLERANCE) {
+    return null
+  }
+
+  let bestMatch: {
+    numerator: number
+    denominator: number
+    error: number
+  } | null = null
+
+  for (const denominator of COMMON_FRACTION_DENOMINATORS) {
+    const numerator = Math.round(remainder * denominator)
+
+    if (numerator === 0) {
+      continue
+    }
+
+    const reduced = gcd(numerator, denominator)
+    const normalizedNumerator = numerator / reduced
+    const normalizedDenominator = denominator / reduced
+    const approximation = normalizedNumerator / normalizedDenominator
+    const error = Math.abs(remainder - approximation)
+
+    if (error <= FRACTION_TOLERANCE) {
+      if (!bestMatch || error < bestMatch.error) {
+        bestMatch = {
+          numerator: normalizedNumerator,
+          denominator: normalizedDenominator,
+          error,
+        }
+      }
+    }
+  }
+
+  return bestMatch
+}
+
+export function formatFractionalQuantity(value: number): string {
+  if (!Number.isFinite(value)) {
+    return ""
+  }
+
+  const sign = value < 0 ? "-" : ""
+  const absoluteValue = Math.abs(value)
+  const whole = Math.floor(absoluteValue)
+  const remainder = absoluteValue - whole
+
+  const fractionalPart = approximateFraction(remainder)
+
+  if (!fractionalPart) {
+    if (remainder <= FRACTION_TOLERANCE) {
+      return `${sign}${whole}`
+    }
+
+    const decimalValue = DECIMAL_FALLBACK_FORMATTER.format(absoluteValue)
+    return `${sign}${decimalValue}`
+  }
+
+  if (fractionalPart.numerator === fractionalPart.denominator) {
+    return `${sign}${whole + 1}`
+  }
+
+  if (whole === 0) {
+    return `${sign}${fractionalPart.numerator}/${fractionalPart.denominator}`
+  }
+
+  return `${sign}${whole} ${fractionalPart.numerator}/${fractionalPart.denominator}`
 }
 
 // Also borrowed (and modified) from @hero-page/hero-recipe-utils
@@ -156,4 +256,131 @@ export function trimAvatarUrl(fullUrl: string) {
     return match[1]
   }
   return ""
+}
+
+export function isRedirectError(error: unknown): boolean {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string"
+  ) {
+    const digestValue = (error as { digest: string }).digest
+    return digestValue.startsWith("NEXT_REDIRECT")
+  }
+
+  return false
+}
+
+const PUBLIC_STORAGE_PREFIX = "/storage/v1/object/public"
+const STORAGE_BUCKET_SEGMENT = STORAGE_URL.startsWith(PUBLIC_STORAGE_PREFIX)
+  ? STORAGE_URL.slice(PUBLIC_STORAGE_PREFIX.length)
+  : STORAGE_URL
+
+export function resolveStorageImageUrl(
+  imagePath?: string | null
+): string | null {
+  if (!imagePath) {
+    return null
+  }
+
+  const trimmed = imagePath.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`
+
+  if (normalized.startsWith("/storage/v1/object/")) {
+    return `${SUPABASE_URL}${normalized}`
+  }
+
+  if (normalized.startsWith("/public/")) {
+    return `${SUPABASE_URL}/storage/v1/object${normalized}`
+  }
+
+  const bucketSegment = STORAGE_BUCKET_SEGMENT
+    ? STORAGE_BUCKET_SEGMENT.startsWith("/")
+      ? STORAGE_BUCKET_SEGMENT
+      : `/${STORAGE_BUCKET_SEGMENT}`
+    : ""
+
+  let relativePath = normalized
+
+  if (bucketSegment && normalized.startsWith(bucketSegment)) {
+    relativePath = normalized.slice(bucketSegment.length)
+    if (!relativePath.startsWith("/")) {
+      relativePath = `/${relativePath}`
+    }
+  }
+
+  return `${SUPABASE_URL}${STORAGE_URL}${relativePath}`
+}
+
+const READABLE_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+}
+
+export type DisplayDate = {
+  dateTime: string
+  label: string
+}
+
+export function getDisplayDate(
+  input?: string | null,
+  options: Intl.DateTimeFormatOptions = READABLE_DATE_FORMAT
+): DisplayDate | null {
+  if (!input) {
+    return null
+  }
+
+  const parsed = new Date(input)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return {
+    dateTime: parsed.toISOString(),
+    label: parsed.toLocaleDateString(undefined, options),
+  }
+}
+
+export function formatDateLabel(
+  input?: string | null,
+  fallback: string | null = "Not available",
+  options: Intl.DateTimeFormatOptions = READABLE_DATE_FORMAT
+): string | null {
+  const displayDate = getDisplayDate(input, options)
+  return displayDate?.label ?? fallback
+}
+
+export function extractErrorMessage(
+  error: unknown,
+  fallbackMessage = "An unexpected error occurred."
+): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    const derived = (error as { message: string }).message.trim()
+    if (derived) {
+      return derived
+    }
+  }
+
+  return fallbackMessage
 }

@@ -1,27 +1,48 @@
 "use client"
 
-import { Suspense } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { getRecipeBySlug } from "@/queries/recipe-queries"
+import { useRouter } from "next/navigation"
+import { getRecipeWithComments } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query"
 import { User } from "@supabase/supabase-js"
 
-import { STORAGE_URL, SUPABASE_URL } from "@/lib/constants"
 import { Recipe } from "@/lib/types"
-import { shimmer, toBase64 } from "@/lib/utils"
+import {
+  extractErrorMessage,
+  getDisplayDate,
+  resolveStorageImageUrl,
+  shimmer,
+  toBase64,
+} from "@/lib/utils"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
+import { ErrorDisplay } from "@/components/error/error-display"
 import { Ingredients } from "@/app/recipes/[slug]/ingredients"
 import { Steps } from "@/app/recipes/[slug]/steps"
 
-interface RecipeHeaderProps {
+interface RecipeHeroProps {
   recipe: Recipe
   user: User | null
+  fallbackSlug: string
 }
 
 interface RecipeContentProps {
@@ -33,284 +54,369 @@ interface RecipeDisplayProps {
   user: User | null
 }
 
-const RecipeHeader = ({ recipe, user }: RecipeHeaderProps) => {
+const RecipeHero = ({ recipe, user, fallbackSlug }: RecipeHeroProps) => {
   const isAuthor = user && recipe.user_id === user.id
-  const imgUrl =
-    `${SUPABASE_URL}${STORAGE_URL}${recipe.img}` ||
-    `https://placehold.co/450x325?text=${recipe.recipe_name}`
+  const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteFeedback, setDeleteFeedback] = useState<{
+    kind: "info" | "error"
+    message: string
+  } | null>(null)
+  const recipeLabel = recipe.recipe_name?.trim() || "this recipe"
+  const resolvedImageUrl = resolveStorageImageUrl(recipe.img)
+  const imageUrl =
+    resolvedImageUrl ||
+    `https://placehold.co/640x480.png?text=${encodeURIComponent(recipeLabel)}`
+
+  const handleDelete = async () => {
+    if (!recipe.id) {
+      setDeleteFeedback({
+        kind: "error",
+        message:
+          "Unable to delete this recipe because it is missing the required identifier.",
+      })
+      return
+    }
+
+    setIsDeleting(true)
+    setDeleteFeedback({ kind: "info", message: "Deleting recipe..." })
+
+    try {
+      const supabase = createClient()
+
+      const { error } = await supabase
+        .from("recipes")
+        .delete()
+        .eq("id", recipe.id)
+
+      if (error) {
+        throw error
+      }
+
+      router.push("/recipes")
+      router.refresh()
+    } catch (error) {
+      console.error("Error deleting recipe:", error)
+      setDeleteFeedback({
+        kind: "error",
+        message: extractErrorMessage(
+          error,
+          "We could not delete the recipe. Please try again."
+        ),
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const createdAt = getDisplayDate(recipe.created_at)
+  const updatedAt = getDisplayDate(recipe.last_updated)
+  const authorDisplayName = recipe.author || "Unknown author"
+  const authorHref = isAuthor
+    ? "/profile"
+    : recipe.user_id
+      ? `/profile/${recipe.user_id}`
+      : undefined
 
   return (
-    <header className="grid grid-cols-1 gap-8 rounded-md bg-primary/30 py-8 md:grid-cols-2">
-      <div className="my-auto grid h-fit place-items-center gap-4 text-center">
-        <Typography variant="h1">{recipe.recipe_name}</Typography>
-        <Typography variant="blockquote">{recipe.quote}</Typography>
-        {isAuthor ? (
-          <Link
-            href="/profile"
-            className="mb-4 inline-flex items-center text-lg underline"
-          >
-            - {recipe.author} (You)
-          </Link>
-        ) : (
-          <Typography>- {recipe.author}</Typography>
-        )}
-        <div className="flex flex-wrap justify-center gap-2">
-          {recipe.tags.map(({ id, tag }) => (
-            <Badge key={id}>{tag}</Badge>
-          ))}
+    <section className="from-background via-muted/30 to-muted relative overflow-hidden rounded-3xl border bg-linear-to-br shadow-xl">
+      <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
+        <div className="order-2 flex flex-col gap-6 lg:order-1">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-sm">
+            {isAuthor ? (
+              <Badge
+                variant="outline"
+                className="border-primary/60 bg-primary/10 text-primary rounded-full px-3 py-1"
+              >
+                Your recipe
+              </Badge>
+            ) : null}
+            <span className="flex items-center gap-1.5">
+              <span className="text-foreground font-medium">By</span>
+              {authorHref ? (
+                <Link
+                  href={authorHref}
+                  className="focus-visible:ring-ring font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  {authorDisplayName}
+                  {isAuthor ? " (You)" : ""}
+                </Link>
+              ) : (
+                <span className="text-foreground font-medium">
+                  {authorDisplayName}
+                  {isAuthor ? " (You)" : ""}
+                </span>
+              )}
+            </span>
+            {createdAt ? (
+              <time
+                dateTime={createdAt.dateTime}
+                className="flex items-center gap-1"
+              >
+                <span aria-hidden="true">•</span>
+                Created {createdAt.label}
+              </time>
+            ) : null}
+            {updatedAt &&
+            (!createdAt || updatedAt.dateTime !== createdAt.dateTime) ? (
+              <time
+                dateTime={updatedAt.dateTime}
+                className="flex items-center gap-1"
+              >
+                <span aria-hidden="true">•</span>
+                Updated {updatedAt.label}
+              </time>
+            ) : null}
+          </div>
+
+          <div className="space-y-4">
+            <Typography variant="h1" className="text-balance">
+              {recipe.recipe_name}
+            </Typography>
+            {recipe.quote ? (
+              <Typography
+                variant="blockquote"
+                className="text-muted-foreground text-lg leading-relaxed text-balance"
+              >
+                {recipe.quote}
+              </Typography>
+            ) : null}
+          </div>
+
+          {recipe.tags.length ? (
+            <ul className="flex flex-wrap gap-2" aria-label="Recipe tags">
+              {recipe.tags.map(({ id, tag }) => (
+                <li key={id ?? tag}>
+                  <Badge
+                    className="rounded-full px-3 py-1 text-sm"
+                    variant="secondary"
+                  >
+                    {tag}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full md:hidden"
+            >
+              <a href="#recipe-ingredients">Jump to ingredients</a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full md:hidden"
+            >
+              <a href="#recipe-steps">Jump to steps</a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+            >
+              <a href="#recipe-comments">View comments</a>
+            </Button>
+            {isAuthor ? (
+              <Button asChild size="sm" className="rounded-full">
+                <Link href={`/recipes/${recipe.slug ?? fallbackSlug}/edit`}>
+                  Edit recipe
+                </Link>
+              </Button>
+            ) : null}
+            {isAuthor ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="rounded-full"
+                    disabled={isDeleting}
+                  >
+                    Delete recipe
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this recipe?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove {recipeLabel} and any related
+                      activity. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={isDeleting}
+                      onClick={() => {
+                        void handleDelete()
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/40"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
+          </div>
+          {deleteFeedback ? (
+            deleteFeedback.kind === "error" ? (
+              <ErrorDisplay
+                error={deleteFeedback.message}
+                title="We couldn't delete this recipe"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+                className="mt-3"
+              />
+            ) : (
+              <Alert
+                variant="default"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="mt-3"
+              >
+                <AlertDescription>{deleteFeedback.message}</AlertDescription>
+              </Alert>
+            )
+          ) : null}
+        </div>
+
+        <div className="order-1 lg:order-2">
+          <div className="border-border/60 bg-background/80 relative mx-auto max-w-[480px] overflow-hidden rounded-3xl border shadow-2xl">
+            <AspectRatio ratio={4 / 3}>
+              <Image
+                src={imageUrl}
+                alt={recipe.recipe_name || "Recipe presentation"}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 420px, (min-width: 640px) 80vw, 100vw"
+                placeholder="blur"
+                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(640, 480))}`}
+              />
+            </AspectRatio>
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-center">
-        <Image
-          src={imgUrl}
-          alt={recipe.recipe_name || "Generic fallback"}
-          width={450}
-          height={325}
-          className="aspect-square rounded-md object-cover shadow shadow-foreground"
-          placeholder="blur"
-          blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(450, 325))}`}
-        />
-      </div>
-    </header>
+    </section>
   )
 }
 
 const RecipeContent = ({ recipe }: RecipeContentProps) => (
-  <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-    <Ingredients ingredients={recipe.ingredients} className="flex flex-col" />
-    <Steps steps={recipe.steps} className="flex flex-col" />
-  </div>
+  <section
+    aria-labelledby="recipe-overview-heading"
+    className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]"
+  >
+    <h2 id="recipe-overview-heading" className="sr-only">
+      Recipe overview
+    </h2>
+    <Ingredients ingredients={recipe.ingredients} className="h-full" />
+    <Steps steps={recipe.steps} className="h-full" />
+  </section>
 )
 
 export function RecipeDisplay({ slug, user }: RecipeDisplayProps) {
   const supabase = createClient()
-  const { data, isLoading, error } = useQuery(getRecipeBySlug(supabase, slug))
-  const recipe = data as unknown as Recipe
+  const { data, isLoading, error } = useQuery(
+    getRecipeWithComments(supabase, slug)
+  )
+  const recipe = useMemo(() => data as unknown as Recipe, [data])
 
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-start justify-center">
-        <Spinner size="xl" icon="pinwheel" />
-      </div>
-    )
+    return <LoadingSkeleton />
   }
 
   if (error) {
     return (
-      <div className="flex flex-1 items-start justify-center rounded bg-destructive/20 py-20">
-        <Typography variant="error" className="text-2xl">
-          An error occurred: {error.message}
-        </Typography>
+      <div className="mx-auto w-full max-w-4xl px-4">
+        <ErrorDisplay
+          error={error.message}
+          title="We couldn't load this recipe"
+          role="alert"
+        />
       </div>
     )
   }
 
+  if (!recipe) {
+    return null
+  }
+
   return (
-    <div className="container mx-auto px-4">
-      <Suspense fallback={<LoadingSkeleton />}>
-        <RecipeHeader recipe={recipe} user={user} />
-        <RecipeContent recipe={recipe} />
-      </Suspense>
-      <Separator />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+      <RecipeHero recipe={recipe} user={user} fallbackSlug={slug} />
+      <RecipeContent recipe={recipe} />
+      <Separator className="mx-auto w-full max-w-5xl" />
     </div>
   )
 }
 
-const SVGSkeleton = ({ className }: { className: string }) => (
-  <svg className={className + " animate-pulse rounded bg-gray-300"} />
-)
-
 const LoadingSkeleton = () => (
-  <>
-    <div className="container mx-auto px-4">
-      <header className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2">
-        <div className="my-auto grid h-fit place-items-center gap-4">
-          <h1 className="scroll-m-20 tracking-tight">
-            <Skeleton className="w-[120px] max-w-full" />
-          </h1>
-          <blockquote className="mt-6 border-l-2 pl-6">
-            <Skeleton className="w-[128px] max-w-full" />
-          </blockquote>
-          <p className="[&amp;:not(:first-child)]:mt-6 leading-7">
-            <Skeleton className="w-[64px] max-w-full" />
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-[48px] max-w-full" />
-            </div>
-            <div className="inline-flex items-center border border-transparent px-2.5 py-0.5 transition-colors">
-              <Skeleton className="w-[56px] max-w-full" />
-            </div>
+  <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
+    <section className="bg-card relative overflow-hidden rounded-3xl border shadow-xl">
+      <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
+        <div className="order-2 flex flex-col gap-6 lg:order-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-6 w-32 rounded-full" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-3/4 max-w-[340px]" />
+            <Skeleton className="h-16 w-full max-w-[460px]" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton
+                key={`tag-skeleton-${index}`}
+                className="h-6 w-20 rounded-full"
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton
+                key={`cta-skeleton-${index}`}
+                className="h-9 w-36 rounded-full"
+              />
+            ))}
           </div>
         </div>
-        <div className="flex items-center justify-center">
-          <SVGSkeleton className="aspect-square h-[325px] w-[450px] rounded-md object-cover shadow shadow-foreground" />
-        </div>
-      </header>
-      <div className="my-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-        <section className="flex flex-col">
-          <div className="flex items-center gap-4 border-b">
-            <h2 className="scroll-m-20 border-0 pb-2 tracking-tight transition-colors first:mt-0">
-              <Skeleton className="w-[88px] max-w-full" />
-            </h2>
-            <a>
-              <SVGSkeleton className="h-[24px] w-[24px]" />
-            </a>
-          </div>
-          <span className="mx-auto flex w-2/3 items-center justify-center gap-x-4">
-            <span className="flex items-center justify-center">
-              <div className="flex h-9 w-16 border border-input px-3 py-1 shadow-sm transition-colors file:border-0"></div>
-              <span>
-                <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-up h-[24px] w-[24px]" />
-                </div>
-                <div className="inline-flex h-9 w-9 items-center justify-center transition-colors">
-                  <SVGSkeleton className="lucide-arrow-down h-[24px] w-[24px]" />
-                </div>
-              </span>
-              <label className="leading-none">
-                <Skeleton className="w-[64px] max-w-full" />
-              </label>
-            </span>
-          </span>
-          <ul className="[&amp;>li]:mt-2 my-6 md:ml-6">
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[80px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[160px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[24px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[80px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[88px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[88px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[80px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[48px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[80px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[40px] max-w-full" />
-                </span>
-              </label>
-            </li>
-            <li className="my-1 flex items-center justify-start gap-x-1">
-              <div className="m-0 w-[12%]">
-                <Skeleton className="w-[14px] max-w-full" />
-              </div>
-              <label className="my-auto w-5/6 space-x-2 border-b border-border">
-                <span>
-                  <Skeleton className="w-[80px] max-w-full" />
-                </span>
-                <span>
-                  <Skeleton className="w-[264px] max-w-full" />
-                </span>
-              </label>
-            </li>
-          </ul>
-        </section>
-        <div className="flex flex-col">
-          <h2 className="scroll-m-20 border-b pb-2 tracking-tight transition-colors first:mt-0">
-            <Skeleton className="w-[40px] max-w-full" />
-          </h2>
-          <ul className="[&amp;>li]:mt-2 my-6 mt-4 flex flex-col space-y-2 md:ml-6">
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[552px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[184px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[488px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[248px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[504px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[336px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[80px] max-w-full" />
-              </label>
-            </li>
-            <li className="flex items-center space-x-2 p-2 transition-colors">
-              <div className="m-0 h-4 w-4 shrink-0 border border-primary"></div>
-              <label className="m-0">
-                <Skeleton className="w-[264px] max-w-full" />
-              </label>
-            </li>
-          </ul>
+        <div className="order-1 flex justify-center lg:order-2">
+          <Skeleton className="h-[260px] w-full max-w-[460px] rounded-3xl" />
         </div>
       </div>
-      <div className="h-[1px] w-full shrink-0 bg-border"></div>
+    </section>
+
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
+      <section className="bg-card rounded-2xl border p-6 shadow">
+        <Skeleton className="h-9 w-32" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
+      </section>
+      <section className="bg-card rounded-2xl border p-6 shadow">
+        <Skeleton className="h-9 w-28" />
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton
+              key={`step-${index}`}
+              className="h-20 w-full rounded-xl"
+            />
+          ))}
+        </div>
+      </section>
     </div>
-  </>
+  </div>
 )
