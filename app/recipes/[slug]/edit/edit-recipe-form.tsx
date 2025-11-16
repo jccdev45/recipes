@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { getRecipeBySlug } from "@/queries/recipe-queries"
 import { createClient } from "@/supabase/client"
@@ -10,6 +11,17 @@ import { cn, extractErrorMessage, genId, toSlug } from "@/lib/utils"
 import { RecipeFormSchema } from "@/lib/zod/schema"
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { useRecipes } from "@/hooks/useRecipes"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Typography } from "@/components/ui/typography"
@@ -27,6 +39,8 @@ import type { SuggestedTag } from "@/app/recipes/add/sections/tags-section"
 import type { Ingredient, Recipe, Step, Tag } from "@/lib/types"
 import type { AddRecipeFormValues } from "@/lib/zod/schema"
 import type { User } from "@supabase/supabase-js"
+
+const IMAGE_BUCKET = "photos"
 
 type EditRecipeFormProps = {
   slug: string
@@ -252,12 +266,15 @@ function EditRecipeFormInner({
   suggestedTags,
 }: EditRecipeFormInnerProps) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const originalImagePath = useMemo(
     () => normalizeStoragePath(recipe.img),
     [recipe.img]
   )
   const [imgURL, setImgURL] = useState(originalImagePath)
+  const [uploadedImagePath, setUploadedImagePath] = useState<string | null>(
+    null
+  )
   const [formError, setFormError] = useState<string | null>(null)
   const [isConfirmed, setIsConfirmed] = useState(() => !originalImagePath)
 
@@ -378,6 +395,7 @@ function EditRecipeFormInner({
         }
 
         const resolvedSlug = data?.slug ?? nextSlug
+        setUploadedImagePath(null)
 
         router.push(`/recipes/${resolvedSlug}`)
         router.refresh()
@@ -399,7 +417,7 @@ function EditRecipeFormInner({
     onUpload: uploadRecipeImage,
     loading: isUploadingImage,
   } = useSupabaseUpload({
-    bucketName: "photos",
+    bucketName: IMAGE_BUCKET,
     maxFiles: 1,
     allowedMimeTypes: ["image/*"],
     maxFileSize: 10 * 1024 * 1024,
@@ -420,23 +438,46 @@ function EditRecipeFormInner({
       const fileName = normalizedExtension
         ? `${baseName}-${uniqueSuffix}.${normalizedExtension}`
         : `${baseName}-${uniqueSuffix}`
-
       return `recipes/${baseName}/${fileName}`
     },
-    onUploadComplete: ({ path }) => {
-      const normalizedPath = normalizeStoragePath(path)
-      setImgURL(normalizedPath)
-      setFormError(null)
-      setIsConfirmed(false)
-    },
-    onUploadError: ({ message }) => {
-      setFormError(message)
-    },
   })
+
+  const deleteSupabaseFile = useCallback(
+    async (path?: string | null) => {
+      const normalizedPath = normalizeStoragePath(path)
+
+      if (!normalizedPath) {
+        return
+      }
+
+      const storagePath = normalizedPath.replace(/^\/+/, "")
+
+      if (!storagePath) {
+        return
+      }
+
+      try {
+        const { error } = await supabase.storage
+          .from(IMAGE_BUCKET)
+          .remove([storagePath])
+
+        if (error) {
+          console.error("Failed to delete unused recipe image", error)
+        }
+      } catch (error) {
+        console.error("Unexpected error deleting recipe image", error)
+      }
+    },
+    [supabase]
+  )
 
   const handleImageUpload = async (file: File | null) => {
     if (!file) {
       setFormError("No file selected")
+      if (uploadedImagePath) {
+        await deleteSupabaseFile(uploadedImagePath)
+        setUploadedImagePath(null)
+      }
       resetRecipeImageUpload()
       setImgURL("")
       setIsConfirmed(true)
@@ -484,7 +525,14 @@ function EditRecipeFormInner({
 
     if (successResult) {
       const normalizedPath = normalizeStoragePath(successResult.path)
+
+      if (uploadedImagePath && uploadedImagePath !== normalizedPath) {
+        await deleteSupabaseFile(uploadedImagePath)
+      }
+
+      setUploadedImagePath(normalizedPath)
       setImgURL(normalizedPath)
+      setFormError(null)
       setIsConfirmed(false)
       resetRecipeImageUpload()
     }
@@ -543,6 +591,18 @@ function EditRecipeFormInner({
           submittingLabel="Saving..."
         />
 
+        <div className="flex flex-col items-center justify-center gap-4 pt-2 sm:flex-row">
+          <EditCancelDialog
+            recipeSlug={recipe.slug}
+            onCancelIntent={async () => {
+              if (uploadedImagePath) {
+                await deleteSupabaseFile(uploadedImagePath)
+                setUploadedImagePath(null)
+              }
+            }}
+          />
+        </div>
+
         {formError && (
           <ErrorDisplay error={formError} title="Heads up">
             {!imgURL && (
@@ -569,5 +629,48 @@ function EditRecipeFormInner({
         )}
       </form>
     </form.AppForm>
+  )
+}
+
+function EditCancelDialog({
+  recipeSlug,
+  onCancelIntent,
+}: {
+  recipeSlug: string
+  onCancelIntent?: () => Promise<void> | void
+}) {
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        void onCancelIntent?.()
+      }
+    },
+    [onCancelIntent]
+  )
+
+  return (
+    <AlertDialog onOpenChange={handleOpenChange}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" className="w-full sm:w-1/4" type="button">
+          Cancel
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Discard recipe changes?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Any edits you made will be lost. Are you sure you want to exit?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>No, go back</AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button asChild variant="destructive">
+              <Link href={`/recipes/${recipeSlug}`}>Yes, discard changes</Link>
+            </Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

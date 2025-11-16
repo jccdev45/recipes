@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/supabase/client"
 
@@ -27,18 +27,37 @@ import { TagsSection } from "./sections/tags-section"
 import type { User } from "@supabase/supabase-js"
 import type { SuggestedTag } from "./sections/tags-section"
 
+const IMAGE_BUCKET = "photos"
+
+const normalizeStoragePath = (path?: string | null): string | null => {
+  if (!path) {
+    return null
+  }
+
+  const trimmed = path.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`
+}
+
 type AddRecipeFormProps = {
   className: string
   user: User | null
 }
 
 export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
   const { tags, units, error: recipeError, isLoading } = useRecipes()
 
   const [imgURL, setImgURL] = useState("")
+  const [uploadedImagePath, setUploadedImagePath] = useState<string | null>(
+    null
+  )
   const [formError, setFormError] = useState<string | null>(null)
   const [isConfirmed, setIsConfirmed] = useState(false)
 
@@ -124,12 +143,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
 
       const normalizedQuote = value.quote?.trim() ?? ""
 
-      const storageImagePath =
-        imgURL && imgURL.trim().length > 0
-          ? imgURL.startsWith("/")
-            ? imgURL
-            : `/${imgURL}`
-          : null
+      const storageImagePath = normalizeStoragePath(imgURL)
 
       const updatedValues = {
         ...value,
@@ -151,6 +165,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
 
         formApi.reset(createAddRecipeDefaultValues())
         setImgURL("")
+        setUploadedImagePath(null)
         setIsConfirmed(false)
         const nextSlug = data?.[0]?.slug ?? uniqueSlug
         router.push(`/recipes/${nextSlug}`)
@@ -173,7 +188,7 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     onUpload: uploadRecipeImage,
     loading: isUploadingImage,
   } = useSupabaseUpload({
-    bucketName: "photos",
+    bucketName: IMAGE_BUCKET,
     maxFiles: 1,
     allowedMimeTypes: ["image/*"],
     maxFileSize: 10 * 1024 * 1024,
@@ -194,23 +209,47 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
       const fileName = normalizedExtension
         ? `${baseName}-${uniqueSuffix}.${normalizedExtension}`
         : `${baseName}-${uniqueSuffix}`
-
       return `recipes/${baseName}/${fileName}`
     },
-    onUploadComplete: ({ path }) => {
-      const normalizedPath = path.startsWith("/") ? path : `/${path}`
-      setImgURL(normalizedPath)
-      setFormError(null)
-      setIsConfirmed(false)
-    },
-    onUploadError: ({ message }) => {
-      setFormError(message)
-    },
   })
+
+  const deleteSupabaseFile = useCallback(
+    async (path?: string | null) => {
+      const normalizedPath = normalizeStoragePath(path)
+
+      if (!normalizedPath) {
+        return
+      }
+
+      const storagePath = normalizedPath.replace(/^\/+/, "")
+
+      if (!storagePath) {
+        return
+      }
+
+      try {
+        const { error } = await supabase.storage
+          .from(IMAGE_BUCKET)
+          .remove([storagePath])
+
+        if (error) {
+          console.error("Failed to delete unused recipe image", error)
+        }
+      } catch (error) {
+        console.error("Unexpected error deleting recipe image", error)
+      }
+    },
+    [supabase]
+  )
 
   const handleImageUpload = async (file: File | null) => {
     if (!file) {
       setFormError("No file selected")
+      if (uploadedImagePath) {
+        await deleteSupabaseFile(uploadedImagePath)
+        setUploadedImagePath(null)
+        setImgURL("")
+      }
       resetRecipeImageUpload()
       return
     }
@@ -255,8 +294,15 @@ export function AddRecipeForm({ className, user }: AddRecipeFormProps) {
     const successResult = results.find((result) => result.status === "success")
 
     if (successResult?.status === "success") {
-      const normalizedPath = successResult.path
-      setImgURL(normalizedPath)
+      const normalizedPath = normalizeStoragePath(successResult.path)
+
+      if (uploadedImagePath && uploadedImagePath !== normalizedPath) {
+        await deleteSupabaseFile(uploadedImagePath)
+      }
+
+      setUploadedImagePath(normalizedPath)
+      setImgURL(normalizedPath ?? "")
+      setFormError(null)
       setIsConfirmed(false)
       resetRecipeImageUpload()
     }
