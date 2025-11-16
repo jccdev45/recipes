@@ -48,9 +48,6 @@ export function Footer({ className }: { className?: string }) {
         </div>
       </div>
       <div className="mt-12 border-t border-foreground/10 pt-8 text-center">
-        <Typography variant="p" className="text-sm text-foreground/60">
-          © 2024 Family Recipes
-        </Typography>
         <Typography variant="p" className="mt-2 text-sm text-foreground/60">
           Made with{" "}
           <Heart
