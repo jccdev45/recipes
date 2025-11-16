@@ -103,37 +103,9 @@ export default async function EditProfilePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 sm:px-6 lg:px-8">
-      <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] xl:gap-12">
-        <article
-          aria-labelledby="edit-profile-heading"
-          className="bg-background space-y-6 rounded-3xl border p-8 shadow-lg ring-1 ring-black/5 sm:space-y-8 sm:p-10"
-        >
-          <div className="space-y-3">
-            <Typography
-              variant="h2"
-              id="edit-profile-heading"
-              className="text-3xl font-semibold sm:text-4xl"
-            >
-              Personalize your account
-            </Typography>
-            <Typography variant="muted" className="text-base leading-relaxed">
-              Keep your contact details and password up to date so the Family
-              Recipes community can stay in touch and celebrate your latest
-              dishes.
-            </Typography>
-          </div>
-
-          <UserProfileForm
-            title="Edit Profile"
-            formType="edit"
-            userData={user}
-            profileData={profileData ?? undefined}
-            className="border-none bg-transparent p-0 shadow-none"
-          />
-        </article>
-
+      <section className="flex flex-col gap-8 xl:gap-12">
         <aside
-          className="space-y-8"
+          className="grid gap-6 lg:grid-cols-2"
           aria-labelledby="edit-profile-support-heading"
         >
           <Card className="overflow-hidden">
@@ -208,6 +180,34 @@ export default async function EditProfilePage() {
             </CardContent>
           </Card>
         </aside>
+
+        <article
+          aria-labelledby="edit-profile-heading"
+          className="bg-background space-y-6 rounded-3xl border p-8 shadow-lg ring-1 ring-black/5 sm:space-y-8 sm:p-10"
+        >
+          <div className="space-y-3">
+            <Typography
+              variant="h2"
+              id="edit-profile-heading"
+              className="text-3xl font-semibold sm:text-4xl"
+            >
+              Personalize your account
+            </Typography>
+            <Typography variant="muted" className="text-base leading-relaxed">
+              Keep your contact details and password up to date so the Family
+              Recipes community can stay in touch and celebrate your latest
+              dishes.
+            </Typography>
+          </div>
+
+          <UserProfileForm
+            title="Edit Profile"
+            formType="edit"
+            userData={user}
+            profileData={profileData ?? undefined}
+            className="border-none bg-transparent p-0 shadow-none"
+          />
+        </article>
       </section>
     </main>
   )

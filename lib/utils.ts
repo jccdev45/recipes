@@ -173,6 +173,11 @@ export function isRedirectError(error: unknown): boolean {
   return false
 }
 
+const PUBLIC_STORAGE_PREFIX = "/storage/v1/object/public"
+const STORAGE_BUCKET_SEGMENT = STORAGE_URL.startsWith(PUBLIC_STORAGE_PREFIX)
+  ? STORAGE_URL.slice(PUBLIC_STORAGE_PREFIX.length)
+  : STORAGE_URL
+
 export function resolveStorageImageUrl(
   imagePath?: string | null
 ): string | null {
@@ -192,7 +197,30 @@ export function resolveStorageImageUrl(
 
   const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`
 
-  return `${SUPABASE_URL}${STORAGE_URL}${normalized}`
+  if (normalized.startsWith("/storage/v1/object/")) {
+    return `${SUPABASE_URL}${normalized}`
+  }
+
+  if (normalized.startsWith("/public/")) {
+    return `${SUPABASE_URL}/storage/v1/object${normalized}`
+  }
+
+  const bucketSegment = STORAGE_BUCKET_SEGMENT
+    ? STORAGE_BUCKET_SEGMENT.startsWith("/")
+      ? STORAGE_BUCKET_SEGMENT
+      : `/${STORAGE_BUCKET_SEGMENT}`
+    : ""
+
+  let relativePath = normalized
+
+  if (bucketSegment && normalized.startsWith(bucketSegment)) {
+    relativePath = normalized.slice(bucketSegment.length)
+    if (!relativePath.startsWith("/")) {
+      relativePath = `/${relativePath}`
+    }
+  }
+
+  return `${SUPABASE_URL}${STORAGE_URL}${relativePath}`
 }
 
 const READABLE_DATE_FORMAT: Intl.DateTimeFormatOptions = {

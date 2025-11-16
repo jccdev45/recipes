@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useId, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import Link from "next/link"
+import { createClient } from "@/supabase/client"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 
 import { registerFormItems } from "@/lib/constants"
 import { cn, isRedirectError, resolveStorageImageUrl } from "@/lib/utils"
 import { EditProfileSchema, RegisterSchema } from "@/lib/zod/schema"
+import { useCurrentUserImage } from "@/hooks/use-current-user-image"
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -79,6 +81,8 @@ const fullWidthFields: RegisterFieldName[] = [
 
 const getColumnClass = (fieldName: RegisterFieldName) =>
   fullWidthFields.includes(fieldName) ? "md:col-span-2" : "md:col-span-1"
+
+const AVATAR_BUCKET = "photos"
 
 const applyServerFieldErrors = <TField extends string>(
   setFieldMeta: (field: TField, updater: (prev: any) => any) => void,
@@ -356,6 +360,15 @@ function EditProfileForm({
     null
   )
 
+  const userMetadata = userData?.user_metadata as
+    | Record<string, unknown>
+    | undefined
+
+  const getMetadataString = (value?: unknown) =>
+    typeof value === "string" && value.trim().length > 0
+      ? value.trim()
+      : undefined
+
   const safeMetadataValue = (value: unknown) =>
     typeof value === "string" && value.trim().length > 0
       ? value.trim()
@@ -363,15 +376,21 @@ function EditProfileForm({
 
   const initialFirstName =
     safeMetadataValue(profileData?.first_name) ??
-    safeMetadataValue(userData?.user_metadata?.first_name)
+    safeMetadataValue(userMetadata?.["first_name"] as string | undefined)
 
   const initialLastName =
     safeMetadataValue(profileData?.last_name) ??
-    safeMetadataValue(userData?.user_metadata?.last_name)
+    safeMetadataValue(userMetadata?.["last_name"] as string | undefined)
+
+  const metadataAvatarPath = getMetadataString(
+    userMetadata?.["avatar_url"] ??
+      userMetadata?.["avatarUrl"] ??
+      userMetadata?.["avatar"]
+  )
 
   const initialAvatarPath =
     safeMetadataValue(profileData?.avatar_url) ??
-    safeMetadataValue(userData?.user_metadata?.avatar_url)
+    safeMetadataValue(metadataAvatarPath)
 
   const defaultValues = useMemo<EditProfileFormValues>(
     () => ({
@@ -430,6 +449,8 @@ function EditProfileForm({
 
   const TanstackField = form.Field
 
+  const supabaseClient = useMemo(() => createClient(), [])
+
   const {
     files: avatarFiles,
     addFiles: addAvatarFiles,
@@ -438,7 +459,7 @@ function EditProfileForm({
     loading: isUploadingAvatar,
     errors: hookAvatarErrors,
   } = useSupabaseUpload({
-    bucketName: "photos",
+    bucketName: AVATAR_BUCKET,
     maxFiles: 1,
     allowedMimeTypes: ["image/*"],
     maxFileSize: 5 * 1024 * 1024,
@@ -472,10 +493,7 @@ function EditProfileForm({
     },
   })
 
-  const resolvedCurrentAvatar = useMemo(
-    () => resolveStorageImageUrl(initialAvatarPath),
-    [initialAvatarPath]
-  )
+  const currentAvatarImage = useCurrentUserImage(initialAvatarPath)
 
   const resolvedUploadedAvatar = useMemo(
     () => resolveStorageImageUrl(uploadedAvatarPath),
@@ -493,36 +511,68 @@ function EditProfileForm({
   const queuedAvatarFile = avatarFiles[0]
   const queuedAvatarPreview = queuedAvatarFile?.preview ?? null
 
-  const previewAvatarSrc =
-    queuedAvatarPreview ??
-    resolvedUploadedAvatar ??
-    resolvedCurrentAvatar ??
-    null
-
-  const hasCurrentAvatar = Boolean(resolvedCurrentAvatar)
+  const hasCurrentAvatar = Boolean(currentAvatarImage)
   const hasPendingAvatar = Boolean(
     queuedAvatarPreview || resolvedUploadedAvatar
   )
 
+  const previewAvatarSrc = hasPendingAvatar
+    ? (queuedAvatarPreview ?? resolvedUploadedAvatar ?? null)
+    : null
+
   const avatarFileName =
-    queuedAvatarFile?.name ??
-    uploadedAvatarPath?.split("/").pop() ??
-    initialAvatarPath?.split("/").pop() ??
-    ""
+    queuedAvatarFile?.name ?? uploadedAvatarPath?.split("/").pop() ?? null
 
   const combinedAvatarError =
     avatarUploadError ?? hookAvatarErrors[0]?.message ?? null
 
-  const resetAvatarSelection = () => {
+  const deleteSupabaseFile = useCallback(
+    async (path?: string | null) => {
+      if (!path) {
+        return
+      }
+
+      const sanitizedPath = path.replace(/^\/+/, "")
+
+      if (!sanitizedPath) {
+        return
+      }
+
+      try {
+        const { error } = await supabaseClient.storage
+          .from(AVATAR_BUCKET)
+          .remove([sanitizedPath])
+
+        if (error) {
+          console.error("Failed to delete unused avatar upload", error)
+        }
+      } catch (error) {
+        console.error("Unexpected error deleting unused avatar upload", error)
+      }
+    },
+    [supabaseClient]
+  )
+
+  const resetAvatarSelection = useCallback(async () => {
+    if (uploadedAvatarPath) {
+      await deleteSupabaseFile(uploadedAvatarPath)
+    }
+
     resetAvatarUpload()
     setUploadedAvatarPath(null)
     form.setFieldValue("avatar_url", initialAvatarPath ?? undefined)
-  }
+  }, [
+    deleteSupabaseFile,
+    form,
+    initialAvatarPath,
+    resetAvatarUpload,
+    uploadedAvatarPath,
+  ])
 
   const handleAvatarSelection = async (file: File | null) => {
     if (!file) {
       setAvatarUploadError(null)
-      resetAvatarSelection()
+      await resetAvatarSelection()
       return
     }
 
@@ -530,13 +580,13 @@ function EditProfileForm({
       setAvatarUploadError(
         "Please choose an image file (PNG, JPG, GIF, or WEBP)."
       )
-      resetAvatarSelection()
+      await resetAvatarSelection()
       return
     }
 
     if (!userData?.id) {
       setAvatarUploadError("We could not confirm your account. Try again.")
-      resetAvatarSelection()
+      await resetAvatarSelection()
       return
     }
 
@@ -547,7 +597,7 @@ function EditProfileForm({
 
     if (!results || results.length === 0) {
       setAvatarUploadError("We couldn’t upload your image. Please try again.")
-      resetAvatarSelection()
+      await resetAvatarSelection()
       return
     }
 
@@ -557,7 +607,7 @@ function EditProfileForm({
 
     if (errorResult) {
       setAvatarUploadError(errorResult.message)
-      resetAvatarSelection()
+      await resetAvatarSelection()
       return
     }
 
@@ -567,6 +617,7 @@ function EditProfileForm({
 
     if (successResult) {
       const normalizedPath = successResult.path
+      await deleteSupabaseFile(uploadedAvatarPath)
       setUploadedAvatarPath(normalizedPath)
       form.setFieldValue("avatar_url", normalizedPath)
       resetAvatarUpload()
@@ -698,7 +749,7 @@ function EditProfileForm({
             firstName={initialFirstName}
             lastName={initialLastName}
             email={safeMetadataValue(userData?.email)}
-            src={resolvedCurrentAvatar}
+            src={currentAvatarImage}
             className="bg-background border shadow-sm"
           />
         }
@@ -710,14 +761,16 @@ function EditProfileForm({
           )
         }
         preview={
-          <UserAvatar
-            size="xl"
-            firstName={futureFirstName}
-            lastName={futureLastName}
-            email={futureEmail}
-            src={previewAvatarSrc}
-            className="bg-background border shadow-sm"
-          />
+          hasPendingAvatar ? (
+            <UserAvatar
+              size="xl"
+              firstName={futureFirstName}
+              lastName={futureLastName}
+              email={futureEmail}
+              src={previewAvatarSrc}
+              className="bg-background border shadow-sm"
+            />
+          ) : null
         }
         previewDescription={
           hasPendingAvatar ? (
@@ -736,7 +789,7 @@ function EditProfileForm({
         isUploading={isUploadingAvatar}
         uploadLabel="Upload image"
         uploadingLabel="Uploading..."
-        fileName={avatarFileName}
+        fileName={hasPendingAvatar ? (avatarFileName ?? undefined) : undefined}
         error={combinedAvatarError}
         buttonAriaLabel="Upload profile photo"
         inputProps={{ "aria-label": "Choose profile photo" }}
@@ -751,7 +804,10 @@ function EditProfileForm({
       >
         {({ isSubmitting, canSubmit }) => (
           <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <CancelButton userData={userData} />
+            <CancelButton
+              userData={userData}
+              onCancelIntent={resetAvatarSelection}
+            />
             <Button
               type="submit"
               className="w-full sm:w-1/2"
@@ -770,9 +826,24 @@ function EditProfileForm({
   )
 }
 
-function CancelButton({ userData }: { userData?: User }) {
+function CancelButton({
+  userData,
+  onCancelIntent,
+}: {
+  userData?: User
+  onCancelIntent?: () => Promise<void> | void
+}) {
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        void onCancelIntent?.()
+      }
+    },
+    [onCancelIntent]
+  )
+
   return (
-    <AlertDialog>
+    <AlertDialog onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-full sm:w-1/4" type="button">
           Cancel

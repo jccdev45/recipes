@@ -303,7 +303,10 @@ export function ImageUploadField({
             />
             <div className="space-y-1">
               <p className="text-sm font-medium">{instructionText}</p>
-              <p className="text-muted-foreground text-xs">
+              <p
+                className="text-muted-foreground max-w-3xs truncate text-center text-xs"
+                title={resolvedFileName}
+              >
                 {resolvedFileName}
               </p>
               {maxFileSizeLabel ? (
