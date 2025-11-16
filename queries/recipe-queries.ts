@@ -115,7 +115,14 @@ export interface LandingStats {
   tagCount: number
 }
 
-export const getLandingHighlights = async (client: TypedSupabaseClient) => {
+type LandingRecipeRow = Recipe & {
+  comment_meta?: { count: number | null }[]
+}
+
+export const getLandingHighlights = async (
+  client: TypedSupabaseClient,
+  options?: { favoriteUserId?: string }
+) => {
   const [featuredResponse, statsResponse] = await Promise.all([
     client
       .from("recipes")
@@ -124,15 +131,19 @@ export const getLandingHighlights = async (client: TypedSupabaseClient) => {
         author,
         id,
         img,
+        ingredients,
+        steps,
         quote,
         recipe_name,
         slug,
-        tags
+        tags,
+        user_id,
+        comment_meta:comments(count)
       `
       )
       .order("created_at", { ascending: false })
       .limit(3)
-      .returns<Recipe[]>(),
+      .returns<LandingRecipeRow[]>(),
     client.rpc("get_recipes_landing_stats"),
   ])
 
@@ -144,7 +155,33 @@ export const getLandingHighlights = async (client: TypedSupabaseClient) => {
     throw statsResponse.error
   }
 
-  const recipes = featuredResponse.data ?? []
+  const rawRecipes = featuredResponse.data ?? []
+
+  let favoriteRecipeIds: Set<number> | null = null
+  const favoriteUserId = options?.favoriteUserId
+
+  if (favoriteUserId && rawRecipes.length) {
+    const recipeIds = rawRecipes.map((recipe) => recipe.id)
+    const { data: favoriteData, error: favoriteError } = await client
+      .from("favorites")
+      .select("recipe_id")
+      .eq("user_id", favoriteUserId)
+      .in("recipe_id", recipeIds)
+
+    if (favoriteError) {
+      console.error("favorites:getLandingHighlights", favoriteError)
+    } else if (favoriteData?.length) {
+      favoriteRecipeIds = new Set(
+        favoriteData.map((favorite) => favorite.recipe_id)
+      )
+    }
+  }
+
+  const recipes: Recipe[] = rawRecipes.map(({ comment_meta, ...recipe }) => ({
+    ...recipe,
+    commentCount: comment_meta?.[0]?.count ?? recipe.commentCount ?? 0,
+    isFavorite: favoriteRecipeIds?.has(recipe.id) ?? false,
+  }))
 
   const statsDataArray = statsResponse.data as
     | {

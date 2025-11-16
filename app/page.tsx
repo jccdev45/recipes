@@ -62,7 +62,12 @@ const VIDEOS =
 
 export default async function Index() {
   const supabase = await createClient()
-  const { recipes, stats } = await getLandingHighlights(supabase)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const { recipes, stats } = await getLandingHighlights(supabase, {
+    favoriteUserId: user?.id ?? undefined,
+  })
 
   const statsItems = [
     {
@@ -143,7 +148,7 @@ export default async function Index() {
         description="Hand-picked dishes to inspire your next meal."
         className="bg-secondary/5"
       >
-        <FeaturedRecipes recipes={recipes} />
+        <FeaturedRecipes recipes={recipes} user={user ?? null} />
       </BlogSection>
 
       <TestimonialsSection />

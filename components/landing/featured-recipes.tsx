@@ -1,19 +1,18 @@
-import { Fragment, ReactNode } from "react"
-import { Bean, Drumstick, LucideIcon, Sprout } from "lucide-react"
+import { Fragment } from "react"
+import { User } from "@supabase/supabase-js"
+import { Sprout } from "lucide-react"
 
 import { EmptyStateDisplay } from "@/components/empty-state-display"
 import { FeaturedRecipeCard } from "@/components/landing/featured-recipe-card"
-import { getUser } from "@/app/(auth)/actions"
 
 import type { Recipe } from "@/lib/types"
 
 interface FeaturedRecipesProps {
   recipes: Recipe[]
+  user: User | null
 }
 
-export async function FeaturedRecipes({ recipes }: FeaturedRecipesProps) {
-  const { user } = await getUser()
-
+export function FeaturedRecipes({ recipes, user }: FeaturedRecipesProps) {
   if (!recipes.length) {
     return (
       <EmptyStateDisplay
