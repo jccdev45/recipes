@@ -13,10 +13,10 @@ export async function Nav() {
       <div className="container flex items-start gap-4 py-4 lg:items-center lg:justify-between">
         <Link
           href="/"
-          className="flex items-center gap-2 underline-offset-4 transition-all duration-300 ease-in-out hover:underline hover:opacity-90"
+          className="flex items-center gap-2 rounded px-1 py-0.5 underline-offset-4 transition-all duration-300 ease-in-out hover:underline hover:opacity-90"
         >
           <UtensilsCrossed className="size-8" aria-hidden="true" />
-          <span className="text-secondary text-2xl font-bold">
+          <span className="text-primary text-2xl font-bold">
             Family Recipes
           </span>
         </Link>

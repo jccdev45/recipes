@@ -62,8 +62,8 @@ export const minAmount = 0.1
 export const maxAmount = 1000
 
 export const NAV_LINKS = [
-  { href: "/recipes", label: "Recipes" },
-  { href: "/recipes/add", label: "Add Recipe" },
+  { href: "/recipes", label: "Recipes", exact: true },
+  { href: "/recipes/add", label: "Add Recipe", exact: true },
 ]
 
 export const SUPABASE_URL = "https://pyprjpalfbyoflzjdsmz.supabase.co"

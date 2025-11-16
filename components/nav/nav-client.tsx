@@ -36,15 +36,16 @@ import { Searchbar } from "@/app/recipes/search"
 
 import type { User } from "@supabase/supabase-js"
 
-const secondaryLinks = [
-  { href: "/terms", label: "Terms of Service" },
-  { href: "/privacy", label: "Privacy Policy" },
-]
-
 type NavLink = {
   href: string
   label: string
+  exact?: boolean
 }
+
+const secondaryLinks: NavLink[] = [
+  { href: "/terms", label: "Terms of Service", exact: true },
+  { href: "/privacy", label: "Privacy Policy", exact: true },
+]
 
 type NavClientProps = {
   navLinks: NavLink[]
@@ -70,12 +71,12 @@ export function NavClient({ navLinks, user }: NavClientProps) {
 function DesktopNav({ links }: { links: NavLink[] }) {
   const pathname = usePathname()
 
-  const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === href
+  const isActive = (link: NavLink) => {
+    if (link.exact || link.href === "/") {
+      return pathname === link.href
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`)
+    return pathname === link.href || pathname.startsWith(`${link.href}/`)
   }
 
   if (links.length === 0) {
@@ -85,20 +86,24 @@ function DesktopNav({ links }: { links: NavLink[] }) {
   return (
     <NavigationMenu className="hidden flex-1 justify-center lg:flex">
       <NavigationMenuList>
-        {links.map(({ href, label }) => (
-          <NavigationMenuItem key={href}>
-            <NavigationMenuLink asChild>
-              <Link
-                href={href}
-                data-active={isActive(href)}
-                aria-current={isActive(href) ? "page" : undefined}
-                className="text-foreground/80 hover:text-primary focus-visible:ring-ring data-[active=true]:text-primary rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                {label}
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        ))}
+        {links.map((link) => {
+          const active = isActive(link)
+
+          return (
+            <NavigationMenuItem key={link.href}>
+              <NavigationMenuLink asChild>
+                <Link
+                  href={link.href}
+                  data-active={active}
+                  aria-current={active ? "page" : undefined}
+                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring data-[active=true]:text-primary rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none data-[active=true]:font-semibold data-[active=true]:underline"
+                >
+                  {link.label}
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          )
+        })}
       </NavigationMenuList>
     </NavigationMenu>
   )
@@ -204,12 +209,12 @@ function LogoutButton() {
 function MobileMenu({ navLinks, user }: NavClientProps) {
   const pathname = usePathname()
 
-  const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === href
+  const isActive = (link: NavLink) => {
+    if (link.exact || link.href === "/") {
+      return pathname === link.href
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`)
+    return pathname === link.href || pathname.startsWith(`${link.href}/`)
   }
 
   return (
@@ -235,16 +240,21 @@ function MobileMenu({ navLinks, user }: NavClientProps) {
         <Searchbar />
 
         <nav className="flex flex-col gap-3" aria-label="Mobile navigation">
-          {[...navLinks, ...secondaryLinks].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-foreground/80 hover:text-primary focus-visible:ring-ring text-left text-base font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              aria-current={isActive(href) ? "page" : undefined}
-            >
-              {label}
-            </Link>
-          ))}
+          {[...navLinks, ...secondaryLinks].map((link) => {
+            const active = isActive(link)
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-active={active}
+                className="text-muted-foreground hover:text-foreground data-[active=true]:text-primary focus-visible:ring-ring text-left text-base font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                aria-current={active ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
         </nav>
 
         <SheetFooter>
