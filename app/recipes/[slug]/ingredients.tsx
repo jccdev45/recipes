@@ -231,25 +231,16 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-2xl font-semibold tracking-tight">Ingredients</h2>
         <HoverCard>
-          <HoverCardTrigger asChild>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              aria-label="How serving adjustments work"
-            >
-              <Info className="h-4 w-4" />
-            </button>
+          <HoverCardTrigger aria-label="How serving adjustments work">
+            <Info className="h-4 w-4" />
           </HoverCardTrigger>
           <HoverCardContent className="max-w-xs text-sm">
             Enter a serving amount or use the increment controls to scale this
-            family recipe. Measurements come from relatives, so treat them as
-            guidance rather than exact science.
+            family recipe. Treat measurements as guidance rather than exact
+            science.
           </HoverCardContent>
         </HoverCard>
       </div>
-      <p className="text-muted-foreground text-sm">
-        Scale the recipe and keep track of what's prepped at a glance.
-      </p>
       <ServingAdjuster serving={serving} setServing={setServing} />
       <div className="bg-card text-card-foreground relative rounded-sm border p-1">
         <div className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-xs">
@@ -267,27 +258,28 @@ export function Ingredients({ ingredients, className }: IngredientsProps) {
             Clear marks
           </Button>
         </div>
-        <ScrollArea className="h-[420px] pr-3" aria-label="Recipe ingredients">
-          <ul className="divide-border/70 divide-y">
-            {adjustedIngredients.map((ingredient, index) => {
-              const ingredientKey = buildIngredientKey(ingredient, index)
-              const checkboxId = getCheckboxId(ingredientKey, index)
+        <ul
+          className="divide-border/70 h-fit divide-y"
+          aria-label="Recipe ingredients"
+        >
+          {adjustedIngredients.map((ingredient, index) => {
+            const ingredientKey = buildIngredientKey(ingredient, index)
+            const checkboxId = getCheckboxId(ingredientKey, index)
 
-              return (
-                <IngredientItem
-                  key={ingredientKey}
-                  ingredient={ingredient}
-                  checkboxId={checkboxId}
-                  isChecked={Boolean(preparedIngredients[ingredientKey])}
-                  onToggle={(checked) =>
-                    toggleIngredientPrepared(ingredientKey, checked)
-                  }
-                  serving={serving}
-                />
-              )
-            })}
-          </ul>
-        </ScrollArea>
+            return (
+              <IngredientItem
+                key={ingredientKey}
+                ingredient={ingredient}
+                checkboxId={checkboxId}
+                isChecked={Boolean(preparedIngredients[ingredientKey])}
+                onToggle={(checked) =>
+                  toggleIngredientPrepared(ingredientKey, checked)
+                }
+                serving={serving}
+              />
+            )
+          })}
+        </ul>
       </div>
     </section>
   )
